@@ -125,7 +125,8 @@ public final class UciSession {
     }
     out.println("option name Engine type combo default " + Engines.DEFAULT + combo);
     out.println("option name Hash type spin default 16 min 1 max 1024");
-    out.println("option name Features type string default all");
+    out.println(
+        "option name Features type string default killers,history,pvs,nmp,lmr,aspiration,rfp");
     out.println("option name Move Overhead type spin default 30 min 0 max 5000");
     out.println("uciok");
   }

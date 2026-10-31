@@ -16,11 +16,12 @@ public final class Engines {
   private static final Map<String, Supplier<Searcher>> ALL = new LinkedHashMap<>();
 
   static {
+    ALL.put("v1", phase4.Search::new);
     ALL.put("random", RandomPlayer::new);
   }
 
   /** The engine used when none is chosen: the strongest one. */
-  public static final String DEFAULT = "random";
+  public static final String DEFAULT = "v1";
 
   private Engines() {}
 

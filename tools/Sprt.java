@@ -47,7 +47,7 @@ public final class Sprt {
     if (args.length < 2) {
       System.out.println(
           "usage: java tools/Sprt.java <new> <base> [--tc 8+0.08] [--concurrency N]"
-              + " [--elo0 0] [--elo1 10] [--maxgames 6000] [--label text]");
+              + " [--elo0 0] [--elo1 10] [--maxgames 6000] [--label text] [--jar path]");
       return;
     }
     String newSpec = args[0];
@@ -58,6 +58,7 @@ public final class Sprt {
     String elo1 = "10";
     int maxGames = 6000;
     String label = newSpec + " vs " + baseSpec;
+    Path jar = ROOT.resolve("target/engine.jar");
     for (int i = 2; i + 1 < args.length; i += 2) {
       switch (args[i]) {
         case "--tc" -> tc = args[i + 1];
@@ -66,13 +67,13 @@ public final class Sprt {
         case "--elo1" -> elo1 = args[i + 1];
         case "--maxgames" -> maxGames = Integer.parseInt(args[i + 1]);
         case "--label" -> label = args[i + 1];
+        case "--jar" -> jar = ROOT.resolve(args[i + 1]);
         default -> throw new IllegalArgumentException("unknown flag " + args[i]);
       }
     }
     require(FASTCHESS, "fastchess (see docs/phases/05-testing-lab.md)");
     require(BOOK, "the opening book (see docs/phases/05-testing-lab.md)");
-    Path jar = ROOT.resolve("target/engine.jar");
-    require(jar, "target/engine.jar - build it first: mvn -q package -DskipTests");
+    require(jar, jar + " - build it first: mvn -q package -DskipTests");
 
     // Snapshot the jar so rebuilding during a long test can't change the engines mid-match.
     String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
@@ -127,7 +128,7 @@ public final class Sprt {
     a.add("-engine");
     a.add("cmd=java");
     a.add("args=-Xmx256m -XX:+UseSerialGC -jar " + jar);
-    a.add("name=" + role + "-" + spec.replace(' ', '_').replace(';', ','));
+    a.add("name=" + role + "-" + spec.replaceAll("[^A-Za-z0-9+-]", "_"));
     a.add("option.Engine=" + name);
     a.add("option.Hash=16");
     if (parts.length > 1) {

@@ -124,6 +124,7 @@ public final class UciSession {
     }
     out.println("option name Engine type combo default " + Engines.DEFAULT + combo);
     out.println("option name Hash type spin default 16 min 1 max 1024");
+    out.println("option name Features type string default all");
     out.println("uciok");
   }
 
@@ -152,6 +153,18 @@ public final class UciSession {
       case "hash" -> {
         hashMb = Integer.parseInt(value);
         searcher.setHashSizeMb(hashMb);
+      }
+      case "features" -> {
+        // Phase 6 switches, e.g. "all", "none", "pvs,nmp" or "all,-nmp" (see phase6/Features).
+        if (searcher instanceof phase6.Search2 v2) {
+          try {
+            v2.setFeatures(phase6.Features.parse(value));
+          } catch (IllegalArgumentException e) {
+            out.println("info string " + e.getMessage());
+          }
+        } else {
+          out.println("info string Features only applies to engine v2");
+        }
       }
       default -> out.println("info string unknown option '" + name + "'");
     }

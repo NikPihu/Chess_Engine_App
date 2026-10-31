@@ -11,8 +11,8 @@
 
 | # | Phase | Part | Output you can load/run | Status |
 |---|-------|------|-------------------------|--------|
-| 0 | Foundations | A · Engine | `mvn verify` green locally + CI | ⬜ |
-| 1 | Board, FEN, Zobrist | A · Engine | `engine.jar` → `position fen …` / `d` prints board + hash | ⬜ |
+| 0 | [Foundations](phases/00-foundations.md) | A · Engine | `mvn verify` green locally + CI | ✅ |
+| 1 | [Board, FEN, Zobrist](phases/01-board.md) | A · Engine | `engine-uci.jar` → `position fen …` / `d` prints board + hash | ✅ |
 | 2 | Move generation + perft | A · Engine | `go perft 5` = 4,865,609 · `bench` nps | ⬜ |
 | 3 | Rules + playable UCI engine | A · Engine | Load in Cute Chess GUI and play a full game | ⬜ |
 | 4 | Search & eval v1 | A · Engine | `engine-v1.0` beats random bot, solves tactic suite | ⬜ |
@@ -118,6 +118,8 @@ Chess_Engine_App/
 ├─ deploy/          docker-compose.yml, Caddyfile, env templates
 └─ docs/            ROADMAP, learn/ primers, adr/ decisions, phases/ notes, results/ ledgers
 ```
+
+Code inside `engine` is organised as one concept per file in versioned packages (`board/v1`, `movegen/v2`, …); see [CODE_LAYOUT.md](CODE_LAYOUT.md).
 
 The `engine` module is the heart of the project. Everything else (UCI, server, fair-play, arena)
 reuses it instead of re-implementing chess rules, so there is only one source of truth for legality.
@@ -571,6 +573,7 @@ Learnings 2 linked "the GitHub `main` branch". The V2 code is actually on
 - [ADR-0002 — Maven multi-module monorepo](adr/0002-monorepo.md)
 - [ADR-0003 — react-chessboard over chessground](adr/0003-react-chessboard.md)
 - [ADR-0004 — Session-cookie auth over JWT](adr/0004-session-auth.md)
+- [ADR-0005 — Versioned packages, one concept per file](adr/0005-versioned-packages.md)
 
 The Eraser board (original learnings + mirrored diagrams):
 https://app.eraser.io/workspace/1dlGrfXL6QtQMgK64YgD

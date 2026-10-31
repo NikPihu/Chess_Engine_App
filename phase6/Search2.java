@@ -45,7 +45,13 @@ public class Search2 extends Search {
     }
   }
 
-  private int features = Features.ALL;
+  /**
+   * The features the Phase 6 SPRT ladder proved (docs/results/elo-ledger.md). Evaluation terms and
+   * the check extension failed to show a gain and stay off until they are tuned.
+   */
+  public static final int PROVEN = Features.parse("killers,history,pvs,nmp,lmr,aspiration,rfp");
+
+  private int features = PROVEN;
   private final Killers killers = new Killers();
   private final History history = new History();
   private int previousScore = 0;

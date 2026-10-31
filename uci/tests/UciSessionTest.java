@@ -61,10 +61,31 @@ class UciSessionTest {
   }
 
   @Test
-  void positionFenWithMovesKeepsBasePositionAndWarns() {
-    session.handle("position fen " + KIWIPETE + " moves e2a6");
-    assertThat(session.board().pieceAt(Square.E2)).isEqualTo(Piece.WHITE_BISHOP);
-    assertThat(output()).contains("moves are ignored until Phase 2");
+  void positionWithMovesPlaysThem() {
+    session.handle("position fen " + KIWIPETE + " moves e2a6 b4c3");
+    assertThat(session.board().pieceAt(Square.A6)).isEqualTo(Piece.WHITE_BISHOP);
+    assertThat(session.board().pieceAt(Square.C3)).isEqualTo(Piece.BLACK_PAWN);
+  }
+
+  @Test
+  void positionStartposWithCastlingAndEnPassant() {
+    session.handle(
+        "position startpos moves e2e4 a7a6 e4e5 d7d5 e5d6 a6a5 g1f3 a5a4 f1e2 a4a3 e1g1");
+    session.handle("fen");
+    assertThat(output()).isEqualTo("rnbqkbnr/1pp1pppp/3P4/8/8/p4N2/PPPPBPPP/RNBQ1RK1 b kq - 1 6\n");
+  }
+
+  @Test
+  void illegalMoveIsRejectedAndPositionKept() {
+    session.handle("position startpos moves e2e5");
+    assertThat(output()).contains("illegal move 'e2e5'");
+    assertThat(session.board()).isEqualTo(FenParser.parse(FenParser.START_POSITION));
+  }
+
+  @Test
+  void goPerftDividesByFirstMove() {
+    session.handle("go perft 3");
+    assertThat(output()).contains("e2e4: 600").contains("Nodes searched: 8902");
   }
 
   @Test

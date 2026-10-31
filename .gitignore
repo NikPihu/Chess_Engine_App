@@ -17,3 +17,10 @@ Thumbs.db
 # Secrets (tokens for lichess / LLM providers live in env vars, never in git)
 .env
 *.secret
+
+# Third-party tools and downloads (fastchess, opening books, lichess-bot clone)
+tools/lichess-bot/
+tools/bin/
+tools/books/
+tools/versions/
+tools/results/

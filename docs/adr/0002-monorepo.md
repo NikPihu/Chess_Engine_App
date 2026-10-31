@@ -1,20 +1,29 @@
-# ADR-0002 — Maven multi-module monorepo
+# ADR-0002 — One repo, one build, flat phase folders
 
-- **Status:** accepted
+- **Status:** accepted (revised 2026-10-31; first version used Maven's standard multi-module layout)
 - **Date:** 2026-10-31
 
 ## Context
-Engine, UCI wrapper, server, arena, tools and web all evolve together, and engine changes must be tested
-against their users in the same commit.
+The first layout followed the Maven standard (`engine/src/main/java/io/github/nikpihu/chess/engine/board/v1/Board.java`).
+That's nine folders before reaching a class, which made the code hard to browse for a learning project.
 
 ## Decision
-Use one Git repo with a Maven parent `pom.xml` and the modules `engine`, `engine-uci`, `server` and `arena`.
-`web/` is a separate npm project inside the same repo.
-Each module is added in the phase that needs it, not up front.
+One Git repo with a single `pom.xml`. The project folder is the Java source root, and code lives in
+one flat folder per phase (`phase1/`, `phase2/`, …) with a `tests/` folder inside each.
+`uci/` holds the runnable program. Full rules: [CODE_LAYOUT.md](../CODE_LAYOUT.md).
+
+Product phases (the Spring Boot server and React web app) may add their own build file inside
+their phase folder when they arrive. That decision is made at the start of Phase 8.
 
 ## Consequences
-- One PR can change the engine and its callers together, and CI builds everything.
-- The `engine` module must stay dependency-free so it's trivial to embed anywhere.
+- **Easier:** every class is at most two folders deep, and the folder name is the package name.
+- **Harder:** this isn't the Maven default, so `pom.xml` needs custom `sourceDirectory`, compiler
+  `includes`, and a surefire test location. JUnit is a "provided" dependency rather than "test",
+  so main code *could* import it by mistake. We rely on review to keep it out.
+- Phase direction (`phase2` may use `phase1`, never the reverse) is a convention, not something
+  the build checks.
 
 ## Alternatives considered
-- **Separate repos per component:** version skew between them, and more ceremony than a solo/learning project needs.
+- **Standard Maven layout:** IDE-perfect, but deeply nested. Rejected by the project owner.
+- **One Maven module per phase:** enforces direction, but every phase folder needs its own
+  `src/main/java/...` and `pom.xml`, which brings the nesting back.

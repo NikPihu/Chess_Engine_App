@@ -12,7 +12,7 @@
 | # | Phase | Part | Output you can load/run | Status |
 |---|-------|------|-------------------------|--------|
 | 0 | [Foundations](phases/00-foundations.md) | A · Engine | `mvn verify` green locally + CI | ✅ |
-| 1 | [Board, FEN, Zobrist](phases/01-board.md) | A · Engine | `engine-uci.jar` → `position fen …` / `d` prints board + hash | ✅ |
+| 1 | [Board, FEN, Zobrist](phases/01-board.md) | A · Engine | `engine "position fen …" d` / `d` prints board + hash | ✅ |
 | 2 | Move generation + perft | A · Engine | `go perft 5` = 4,865,609 · `bench` nps | ⬜ |
 | 3 | Rules + playable UCI engine | A · Engine | Load in Cute Chess GUI and play a full game | ⬜ |
 | 4 | Search & eval v1 | A · Engine | `engine-v1.0` beats random bot, solves tactic suite | ⬜ |
@@ -86,7 +86,7 @@ flowchart TB
         RD[(Redis<br/>queues, presence, cache, pub/sub)]
     end
     subgraph Offline["Offline tools"]
-        UCI[engine-uci.jar]
+        UCI[engine.jar]
         FC[fastchess SPRT]
         LB[lichess-bot]
         AR[LLM Arena]
@@ -108,21 +108,21 @@ flowchart TB
 
 ```
 Chess_Engine_App/
-├─ pom.xml          Maven parent (multi-module)
-├─ engine/          pure Java library, zero dependencies: board, movegen, search, eval
-├─ engine-uci/      thin UCI wrapper → runnable jar (loads in any chess GUI)
-├─ tools/           perft runner, bench, SPRT scripts, opening-book builder
-├─ server/          Spring Boot app (REST + WebSocket), depends on engine
-├─ arena/           LLM Arena harness, depends on engine
-├─ web/             React + TypeScript + Vite frontend
+├─ pom.xml          single build file (project folder = Java source root)
+├─ engine.cmd       shortcut: engine "position startpos" d
+├─ phase1/ … phase7/   engine phases, one flat folder each (+ tests/ inside)
+├─ uci/             the runnable UCI program → target/engine.jar (loads in any chess GUI)
+├─ phase8/ … phase11/  product phases (server, web, multiplayer, deploy); may add their own build file
+├─ phase12/ phase13/   LLM Arena
+├─ tools/           SPRT scripts, opening-book builder (Phase 5)
 ├─ deploy/          docker-compose.yml, Caddyfile, env templates
 └─ docs/            ROADMAP, learn/ primers, adr/ decisions, phases/ notes, results/ ledgers
 ```
 
-Code inside `engine` is organised as one concept per file in versioned packages (`board/v1`, `movegen/v2`, …); see [CODE_LAYOUT.md](CODE_LAYOUT.md).
+Each phase is one flat folder (`phase1/`, `phase2/`, …), one concept per file. A finished phase folder is frozen, and later phases import from it (`import phase1.Board;`). See [CODE_LAYOUT.md](CODE_LAYOUT.md).
 
-The `engine` module is the heart of the project. Everything else (UCI, server, fair-play, arena)
-reuses it instead of re-implementing chess rules, so there is only one source of truth for legality.
+The engine phases (1–6) are the heart of the project. Everything else (UCI, server, fair-play, arena)
+reuses them instead of re-implementing chess rules, so there is only one source of truth for legality.
 
 ---
 
@@ -181,11 +181,11 @@ self-play counts. We use the same statistics Stockfish uses.
 **Goal:** a clean, professional skeleton so every later phase builds and tests the same way.
 
 - **Build:**
-  - Maven multi-module parent targeting Java 21, with `engine` and `engine-uci` modules (the others are added in their own phases).
+  - A single Maven build targeting Java 21, with flat phase folders as the source (see ADR-0002).
   - JUnit 5 and AssertJ, plus Spotless (google-java-format) so formatting is never debated.
   - GitHub Actions workflow running `mvn verify` on every push and PR.
   - `.gitignore`, `.editorconfig`, a README quick-start, and the ADR template.
-- **Read:** [Maven multi-module guide](https://maven.apache.org/guides/mini/guide-multiple-modules.html), [GitHub Actions for Java/Maven](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-java-with-maven).
+- **Read:** [Maven in 5 minutes](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html), [GitHub Actions for Java/Maven](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-java-with-maven).
 - **Verify on your machine:**
   ```bash
   mvn -q verify            # BUILD SUCCESS, sample test passes
@@ -206,7 +206,7 @@ self-play counts. We use the same statistics Stockfish uses.
   - FEN parse and emit, covering every field: side to move, castling, en-passant, halfmove and fullmove.
   - Zobrist keys, initialised from a fixed seed so they are reproducible.
   - Pretty-printing the board.
-  - Minimal `engine-uci` main supporting `position fen …` and the debug command `d`.
+  - The `uci/` program supporting `position fen …` and the debug commands `d` and `bb`.
 - **DSA spotlight:** bitboards vs arrays; `Long.bitCount` / `numberOfTrailingZeros` / `x & (x-1)` loops;
   why XOR hashing allows incremental updates (A⊕B⊕B = A); 64-bit collision probability.
 - **Read:** [Bitboards](https://www.chessprogramming.org/Bitboards) ·
@@ -216,10 +216,8 @@ self-play counts. We use the same statistics Stockfish uses.
   primer [`docs/learn/01-board-fen-move-encoding.md`](learn/01-board-fen-move-encoding.md).
 - **Verify on your machine:**
   ```bash
-  mvn -q package
-  java -jar engine-uci/target/engine-uci.jar
-  position fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1
-  d
+  mvn -q package -DskipTests
+  engine "position fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" d
   ```
   You'll see an ASCII board, the same FEN echoed back, and a 64-bit hash.
 - **Tests:** FEN round-trip on 50+ positions, and the Move encode/decode table.
@@ -247,7 +245,7 @@ self-play counts. We use the same statistics Stockfish uses.
   Lague V2 `src/Core/Move Generation/` ([repo](https://github.com/SebLague/Chess-Coding-Adventure/tree/Chess-V2-UCI)).
 - **Verify on your machine:**
   ```bash
-  java -jar engine-uci/target/engine-uci.jar
+  engine
   position startpos
   go perft 5               # → 4865609
   bench                    # → prints nodes/sec (first performance baseline)
@@ -281,7 +279,7 @@ self-play counts. We use the same statistics Stockfish uses.
   [SAN](https://www.chessprogramming.org/Algebraic_Chess_Notation) ·
   [Cute Chess](https://cutechess.com/).
 - **Verify on your machine:** install **Cute Chess GUI** (Windows). Add an engine with
-  command `java -jar <path>\engine-uci.jar`, start a new game against it, play to the end, and save the PGN.
+  command `java -jar <path>\target\engine.jar`, start a new game against it, play to the end, and save the PGN.
 - **Exit:** a full game is played in the GUI with no protocol errors, and end-of-game rules are tested.
 
 #### Phase 4 — Search & evaluation v1 → `engine-v1.0`
@@ -311,7 +309,7 @@ self-play counts. We use the same statistics Stockfish uses.
   [MinimalChessEngine](https://github.com/lithander/MinimalChessEngine) (clean C# engine inspired by Lague).
 - **Verify on your machine:**
   ```bash
-  java -jar engine-uci/target/engine-uci.jar
+  engine
   position fen 6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1
   go depth 6               # → bestmove d1d8 (back-rank mate)
   ```
@@ -388,7 +386,7 @@ self-play counts. We use the same statistics Stockfish uses.
 **Goal:** a secure Spring Boot API where you can play the engine, with games stored.
 
 - **Build:**
-  - The `server` module: Spring Boot 3 / Java 21, Spring Web, Spring Data JPA, Flyway, Spring Security
+  - The server (in `phase8/`): Spring Boot 3 / Java 21, Spring Web, Spring Data JPA, Flyway, Spring Security
     (session cookies + CSRF; see ADR-0004).
   - `deploy/docker-compose.yml` with **PostgreSQL** and **Redis**.
   - Schema: `users`, `games` (PGN, result, termination, time control, ratings before and after, final FEN).
@@ -404,7 +402,7 @@ self-play counts. We use the same statistics Stockfish uses.
 - **Verify on your machine:**
   ```bash
   docker compose -f deploy/docker-compose.yml up -d
-  mvn -pl server spring-boot:run
+  mvn spring-boot:run    # exact command fixed at the start of Phase 8
   ```
   Open http://localhost:8080/swagger-ui.html, register, create a game and play moves.
 - **Exit:** integration tests are green, and a game survives a server restart.
@@ -413,7 +411,7 @@ self-play counts. We use the same statistics Stockfish uses.
 **Goal:** a good-looking site where you play the engine.
 
 - **Build:**
-  - `web/`: React + TypeScript + Vite, using [react-chessboard](https://github.com/Clariity/react-chessboard)
+  - The web app (in `phase9/`): React + TypeScript + Vite, using [react-chessboard](https://github.com/Clariity/react-chessboard)
     (MIT; chessground is GPL-3, see ADR-0003).
   - Pages: login/register, lobby, play vs computer (level picker), game view with move list, eval bar,
     PGN export, game history, and profile.
@@ -519,7 +517,7 @@ self-play counts. We use the same statistics Stockfish uses.
 - **Verify on your machine:**
   ```bash
   ollama pull llama3.2
-  java -jar arena/target/arena.jar run --white ollama:llama3.2 --black engine:v1.0@depth1 --games 2
+  arena run --white ollama:llama3.2 --black engine:v1.0@depth1 --games 2
   ```
   This writes `arena/out/<run>/games.pgn` and `report.json` (tokens, cost, illegal-move rate, ACPL).
 - **Exit:** a reproducible run gives the same report from the same seed and logs.
@@ -570,10 +568,10 @@ Learnings 2 linked "the GitHub `main` branch". The V2 code is actually on
 
 ## 5. Decisions (ADRs)
 - [ADR-0001 — Java 21 for the engine](adr/0001-java-engine.md)
-- [ADR-0002 — Maven multi-module monorepo](adr/0002-monorepo.md)
+- [ADR-0002 — One repo, one build, flat phase folders](adr/0002-monorepo.md)
 - [ADR-0003 — react-chessboard over chessground](adr/0003-react-chessboard.md)
 - [ADR-0004 — Session-cookie auth over JWT](adr/0004-session-auth.md)
-- [ADR-0005 — Versioned packages, one concept per file](adr/0005-versioned-packages.md)
+- [ADR-0005 — Phase folders as versions, one concept per file](adr/0005-versioned-packages.md)
 
 The Eraser board (original learnings + mirrored diagrams):
 https://app.eraser.io/workspace/1dlGrfXL6QtQMgK64YgD

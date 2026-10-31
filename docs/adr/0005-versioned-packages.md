@@ -1,6 +1,6 @@
-# ADR-0005 — Versioned packages, one concept per file
+# ADR-0005 — Phase folders as versions, one concept per file
 
-- **Status:** accepted
+- **Status:** accepted (revised 2026-10-31: phase folders replace `board/v1`-style packages)
 - **Date:** 2026-10-31
 
 ## Context
@@ -9,17 +9,17 @@ understandable on its own, and earlier code must stay provably correct when late
 
 ## Decision
 - One major concept per file.
-- Engine components live in versioned packages (`board/v1`, `movegen/v2`, …). A new version goes
-  next to the old one instead of overwriting it, and old versions keep their tests in CI.
-  The full rules are in [CODE_LAYOUT.md](../CODE_LAYOUT.md).
+- **Each phase folder is a version.** Once a phase is tagged, its folder is frozen. Later phases
+  import from earlier folders, and put any improved version of a component in their own folder.
+  Old code keeps its tests in CI. The full rules are in [CODE_LAYOUT.md](../CODE_LAYOUT.md).
 
 ## Consequences
-- **Easier:** you can read a single version in isolation and diff two versions folder to folder.
-  Old versions double as test oracles, e.g. `movegen/v2` must equal `movegen/v1` on thousands of positions.
-- **Harder:** there is some duplicated code between versions, and every new version has to decide
-  which versions of other components it builds on.
-- **Watch:** only version components that really change. Never copy code just to bump a number.
+- **Easier:** you can read one phase in isolation, see exactly what each phase added, and use old
+  implementations as test oracles. For example, Phase 2's magic move generator must match its ray
+  generator on thousands of positions.
+- **Harder:** a later phase that needs a changed `Board` must write its own version and decide
+  which earlier pieces it still uses.
 
 ## Alternatives considered
 - **Git tags only:** history is safe, but you can't run old and new code side by side or compare them in one test.
-- **Feature flags inside one class:** gets hard to read quickly, which defeats the learning goal.
+- **`board/v1`, `board/v2` sub-packages:** the same idea, but deeper folders and spread across phases.

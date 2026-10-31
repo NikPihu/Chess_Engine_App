@@ -6,15 +6,25 @@ Trying to make a chess engine while taking in account all the problem solving fu
 ## Quick start (Windows, Java 21 + Maven)
 ```bash
 mvn verify                    # build + run all tests
-engine "position startpos" d  # draw the board   (PowerShell: .\engine "position startpos" d)
-engine                        # interactive mode, type 'help'
+engine gui                    # chess board in your browser - play the engine (PowerShell: .\engine gui)
+engine "position startpos" d  # draw the board in the terminal
+engine "go movetime 2000"     # let the engine think 2 s from the start position
+engine                        # interactive UCI mode, type 'help'
 ```
+
+How to check every phase: see the phase notes in [docs/phases/](docs/phases/).
 
 ## Where things are
 | Folder | What |
 |---|---|
 | `phase1/` | Board, pieces, FEN, Zobrist hashing (+ `tests/`) |
-| `uci/` | The runnable program (UCI commands) |
+| `phase2/` | Move generation, magic bitboards, make/unmake, perft |
+| `phase3/` | Game rules, SAN/PGN, search interface, random player |
+| `phase4/` | Search v1 (alpha-beta, TT, PeSTO eval) |
+| `phase6/` | Search v2 + evaluation v2 (feature switches) |
+| `uci/` | The runnable program (UCI commands, engine registry) |
+| `gui/` | Graphical board in the browser (`engine gui`) |
+| `tools/` | SPRT testing (`Sprt.java`, `Ladder.java`), lichess bot launcher |
 | `docs/` | Roadmap, phase notes, primers, decisions |
 
 Layout rules: [docs/CODE_LAYOUT.md](docs/CODE_LAYOUT.md)

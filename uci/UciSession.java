@@ -43,6 +43,7 @@ public final class UciSession {
   private String engineName = Engines.DEFAULT;
   private Searcher searcher = Engines.create(engineName);
   private int hashMb = 16;
+  private int moveOverheadMs = 30;
 
   private Thread searchThread;
   private SearchContext searchContext;
@@ -125,6 +126,7 @@ public final class UciSession {
     out.println("option name Engine type combo default " + Engines.DEFAULT + combo);
     out.println("option name Hash type spin default 16 min 1 max 1024");
     out.println("option name Features type string default all");
+    out.println("option name Move Overhead type spin default 30 min 0 max 5000");
     out.println("uciok");
   }
 
@@ -154,6 +156,7 @@ public final class UciSession {
         hashMb = Integer.parseInt(value);
         searcher.setHashSizeMb(hashMb);
       }
+      case "move overhead" -> moveOverheadMs = Integer.parseInt(value);
       case "features" -> {
         // Phase 6 switches, e.g. "all", "none", "pvs,nmp" or "all,-nmp" (see phase6/Features).
         if (searcher instanceof phase6.Search2 v2) {
@@ -218,6 +221,7 @@ public final class UciSession {
     }
     waitForSearch();
     SearchLimits limits = SearchLimits.parse(tokens, 1);
+    applyMoveOverhead(limits);
     Position searchPosition = game.copyOfPosition();
     Searcher engine = searcher;
     SearchContext context = new SearchContext(out::println);
@@ -230,6 +234,22 @@ public final class UciSession {
             },
             "search");
     searchThread.start();
+  }
+
+  /**
+   * Keeps {@code Move Overhead} ms of every clock in reserve for network and GUI delays, so online
+   * games (lichess) are not lost on time.
+   */
+  private void applyMoveOverhead(SearchLimits limits) {
+    if (limits.whiteTimeMs > 0) {
+      limits.whiteTimeMs = Math.max(1, limits.whiteTimeMs - moveOverheadMs);
+    }
+    if (limits.blackTimeMs > 0) {
+      limits.blackTimeMs = Math.max(1, limits.blackTimeMs - moveOverheadMs);
+    }
+    if (limits.moveTimeMs > 0) {
+      limits.moveTimeMs = Math.max(1, limits.moveTimeMs - moveOverheadMs);
+    }
   }
 
   private void stopSearch() {

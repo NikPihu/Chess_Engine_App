@@ -13,12 +13,12 @@
 |---|-------|------|-------------------------|--------|
 | 0 | [Foundations](phases/00-foundations.md) | A · Engine | `mvn verify` green locally + CI | ✅ |
 | 1 | [Board, FEN, Zobrist](phases/01-board.md) | A · Engine | `engine "position fen …" d` / `d` prints board + hash | ✅ |
-| 2 | Move generation + perft | A · Engine | `go perft 5` = 4,865,609 · `bench` nps | ⬜ |
-| 3 | Rules + playable UCI engine | A · Engine | Load in Cute Chess GUI and play a full game | ⬜ |
-| 4 | Search & eval v1 | A · Engine | `engine-v1.0` beats random bot, solves tactic suite | ⬜ |
-| 5 | Testing lab (SPRT) | B · Strength | `sprt.ps1 v1.0 v0` → result + Elo ledger row | ⬜ |
-| 6 | Strength sprints | B · Strength | `engine-v2.0`, every feature proven in ledger | ⬜ |
-| 7 | Lichess bot | B · Strength | Challenge your bot on lichess.org | ⬜ |
+| 2 | [Move generation + perft](phases/02-movegen.md) | A · Engine | `go perft 5` = 4,865,609 · `bench` nps | ✅ |
+| 3 | [Rules + playable UCI engine + board GUI](phases/03-rules-uci.md) | A · Engine | `engine gui` → play in your browser (or Cute Chess) | ✅ |
+| 4 | [Search & eval v1](phases/04-search.md) | A · Engine | `engine-v1.0` beats random bot, solves tactic suite | ✅ |
+| 5 | [Testing lab (SPRT)](phases/05-testing-lab.md) | B · Strength | `java tools/Sprt.java v1 random` → H1 + Elo ledger row | ✅ |
+| 6 | [Strength sprints](phases/06-strength.md) | B · Strength | `engine-v2.0`, every feature proven in ledger | 🟨 |
+| 7 | [Lichess bot](phases/07-lichess-bot.md) | B · Strength | Challenge your bot on lichess.org | 🟨 |
 | 8 | Backend core | C · Product | `docker compose up` + play a game via Swagger UI | ⬜ |
 | 9 | Web frontend | C · Product | `npm run dev` → play vs engine at localhost:5173 | ⬜ |
 | 10 | Real-time multiplayer | C · Product | Two browser windows matched, timed game, ratings move | ⬜ |
@@ -326,10 +326,11 @@ self-play counts. We use the same statistics Stockfish uses.
 - **Build:**
   - Download [fastchess](https://github.com/Disservin/fastchess) (Windows binary) and an opening book from
     [official-stockfish/books](https://github.com/official-stockfish/books) (UHO or 8moves).
-  - `tools/sprt.ps1 <new> <base>`: runs normalised SPRT with bounds `[0, 5]`, α = β = 0.05, at 8+0.08,
+  - `java tools/Sprt.java <new> <base>` (shortcut `tools\sprt`): runs normalised SPRT with bounds `[0, 10]`, α = β = 0.05, at 8+0.08,
     using the book with both colours.
-  - A `versions/` registry, where each `engine-vX.Y` tag builds into `versions/engine-vX.Y.jar`.
-  - `tools/ledger` appends results to **`docs/results/elo-ledger.md`**
+  - Every engine version lives in the same jar (phase folders), selected with the UCI option
+    `Engine`. Each test snapshots the jar into `tools/versions/`.
+  - Results are appended to **`docs/results/elo-ledger.md`**
     (feature · Elo ± error · games · W/D/L · LLR · accepted?).
     This is your "table of results" idea from Learnings 2, automated.
   - *Optional creative extra:* `tools/book-builder.py` takes positions from the Lichess open database, keeps
@@ -339,8 +340,8 @@ self-play counts. We use the same statistics Stockfish uses.
   [fastchess README](https://github.com/Disservin/fastchess) ·
   primer `docs/learn/05-sprt-explained.md`.
 - **Verify on your machine:**
-  ```powershell
-  tools\sprt.ps1 engine-v1.0 engine-v0
+  ```bash
+  java tools/Sprt.java v1 random
   ```
   Expect H1 accepted almost instantly and a new ledger row.
 - **Exit:** a one-command SPRT plus the ledger work end to end.

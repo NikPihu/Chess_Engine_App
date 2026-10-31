@@ -11,6 +11,9 @@ chess_engine/
 │   └─ tests/
 ├─ uci/             the program you run (UCI commands); it wires the phases together
 │   └─ tests/
+├─ gui/             browser board (engine gui): GuiServer.java + index.html
+├─ tools/           Sprt.java / Ladder.java (run with: java tools/Sprt.java ...), bot.cmd
+│                   bin/, books/, versions/, results/, lichess-bot/ are git-ignored downloads/output
 └─ docs/
 ```
 

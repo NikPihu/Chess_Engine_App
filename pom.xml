@@ -16,6 +16,7 @@
       phase1/tests/    tests of Phase 1       (package phase1.tests)
       phaseN/ ...      later phases import earlier ones: import phase1.Board;
       uci/             the runnable program   (package uci)
+      gui/             graphical board in the browser: engine gui
 
     The project folder itself is the Java source root, so a class is at most two folders deep.
     Tests are compiled together with the code (JUnit is "provided": available while building and
@@ -58,6 +59,15 @@
   <build>
     <finalName>engine</finalName>
     <sourceDirectory>${project.basedir}</sourceDirectory>
+    <resources>
+      <!-- the board viewer's web page is packed into the jar -->
+      <resource>
+        <directory>${project.basedir}</directory>
+        <includes>
+          <include>gui/*.html</include>
+        </includes>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>
@@ -68,6 +78,7 @@
           <includes>
             <include>phase*/**/*.java</include>
             <include>uci/**/*.java</include>
+            <include>gui/**/*.java</include>
           </includes>
         </configuration>
       </plugin>
@@ -112,6 +123,7 @@
             <includes>
               <include>phase*/**/*.java</include>
               <include>uci/**/*.java</include>
+              <include>gui/**/*.java</include>
             </includes>
             <googleJavaFormat/>
             <removeUnusedImports/>

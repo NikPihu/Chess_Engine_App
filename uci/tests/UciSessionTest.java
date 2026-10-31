@@ -110,4 +110,26 @@ class UciSessionTest {
     session.handle("bb x");
     assertThat(output()).contains("unknown bitboard 'x'");
   }
+
+  @Test
+  void goWithRandomEnginePrintsALegalBestMove() {
+    session.handle("position startpos moves e2e4");
+    session.handle("go depth 1");
+    session.waitForSearch();
+    assertThat(output()).containsPattern("bestmove [a-h][1-8][a-h][1-8]");
+  }
+
+  @Test
+  void setOptionChoosesEngine() {
+    session.handle("setoption name Engine value random");
+    assertThat(session.engineName()).isEqualTo("random");
+    session.handle("setoption name Engine value nonsense");
+    assertThat(output()).contains("unknown engine 'nonsense'");
+  }
+
+  @Test
+  void uciListsOptions() {
+    session.handle("uci");
+    assertThat(output()).contains("option name Engine type combo").contains("option name Hash");
+  }
 }

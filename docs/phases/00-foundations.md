@@ -1,21 +1,24 @@
 # Phase 0 — Foundations ✅
 
-**Tag:** `phase-0`
+**Tag:** `phase-0` (the build was later flattened into phase folders; see ADR-0002)
 
 ## What was built
-- A Maven multi-module build: the parent `pom.xml` plus the `engine` and `engine-uci` modules, on Java 21.
-- JUnit 5 and AssertJ for tests, Spotless (google-java-format) for formatting, and a GitHub Actions CI
-  (`.github/workflows/ci.yml`) that runs `mvn verify`.
-- `engine-uci.jar`: a runnable jar that answers the UCI handshake.
+- A single Maven build (`pom.xml`) on Java 21, with JUnit 5 + AssertJ for tests, Spotless
+  (google-java-format) for formatting, and GitHub Actions CI (`.github/workflows/ci.yml`) running `mvn verify`.
+- `target/engine.jar`: the runnable program (code in `uci/`), plus the `engine.cmd` shortcut.
 
 ## Commands
 ```bash
 mvn verify                  # build + all tests + formatting check
 mvn spotless:apply          # auto-format all Java code (run before committing)
-java -jar engine-uci/target/engine-uci.jar uci isready quit
+mvn -q package -DskipTests  # just rebuild target/engine.jar
 ```
+```bash
+engine uci isready quit
+```
+In PowerShell, type `.\engine` instead of `engine`.
 
-Expected output of the last command:
+Expected output:
 ```
 id name ChessEngineApp 0.1.0
 id author NikPihu

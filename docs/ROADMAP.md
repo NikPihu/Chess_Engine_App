@@ -18,7 +18,7 @@
 | 4 | [Search & eval v1](phases/04-search.md) | A · Engine | `engine-v1.0` beats random bot, solves tactic suite | ✅ |
 | 5 | [Testing lab (SPRT)](phases/05-testing-lab.md) | B · Strength | `java tools/Sprt.java v1 random` → H1 + Elo ledger row | ✅ |
 | 6 | [Strength sprints](phases/06-strength.md) | B · Strength | `engine-v2.0`: +296 Elo over v1, every feature proven in ledger | ✅ |
-| 7 | [Lichess bot](phases/07-lichess-bot.md) | B · Strength | Challenge your bot on lichess.org | 🟨 |
+| 7 | [Lichess bot](phases/07-lichess-bot.md) | B · Strength | BOT nikpihu live on lichess.org: blitz 2289 (provisional) | ✅ |
 | 8 | Backend core | C · Product | `docker compose up` + play a game via Swagger UI | ⬜ |
 | 9 | Web frontend | C · Product | `npm run dev` → play vs engine at localhost:5173 | ⬜ |
 | 10 | Real-time multiplayer | C · Product | Two browser windows matched, timed game, ratings move | ⬜ |

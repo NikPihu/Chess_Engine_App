@@ -1,4 +1,4 @@
-# Phase 7 — Lichess bot 🟨 (ready; going live needs your BOT account)
+# Phase 7 — Lichess bot ✅
 
 **Files:** [`tools/bot.cmd`](../../tools/bot.cmd), your clone in `tools/lichess-bot/` (git-ignored, holds your token)
 
@@ -24,7 +24,14 @@ Welcome nikpihu!               ← your token works
 nikpihu is not a bot account.  ← expected: not upgraded yet
 ```
 
-## Going live: your steps
+## Live results
+- **2026-11-01:** account **nikpihu** upgraded to BOT and online: https://lichess.org/@/nikpihu
+- **First day:** 18 blitz games, **6 wins, 2 draws, 10 losses**. Blitz rating **2289**, still
+  provisional (a "?" rating until about 20+ games; it started at 3000? and is settling).
+- **No bullet games**, because matchmaking only sends 3–5 minute blitz challenges
+  (`matchmaking.challenge_initial_time`). Bullet happens only when someone challenges it.
+
+## Going live: your steps (done)
 > ⚠️ **Upgrading to BOT is permanent.** A BOT account can never play as a human again, and Lichess only
 > allows the upgrade on an account that has **never played a game**. If `nikpihu` is your personal
 > account, **don't upgrade it**. Instead:

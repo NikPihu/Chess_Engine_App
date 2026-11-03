@@ -81,6 +81,31 @@
     </div>
   </div>
   <div class="panel">
+    <h2>Watch: engine vs engine</h2>
+    <div class="row">
+      <label>White <select id="watchWhite"></select></label>
+      <label>Black <select id="watchBlack"></select></label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn primary" onclick="startWatch()">&#9654; Start</button>
+      <button class="btn" onclick="stopWatch()">&#9632; Stop</button>
+      <span id="watchInfo" style="font-size:12px;color:#9a9a9a"></span>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Replay a PGN (e.g. tools/results/*.pgn)</h2>
+    <input type="file" id="pgnFile" accept=".pgn,.txt" onchange="loadPgnFile(this.files[0])">
+    <select id="replayGame" style="width:100%;margin-top:8px" onchange="replayGo(0)"></select>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" onclick="replayGo(0)">|&#9664;</button>
+      <button class="btn" onclick="replayStep(-1)">&#9664;</button>
+      <button class="btn" onclick="replayStep(1)">&#9654;</button>
+      <button class="btn" onclick="replayGo(1e9)">&#9654;|</button>
+      <button class="btn" onclick="replayAuto()">Auto &#9654;&#9654;</button>
+      <span id="replayInfo" style="font-size:12px;color:#9a9a9a"></span>
+    </div>
+  </div>
+  <div class="panel">
     <h2>Moves</h2>
     <div id="moves"></div>
   </div>
@@ -94,6 +119,7 @@
 <script>
 const GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 let state = null, selected = null, flipped = false, humanColor = 'w', busy = false, pendingPromo = null;
+let watching = false, replayTimer = null;
 
 const sqName = i => 'abcdefgh'[i % 8] + (Math.floor(i / 8) + 1);
 const sqIndex = n => (n.charCodeAt(0) - 97) + 8 * (n.charCodeAt(1) - 49);
@@ -158,7 +184,16 @@ function render() {
   const turn = state.turn === 'w' ? 'White' : 'Black';
   document.getElementById('status').textContent =
     state.error ? state.error : state.status ? `${state.status} (${state.result})` : busy ? `${turn} to move — engine thinking…` : `${turn} to move`;
-  document.getElementById('info').textContent = state.info || '';
+  document.getElementById('info').textContent = describeInfo(state.info, state.turn);
+  for (const id of ['watchWhite', 'watchBlack']) {
+    const sel = document.getElementById(id);
+    if (sel.options.length !== state.engines.length) {
+      sel.innerHTML = state.engines.map(e => `<option>${e}</option>`).join('');
+      sel.value = id === 'watchWhite' ? state.engines[0] : (state.engines[1] || state.engines[0]);
+    }
+  }
+  const r = state.replay;
+  document.getElementById('replayInfo').textContent = r ? `ply ${r.ply} / ${r.total}` : '';
   const movesEl = document.getElementById('moves');
   movesEl.innerHTML = '';
   for (let i = 0; i < state.san.length; i += 2) {
@@ -264,6 +299,68 @@ async function downloadPgn() {
   a.href = URL.createObjectURL(new Blob([pgn], { type: 'text/plain' }));
   a.download = 'game.pgn'; a.click();
 }
+
+/** "info depth 9 ... score cp 35 ..." -> "Eval +0.35 (White's view) · depth 9". */
+function describeInfo(info, turn) {
+  if (!info) return '';
+  const d = /depth (\d+)/.exec(info), cp = /score cp (-?\d+)/.exec(info), mate = /score mate (-?\d+)/.exec(info);
+  // The score belongs to the side that just moved; turn is now the other side.
+  const moverWhite = turn === 'b';
+  let text = '';
+  if (cp) { const v = (moverWhite ? 1 : -1) * parseInt(cp[1]) / 100; text = `Eval ${v >= 0 ? '+' : ''}${v.toFixed(2)} (White's view)`; }
+  if (mate) { const m = parseInt(mate[1]); text = `Mate in ${Math.abs(m)} for ${(m > 0) === moverWhite ? 'White' : 'Black'}`; }
+  return text ? `${text} · depth ${d ? d[1] : '?'}` : info;
+}
+
+async function startWatch() {
+  if (watching) return;
+  document.getElementById('vsEngine').checked = false;
+  if (state.status) { state = await api('/api/new'); }
+  watching = true;
+  const w = document.getElementById('watchWhite').value, b = document.getElementById('watchBlack').value;
+  document.getElementById('watchInfo').textContent = `${w} (White) vs ${b} (Black)`;
+  while (watching && !state.status) {
+    busy = true; render();
+    state = await api('/api/engine-move?engine=' + encodeURIComponent(state.turn === 'w' ? w : b));
+    busy = false; render();
+  }
+  watching = false;
+}
+
+function stopWatch() { watching = false; }
+
+async function loadPgnFile(file) {
+  if (!file) return;
+  const res = await fetch('/api/pgn-load', { method: 'POST', body: await file.text() });
+  const data = await res.json();
+  const sel = document.getElementById('replayGame');
+  sel.innerHTML = data.games.map((g, i) => `<option value="${i}">${i + 1}. ${g.title} (${g.plies} plies)</option>`).join('');
+  document.getElementById('vsEngine').checked = false;
+  if (data.games.length) replayGo(0);
+}
+
+async function replayGo(ply) {
+  const game = document.getElementById('replayGame').value;
+  if (game === '') return;
+  state = await api(`/api/replay?game=${game}&ply=${Math.round(ply)}`);
+  selected = null; render();
+}
+
+function replayStep(delta) { if (state.replay) replayGo(state.replay.ply + delta); }
+
+function replayAuto() {
+  if (replayTimer) { clearInterval(replayTimer); replayTimer = null; return; }
+  replayTimer = setInterval(() => {
+    if (!state.replay || state.replay.ply >= state.replay.total) { clearInterval(replayTimer); replayTimer = null; return; }
+    replayStep(1);
+  }, 700);
+}
+
+document.addEventListener('keydown', e => {
+  if (!state || !state.replay || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') replayStep(1);
+  if (e.key === 'ArrowLeft') replayStep(-1);
+});
 
 (async () => { state = await api('/api/state'); render(); })();
 </script>

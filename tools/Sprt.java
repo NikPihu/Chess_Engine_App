@@ -47,7 +47,8 @@ public final class Sprt {
     if (args.length < 2) {
       System.out.println(
           "usage: java tools/Sprt.java <new> <base> [--tc 8+0.08] [--concurrency N]"
-              + " [--elo0 0] [--elo1 10] [--maxgames 6000] [--label text] [--jar path]");
+              + " [--elo0 0] [--elo1 10] [--maxgames 6000] [--label text] [--jar path]"
+              + " [--base-jar path] [--games N]");
       return;
     }
     String newSpec = args[0];
@@ -58,7 +59,12 @@ public final class Sprt {
     String elo1 = "10";
     int maxGames = 6000;
     String label = newSpec + " vs " + baseSpec;
-    Path jar = ROOT.resolve("chess_engine_v1/target/chess_engine_v1.jar");
+    // Default: the newest engine jar (v2 contains every engine: nnue, v2, v1, random).
+    Path v2Jar = ROOT.resolve("chess_engine_v2/target/chess_engine_v2.jar");
+    Path jar =
+        Files.exists(v2Jar) ? v2Jar : ROOT.resolve("chess_engine_v1/target/chess_engine_v1.jar");
+    Path baseJar = null;
+    int fixedGames = 0; // > 0: plain match of that many games, no SPRT
     for (int i = 2; i + 1 < args.length; i += 2) {
       switch (args[i]) {
         case "--tc" -> tc = args[i + 1];
@@ -68,18 +74,29 @@ public final class Sprt {
         case "--maxgames" -> maxGames = Integer.parseInt(args[i + 1]);
         case "--label" -> label = args[i + 1];
         case "--jar" -> jar = ROOT.resolve(args[i + 1]);
+        case "--base-jar" -> baseJar = ROOT.resolve(args[i + 1]);
+        case "--games" -> fixedGames = Integer.parseInt(args[i + 1]);
         default -> throw new IllegalArgumentException("unknown flag " + args[i]);
       }
     }
     require(FASTCHESS, "fastchess (see docs/phases/05-testing-lab.md)");
     require(BOOK, "the opening book (see docs/phases/05-testing-lab.md)");
     require(jar, jar + " - build it first: mvn -q package -DskipTests");
+    if (baseJar == null) {
+      baseJar = jar;
+    }
+    require(baseJar, baseJar + " - build it first: mvn -q package -DskipTests");
 
     // Snapshot the jar so rebuilding during a long test can't change the engines mid-match.
     String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
     Path snapshot = ROOT.resolve("tools/versions/engine-" + stamp + ".jar");
     Files.createDirectories(snapshot.getParent());
     Files.copy(jar, snapshot, StandardCopyOption.REPLACE_EXISTING);
+    Path baseSnapshot = snapshot;
+    if (!baseJar.equals(jar)) {
+      baseSnapshot = ROOT.resolve("tools/versions/engine-" + stamp + "-base.jar");
+      Files.copy(baseJar, baseSnapshot, StandardCopyOption.REPLACE_EXISTING);
+    }
     Path results = ROOT.resolve("tools/results");
     Files.createDirectories(results);
     Path pgn = results.resolve(stamp + ".pgn");
@@ -87,20 +104,29 @@ public final class Sprt {
 
     List<String> cmd = new ArrayList<>(List.of(FASTCHESS.toString()));
     cmd.addAll(engine(newSpec, "New", snapshot));
-    cmd.addAll(engine(baseSpec, "Base", snapshot));
+    cmd.addAll(engine(baseSpec, "Base", baseSnapshot));
     cmd.addAll(
         List.of(
             "-each", "tc=" + tc, "proto=uci",
             "-openings", "file=" + BOOK, "format=pgn", "order=random",
             "-games", "2", "-repeat",
-            "-rounds", String.valueOf(maxGames / 2),
+            "-rounds", String.valueOf((fixedGames > 0 ? fixedGames : maxGames) / 2),
             "-concurrency", String.valueOf(concurrency),
-            "-sprt", "elo0=" + elo0, "elo1=" + elo1, "alpha=0.05", "beta=0.05", "model=normalized",
             "-ratinginterval", "50",
             "-pgnout", "file=" + pgn));
-
-    System.out.println("SPRT " + label + "  [" + elo0 + ", " + elo1 + "]  tc " + tc
-        + "  concurrency " + concurrency);
+    if (fixedGames <= 0) {
+      cmd.addAll(
+          List.of(
+              "-sprt", "elo0=" + elo0, "elo1=" + elo1, "alpha=0.05", "beta=0.05",
+              "model=normalized"));
+      System.out.println("SPRT " + label + "  [" + elo0 + ", " + elo1 + "]  tc " + tc
+          + "  concurrency " + concurrency);
+    } else {
+      elo0 = "-";
+      elo1 = "-";
+      System.out.println("Match " + label + ": " + fixedGames + " games, tc " + tc
+          + "  concurrency " + concurrency);
+    }
     System.out.println("log: " + log + "\n");
 
     Process process = new ProcessBuilder(cmd).redirectErrorStream(true).start();
@@ -151,7 +177,8 @@ public final class Sprt {
     String llr = find(output, "LLR: ([-0-9.]+)");
     String verdict =
         output.contains("H1 was accepted") ? "✅ H1 (better)"
-            : output.contains("H0 was accepted") ? "❌ H0 (not better)" : "⏸ inconclusive";
+            : output.contains("H0 was accepted") ? "❌ H0 (not better)"
+            : elo0.equals("-") ? "📊 fixed match" : "⏸ inconclusive";
 
     Files.createDirectories(LEDGER.getParent());
     if (!Files.exists(LEDGER)) {

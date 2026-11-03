@@ -54,6 +54,14 @@ public final class GuiServer {
   private long thinkMs = 1000;
   private String lastInfo = "";
 
+  // Engine vs Engine: one searcher per engine name, so each side keeps its own hash table.
+  private final Map<String, Searcher> watchEngines = new HashMap<>();
+
+  // PGN replay: the loaded games and where we are in the selected one.
+  private List<PgnReader.PgnGame> replayGames = List.of();
+  private int replayIndex = -1;
+  private int replayPly = 0;
+
   private GuiServer() {}
 
   /** Starts the server and (if possible) opens the browser. Runs until the program is closed. */
@@ -86,11 +94,38 @@ public final class GuiServer {
         case "/api/move" -> {
           String uci = query.getOrDefault("uci", "");
           boolean ok = !game.result().isOver() && game.play(uci);
+          if (ok) {
+            replayIndex = -1;
+          }
           sendJson(exchange, ok ? 200 : 400, stateJson(ok ? null : "Illegal move: " + uci));
         }
         case "/api/engine-move" -> {
-          String error = engineMove();
+          String error = engineMove(query.get("engine"));
           sendJson(exchange, 200, stateJson(error));
+        }
+        case "/api/pgn-load" -> {
+          String text =
+              new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+          replayGames = PgnReader.read(text);
+          replayIndex = -1;
+          sendJson(exchange, 200, gamesJson());
+        }
+        case "/api/replay" -> {
+          int index = Integer.parseInt(query.getOrDefault("game", "0"));
+          if (index < 0 || index >= replayGames.size()) {
+            sendJson(exchange, 400, stateJson("No such game"));
+            return;
+          }
+          PgnReader.PgnGame g = replayGames.get(index);
+          replayIndex = index;
+          replayPly =
+              Math.max(
+                  0, Math.min(g.moves().size(), Integer.parseInt(query.getOrDefault("ply", "0"))));
+          game = new Game(g.startFen());
+          for (int i = 0; i < replayPly; i++) {
+            game.play(g.moves().get(i));
+          }
+          sendJson(exchange, 200, stateJson(null));
         }
         case "/api/new" -> {
           String fen = query.get("fen");
@@ -98,6 +133,8 @@ public final class GuiServer {
           try {
             game = fen == null || fen.isBlank() ? new Game() : new Game(fen);
             searcher.newGame();
+            watchEngines.values().forEach(Searcher::newGame);
+            replayIndex = -1;
             lastInfo = "";
           } catch (FenException e) {
             error = e.getMessage();
@@ -130,17 +167,26 @@ public final class GuiServer {
     }
   }
 
-  private String engineMove() {
+  /**
+   * Lets an engine play the side to move: the selected one, or (Engine vs Engine mode) the engine
+   * named in the request.
+   */
+  private String engineMove(String name) {
     if (game.result().isOver()) {
       return "The game is over";
     }
+    Searcher engine = searcher;
+    if (name != null && Engines.exists(name)) {
+      engine = watchEngines.computeIfAbsent(name, Engines::create);
+    }
     Position position = game.copyOfPosition();
     SearchContext context = new SearchContext(line -> lastInfo = line);
-    int move = searcher.bestMove(position, SearchLimits.moveTime(thinkMs), context);
+    int move = engine.bestMove(position, SearchLimits.moveTime(thinkMs), context);
     if (move == Move.NULL) {
       return "Engine found no move";
     }
     game.play(move);
+    replayIndex = -1; // a new move leaves PGN replay mode
     return null;
   }
 
@@ -181,10 +227,36 @@ public final class GuiServer {
     }
     sb.append("],");
     sb.append("\"thinkMs\":").append(thinkMs).append(',');
+    if (replayIndex >= 0) {
+      PgnReader.PgnGame g = replayGames.get(replayIndex);
+      sb.append("\"replay\":{\"game\":")
+          .append(replayIndex)
+          .append(",\"ply\":")
+          .append(replayPly)
+          .append(",\"total\":")
+          .append(g.moves().size())
+          .append(",\"title\":\"")
+          .append(escape(g.title()))
+          .append("\"},");
+    }
     field(sb, "info", lastInfo);
     field(sb, "error", error == null ? "" : error);
     sb.setLength(sb.length() - 1);
     return sb.append('}').toString();
+  }
+
+  private String gamesJson() {
+    StringBuilder sb = new StringBuilder("{\"games\":[");
+    for (int i = 0; i < replayGames.size(); i++) {
+      PgnReader.PgnGame g = replayGames.get(i);
+      sb.append(i > 0 ? "," : "")
+          .append("{\"title\":\"")
+          .append(escape(g.title()))
+          .append("\",\"plies\":")
+          .append(g.moves().size())
+          .append('}');
+    }
+    return sb.append("]}").toString();
   }
 
   private static void field(StringBuilder sb, String name, String value) {

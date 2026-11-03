@@ -40,8 +40,9 @@ public final class UciSession {
 
   private final PrintStream out;
   private Game game = new Game();
-  private String engineName = Engines.DEFAULT;
+  private String engineName = Engines.defaultName();
   private Searcher searcher = Engines.create(engineName);
+  private final java.util.Map<String, String> customValues = new java.util.LinkedHashMap<>();
   private int hashMb = 16;
   private int moveOverheadMs = 30;
 
@@ -123,11 +124,14 @@ public final class UciSession {
     for (String name : Engines.names()) {
       combo.append(" var ").append(name);
     }
-    out.println("option name Engine type combo default " + Engines.DEFAULT + combo);
+    out.println("option name Engine type combo default " + Engines.defaultName() + combo);
     out.println("option name Hash type spin default 16 min 1 max 1024");
     out.println(
         "option name Features type string default killers,history,pvs,nmp,lmr,aspiration,rfp");
     out.println("option name Move Overhead type spin default 30 min 0 max 5000");
+    for (Engines.CustomOption option : Engines.customOptions()) {
+      out.println(option.declaration());
+    }
     out.println("uciok");
   }
 
@@ -152,6 +156,8 @@ public final class UciSession {
         engineName = value;
         searcher = Engines.create(value);
         searcher.setHashSizeMb(hashMb);
+        // Options set earlier (e.g. EvalFile) also apply to the newly chosen engine.
+        customValues.forEach((k, v) -> Engines.customOption(k).handler().accept(searcher, v));
       }
       case "hash" -> {
         hashMb = Integer.parseInt(value);
@@ -170,7 +176,19 @@ public final class UciSession {
           out.println("info string Features only applies to engine v2");
         }
       }
-      default -> out.println("info string unknown option '" + name + "'");
+      default -> {
+        Engines.CustomOption option = Engines.customOption(name);
+        if (option == null) {
+          out.println("info string unknown option '" + name + "'");
+          return;
+        }
+        try {
+          option.handler().accept(searcher, value);
+          customValues.put(option.name(), value);
+        } catch (RuntimeException e) {
+          out.println("info string " + option.name() + ": " + e.getMessage());
+        }
+      }
     }
   }
 

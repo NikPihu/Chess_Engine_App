@@ -17,6 +17,7 @@
   -->
   <modules>
     <module>chess_engine_v1</module>
+    <module>chess_engine_v2</module>
   </modules>
 
   <build>

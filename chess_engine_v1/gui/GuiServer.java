@@ -49,7 +49,7 @@ import uci.Engines;
 public final class GuiServer {
 
   private Game game = new Game();
-  private String engineName = Engines.DEFAULT;
+  private String engineName = Engines.defaultName();
   private Searcher searcher = Engines.create(engineName);
   private long thinkMs = 1000;
   private String lastInfo = "";

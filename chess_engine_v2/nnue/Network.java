@@ -89,6 +89,26 @@ public final class Network {
     return (int) (output * SCALE / ((long) QA * QB));
   }
 
+  /**
+   * Evaluation straight from feature lists (used by tests to compare with the Python trainer; the
+   * engine itself uses an {@link Accumulator}). Feature 768 means "unused slot".
+   */
+  public int evaluateFeatures(int[] usFeatures, int[] themFeatures) {
+    return evaluate(sum(usFeatures), sum(themFeatures));
+  }
+
+  private short[] sum(int[] features) {
+    short[] acc = featureBias.clone();
+    for (int f : features) {
+      if (f >= 0 && f < Features.COUNT) {
+        for (int i = 0; i < HIDDEN; i++) {
+          acc[i] += featureWeights[f * HIDDEN + i];
+        }
+      }
+    }
+    return acc;
+  }
+
   /** Clamp to [0, QA] then square: the integer version of clamp(x, 0, 1)². */
   private static long screlu(short x) {
     int c = x < 0 ? 0 : Math.min(x, QA);

@@ -17,14 +17,8 @@ How to check every phase: see the phase notes in [docs/phases/](docs/phases/).
 ## Where things are
 | Folder | What |
 |---|---|
-| `phase1/` | Board, pieces, FEN, Zobrist hashing (+ `tests/`) |
-| `phase2/` | Move generation, magic bitboards, make/unmake, perft |
-| `phase3/` | Game rules, SAN/PGN, search interface, random player |
-| `phase4/` | Search v1 (alpha-beta, TT, PeSTO eval) |
-| `phase6/` | Search v2 + evaluation v2 (feature switches) |
-| `uci/` | The runnable program (UCI commands, engine registry) |
-| `gui/` | Graphical board in the browser (`engine gui`) |
-| `tools/` | SPRT testing (`Sprt.java`, `Ladder.java`), lichess bot launcher |
-| `docs/` | Roadmap, phase notes, primers, decisions |
+| `chess_engine_v1/` | **Engine v1** (alpha-beta + PeSTO, Phases 1–6): `phase1/` … `phase6/`, its `uci/` program and `gui/` board |
+| `tools/` | **Shared by every engine:** SPRT lab (`Sprt.java`, `Ladder.java`), Lichess bot launcher (`bot.cmd`) |
+| `docs/` | Roadmap, phase notes, primers, decisions, Elo ledger |
 
 Layout rules: [docs/CODE_LAYOUT.md](docs/CODE_LAYOUT.md)

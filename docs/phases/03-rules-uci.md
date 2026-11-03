@@ -1,6 +1,6 @@
 # Phase 3 — Game rules, notation, UCI, and the graphical board ✅
 
-**Tag:** `phase-3` · **Folders:** [`phase3/`](../../phase3), [`gui/`](../../gui), [`uci/`](../../uci)
+**Tag:** `phase-3` · **Folders:** [`phase3/`](../../chess_engine_v1/phase3), [`gui/`](../../chess_engine_v1/gui), [`uci/`](../../chess_engine_v1/uci)
 
 ## What was built
 | File | What it is |
@@ -43,7 +43,7 @@ mvn -q package -DskipTests
 
 4. **Optional, in a real chess GUI:** install the free [Cute Chess](https://cutechess.com/) or
    [Arena](http://www.playwitharena.de/).
-   - Add an engine with command `java`, arguments `-jar <project>\target\engine.jar`, protocol UCI.
+   - Add an engine with command `java`, arguments `-jar <project>\chess_engine_v1\target\chess_engine_v1.jar`, protocol UCI.
    - It then plays like any engine: analysis, engine-vs-engine matches, and so on.
 
 5. **Tests:**

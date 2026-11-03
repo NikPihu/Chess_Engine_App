@@ -47,11 +47,11 @@ public final class Ladder {
       }
     }
     Path ledger = Path.of("docs/results/elo-ledger.md");
-    // One fixed engine build for the whole ladder, even if target/engine.jar is rebuilt meanwhile.
+    // One fixed engine build for the whole ladder, even if the engine is rebuilt meanwhile.
     Path jar = Path.of("tools/versions/ladder-engine.jar");
     Files.createDirectories(jar.getParent());
     Files.copy(
-        Path.of("target/engine.jar"), jar, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        Path.of("chess_engine_v1/target/chess_engine_v1.jar"), jar, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     List<String> accepted = new ArrayList<>();
 
     for (String[] step : STEPS) {

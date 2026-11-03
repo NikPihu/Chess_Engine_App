@@ -1,6 +1,6 @@
 # Phase 6 — Strength sprints → `engine-v2.0` ✅
 
-**Tags:** `phase-6`, `engine-v2.0` · **Folder:** [`phase6/`](../../phase6) · **Results:** [Elo ledger](../results/elo-ledger.md)
+**Tags:** `phase-6`, `engine-v2.0` · **Folder:** [`phase6/`](../../chess_engine_v1/phase6) · **Results:** [Elo ledger](../results/elo-ledger.md)
 
 ## What was built
 | File | What it is |

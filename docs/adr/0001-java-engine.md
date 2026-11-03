@@ -9,7 +9,7 @@ fastchess and lichess-bot; inside the server, for move validation, "play vs comp
 and inside the LLM Arena, for validation and scoring.
 
 ## Decision
-Write the engine in **Java 21** as dependency-free code in the phase folders, with a thin UCI program (`uci/`, built as `target/engine.jar`).
+Write the engine in **Java 21** as dependency-free code in the phase folders, with a thin UCI program (`uci/`, built as `chess_engine_v1/target/chess_engine_v1.jar`).
 
 ## Consequences
 - **Easier:**

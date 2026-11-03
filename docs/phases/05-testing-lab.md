@@ -4,7 +4,7 @@
 
 ## What was built
 - **`tools/Sprt.java`:** runs straight from source with `java tools/Sprt.java ...`, no build step. It:
-  1. copies `target/engine.jar` to `tools/versions/` so a long test is never affected by a rebuild;
+  1. copies `chess_engine_v1/target/chess_engine_v1.jar` to `tools/versions/` so a long test is never affected by a rebuild;
   2. plays both engines with fastchess, using `8moves_v3` openings with each opening played with both colours;
   3. stops as soon as SPRT decides;
   4. appends the result to [`docs/results/elo-ledger.md`](../results/elo-ledger.md).

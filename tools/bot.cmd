@@ -1,16 +1,21 @@
 @echo off
-rem Runs our engine on Lichess through lichess-bot (tools\lichess-bot).
-rem   tools\bot              check the setup / play (needs a BOT account)
+rem Runs a chess engine on Lichess through lichess-bot (tools\lichess-bot).
+rem Works with any of our engines: they all speak UCI.
+rem   tools\bot              play (needs a BOT account)
 rem   tools\bot -u           ONE-TIME, IRREVERSIBLE: upgrade the account to a BOT account
-rem Build the engine first: mvn -q package -DskipTests
+rem Which engine plays: set ENGINE_JAR (default chess_engine_v1), e.g.
+rem   set ENGINE_JAR=chess_engine_v2\target\chess_engine_v2.jar
+rem Build first: mvn -q package -DskipTests
 setlocal
 pushd "%~dp0.."
-if not exist target\engine.jar (
-  echo target\engine.jar not found - run: mvn -q package -DskipTests
+if "%ENGINE_JAR%"=="" set "ENGINE_JAR=chess_engine_v1\target\chess_engine_v1.jar"
+if not exist "%ENGINE_JAR%" (
+  echo %ENGINE_JAR% not found - run: mvn -q package -DskipTests
   popd
   exit /b 1
 )
-copy /y target\engine.jar tools\lichess-bot\engines\ChessEngineApp.jar >nul
+echo Playing with %ENGINE_JAR%
+copy /y "%ENGINE_JAR%" tools\lichess-bot\engines\ChessEngineApp.jar >nul
 pushd tools\lichess-bot
 venv\Scripts\python.exe lichess-bot.py %*
 popd

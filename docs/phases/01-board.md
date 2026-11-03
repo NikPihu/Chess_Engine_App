@@ -1,6 +1,6 @@
 # Phase 1 — Board, FEN, Zobrist ✅
 
-**Tag:** `phase-1` · **Folder:** [`phase1/`](../../phase1) · **Primer:** [learn/01-board-fen-move-encoding.md](../learn/01-board-fen-move-encoding.md)
+**Tag:** `phase-1` · **Folder:** [`phase1/`](../../chess_engine_v1/phase1) · **Primer:** [learn/01-board-fen-move-encoding.md](../learn/01-board-fen-move-encoding.md)
 
 ## What was built (all in `phase1/`)
 | File | What it is |
@@ -28,7 +28,7 @@ mvn -q package -DskipTests
 ```
 
 These commands use `engine` (cmd). **In PowerShell, type `.\engine`.** The long form
-`java -jar target/engine.jar ...` works everywhere.
+`java -jar chess_engine_v1/target/chess_engine_v1.jar ...` works everywhere.
 
 **1. Draw the start position**
 ```bash

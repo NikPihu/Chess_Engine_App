@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.nikpihu</groupId>
+  <artifactId>chess-engine-v1</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <name>chess_engine_v1</name>
+
+  <!--
+    Engine v1 (alpha-beta + PeSTO; search versions "v1" and "v2" inside). Built by the root pom.xml,
+    or on its own from this folder. Output: chess_engine_v1/target/chess_engine_v1.jar, a UCI engine
+    that the shared tools (tools/Sprt.java, tools/bot.cmd, engine.cmd) run like any other engine.
+
+    Flat, phase-wise layout (see docs/CODE_LAYOUT.md), relative to this folder:
+
+      phase1/          code of Phase 1        (package phase1)
+      phase1/tests/    tests of Phase 1       (package phase1.tests)
+      phaseN/ ...      later phases import earlier ones: import phase1.Board;
+      uci/             the runnable program   (package uci)
+      gui/             graphical board in the browser: engine gui
+
+    This folder is the Java source root, so a class is at most two folders deep.
+    Tests are compiled together with the code (JUnit is "provided": available while building and
+    testing, never packed into the jar), and *Test classes run on `mvn test` as usual.
+  -->
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>5.11.4</junit.version>
+    <assertj.version>3.27.3</assertj.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>chess_engine_v1</finalName>
+    <sourceDirectory>${project.basedir}</sourceDirectory>
+    <resources>
+      <!-- the board viewer's web page is packed into the jar -->
+      <resource>
+        <directory>${project.basedir}</directory>
+        <includes>
+          <include>gui/*.html</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <includes>
+            <include>phase*/**/*.java</include>
+            <include>uci/**/*.java</include>
+            <include>gui/**/*.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <!-- Tests live next to the code, so look for *Test classes among the normal classes. -->
+          <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
+          <includes>
+            <include>**/tests/*Test.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <configuration>
+          <excludes>
+            <exclude>**/tests/**</exclude>
+          </excludes>
+          <archive>
+            <manifest>
+              <mainClass>uci.UciMain</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Formatting is never debated: `mvn spotless:apply` fixes it, `mvn verify` checks it. -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.44.2</version>
+        <configuration>
+          <lineEndings>UNIX</lineEndings>
+          <java>
+            <includes>
+              <include>phase*/**/*.java</include>
+              <include>uci/**/*.java</include>
+              <include>gui/**/*.java</include>
+            </includes>
+            <googleJavaFormat/>
+            <removeUnusedImports/>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

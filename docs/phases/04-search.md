@@ -1,6 +1,6 @@
 # Phase 4 — Search and evaluation v1 → `engine-v1.0` ✅
 
-**Tags:** `phase-4`, `engine-v1.0` · **Folder:** [`phase4/`](../../phase4)
+**Tags:** `phase-4`, `engine-v1.0` · **Folder:** [`phase4/`](../../chess_engine_v1/phase4)
 
 ## What was built
 | File | What it is |

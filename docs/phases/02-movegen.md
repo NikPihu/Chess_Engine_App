@@ -1,6 +1,6 @@
 # Phase 2 — Move generation, make/unmake, perft ✅
 
-**Tag:** `phase-2` · **Folder:** [`phase2/`](../../phase2)
+**Tag:** `phase-2` · **Folder:** [`phase2/`](../../chess_engine_v1/phase2)
 
 ## What was built
 | File | What it is |

@@ -15,7 +15,7 @@
   | `uci_options` | `Hash: 128`, `Move Overhead: 100` | Only options our engine has |
 
 - **Move Overhead** (new UCI option): keeps 100 ms of every move in reserve for network lag, so the bot doesn't lose on time.
-- **`tools\bot.cmd`** copies the latest `target/engine.jar` into `tools/lichess-bot/engines/` and starts lichess-bot.
+- **`tools\bot.cmd`** copies the latest `chess_engine_v1/target/chess_engine_v1.jar` into `tools/lichess-bot/engines/` and starts lichess-bot.
 
 ## Connection check (done, 2026-10-31)
 ```

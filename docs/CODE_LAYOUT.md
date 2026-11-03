@@ -1,41 +1,56 @@
 # Code layout rules
 
-## Flat, phase-wise folders
+## One folder per engine, shared tools outside
 ```
 chess_engine/
-├─ pom.xml          the only build file
-├─ engine.cmd       shortcut to run the engine:  engine "position startpos" d
-├─ phase1/          all Phase 1 code, flat         (package phase1)
-│   └─ tests/       Phase 1 tests + test data      (package phase1.tests)
-├─ phase2/          Phase 2 code; it imports what it needs: import phase1.Board;
-│   └─ tests/
-├─ uci/             the program you run (UCI commands); it wires the phases together
-│   └─ tests/
-├─ gui/             browser board (engine gui): GuiServer.java + index.html
-├─ tools/           Sprt.java / Ladder.java (run with: java tools/Sprt.java ...), bot.cmd
-│                   bin/, books/, versions/, results/, lichess-bot/ are git-ignored downloads/output
-└─ docs/
+├─ pom.xml               builds every engine (root aggregator)
+├─ engine.cmd            run an engine:  engine "position startpos" d   /   engine gui
+│
+├─ chess_engine_v1/      ENGINE v1: alpha-beta + PeSTO (everything built in Phases 1–6)
+│   ├─ pom.xml           its own build → chess_engine_v1/target/chess_engine_v1.jar
+│   ├─ phase1/ … phase6/ engine code, one flat folder per phase (+ tests/ inside)
+│   ├─ uci/              its UCI front door (UciMain, UciSession, Engines registry)
+│   └─ gui/              its browser board (engine gui)
+│
+├─ chess_engine_v2/      (next) e.g. NNUE engine: own folder, own pom.xml, own jar
+│
+├─ tools/                SHARED, works with any engine that speaks UCI
+│   ├─ Sprt.java, Ladder.java   SPRT testing lab (fastchess)
+│   ├─ bot.cmd                  run an engine on Lichess (lichess-bot)
+│   └─ bin/ books/ versions/ results/ lichess-bot/   git-ignored downloads and output
+└─ docs/                 roadmap, phase notes, primers, decisions, Elo ledger
 ```
 
-Any class is at most two folders deep: `phase1/Board.java`, `phase1/tests/BoardTest.java`.
+## Why this split
+- **The contract between engines and tools is UCI,** the standard chess-engine protocol. The SPRT lab,
+  the Lichess bot, Cute Chess, fastchess and Stockfish all talk UCI, so any engine folder that builds a
+  UCI program plugs in without changing the tools. It can even be written in another language.
+- **`uci/` and `gui/` live inside the engine,** because they use that engine's own board and move
+  generator. A new engine can copy them as a starting point, or bring its own.
+- **Choosing which engine the tools run:** set `ENGINE_JAR` before running a launcher.
+  The default is `chess_engine_v1\target\chess_engine_v1.jar`.
+  ```bash
+  set ENGINE_JAR=chess_engine_v2\target\chess_engine_v2.jar
+  ```
+  ```bash
+  tools\bot
+  ```
+  For the lab, use `java tools/Sprt.java ... --jar <path>`.
 
-## The rules
+## Rules inside an engine folder
 1. **One concept per file.** Each file starts with a comment explaining its idea.
-2. **A phase folder is frozen once its phase is tagged.** After `phase-1` is tagged, `phase1/`
-   only gets bug fixes, and each fix comes with a test that reproduces the bug.
-3. **Later phases build on earlier folders, never edit them.** `phase2/` imports `phase1.Board`
-   instead of copying it. If a later phase needs a *better* version of something, it writes the
-   new version in its own folder. For example, `phase2/` will have both a simple `RayMoveGenerator`
-   and a fast `MagicMoveGenerator`.
-4. **Old code keeps its tests running.** CI proves every phase correct on every build, and newer
-   code is tested against older code. For example, the magic generator must produce exactly the
-   same moves as the ray generator on thousands of positions.
-5. **Dependencies only point backwards.** `phase2` may use `phase1`, but never the other way round.
-6. **`uci/` is not a phase.** It's the front door. It grows each phase to expose new commands, and
-   picks which phase's code to use.
+2. **A phase folder is frozen once its phase is tagged.** It only gets bug fixes, each with a test
+   that reproduces the bug.
+3. **Later phases build on earlier folders, never edit them.** `phase6/` imports `phase4.Search` and
+   extends it. Improvements go into the newer folder.
+4. **Old code keeps its tests running.** Newer code is tested against older code; for example, the
+   magic move generator must match the simple ray generator.
+5. **Dependencies only point backwards.** `phase2` may use `phase1`, never the other way round.
 
 ## How the build finds the code
-The project folder itself is the Java source root (`<sourceDirectory>` in `pom.xml`), so the
-folder name *is* the package name (`phase1/Board.java` → `package phase1;`). Tests are compiled
-along with the code. JUnit is only available at build time ("provided" scope), and test classes
-are left out of `target/engine.jar`.
+Each engine folder is its own Java source root, so inside `chess_engine_v1/` the folder name is the
+package name (`chess_engine_v1/phase1/Board.java` is `package phase1;`). Tests are compiled along with
+the code. JUnit is only available at build time, and test classes are left out of the jar.
+
+A new engine should use a distinct package prefix (e.g. `v2.search`) so two engines never define the
+same class name if one ever reuses the other's code.

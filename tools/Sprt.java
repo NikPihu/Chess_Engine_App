@@ -58,7 +58,7 @@ public final class Sprt {
     String elo1 = "10";
     int maxGames = 6000;
     String label = newSpec + " vs " + baseSpec;
-    Path jar = ROOT.resolve("target/engine.jar");
+    Path jar = ROOT.resolve("chess_engine_v1/target/chess_engine_v1.jar");
     for (int i = 2; i + 1 < args.length; i += 2) {
       switch (args[i]) {
         case "--tc" -> tc = args[i + 1];

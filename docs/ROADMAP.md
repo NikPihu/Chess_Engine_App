@@ -110,8 +110,8 @@ flowchart TB
 Chess_Engine_App/
 ├─ pom.xml          single build file (project folder = Java source root)
 ├─ engine.cmd       shortcut: engine "position startpos" d
-├─ phase1/ … phase7/   engine phases, one flat folder each (+ tests/ inside)
-├─ uci/             the runnable UCI program → target/engine.jar (loads in any chess GUI)
+├─ chess_engine_v1/  engine v1: phase1/ … phase6/ (+ tests/), its uci/ program and gui/ board
+├─ chess_engine_v2/  next engine (e.g. NNUE), own folder and build; tools work with any UCI engine
 ├─ phase8/ … phase11/  product phases (server, web, multiplayer, deploy); may add their own build file
 ├─ phase12/ phase13/   LLM Arena
 ├─ tools/           SPRT scripts, opening-book builder (Phase 5)
@@ -119,7 +119,7 @@ Chess_Engine_App/
 └─ docs/            ROADMAP, learn/ primers, adr/ decisions, phases/ notes, results/ ledgers
 ```
 
-Each phase is one flat folder (`phase1/`, `phase2/`, …), one concept per file. A finished phase folder is frozen, and later phases import from it (`import phase1.Board;`). See [CODE_LAYOUT.md](CODE_LAYOUT.md).
+Each engine has its own folder (`chess_engine_v1/`, …); inside it each phase is one flat folder (`phase1/`, `phase2/`, …), one concept per file. A finished phase folder is frozen, and later phases import from it (`import phase1.Board;`). See [CODE_LAYOUT.md](CODE_LAYOUT.md).
 
 The engine phases (1–6) are the heart of the project. Everything else (UCI, server, fair-play, arena)
 reuses them instead of re-implementing chess rules, so there is only one source of truth for legality.
@@ -279,7 +279,7 @@ self-play counts. We use the same statistics Stockfish uses.
   [SAN](https://www.chessprogramming.org/Algebraic_Chess_Notation) ·
   [Cute Chess](https://cutechess.com/).
 - **Verify on your machine:** install **Cute Chess GUI** (Windows). Add an engine with
-  command `java -jar <path>\target\engine.jar`, start a new game against it, play to the end, and save the PGN.
+  command `java -jar <path>\chess_engine_v1\target\chess_engine_v1.jar`, start a new game against it, play to the end, and save the PGN.
 - **Exit:** a full game is played in the GUI with no protocol errors, and end-of-game rules are tested.
 
 #### Phase 4 — Search & evaluation v1 → `engine-v1.0`

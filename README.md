@@ -18,6 +18,7 @@ How to check every phase: see the phase notes in [docs/phases/](docs/phases/).
 | Folder | What |
 |---|---|
 | `chess_engine_v1/` | **Engine v1** (alpha-beta + PeSTO, Phases 1–6): `phase1/` … `phase6/`, its `uci/` program and `gui/` board |
+| `chess_engine_v2/` | **Engine v2**: v1's search + a learned **NNUE** evaluation, improved by self-play + Lichess games ([notes](docs/phases/v2-nnue.md)) |
 | `tools/` | **Shared by every engine:** SPRT lab (`Sprt.java`, `Ladder.java`), Lichess bot launcher (`bot.cmd`) |
 | `docs/` | Roadmap, phase notes, primers, decisions, Elo ledger |
 

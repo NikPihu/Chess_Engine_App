@@ -12,7 +12,10 @@ chess_engine/
 │   ├─ uci/              its UCI front door (UciMain, UciSession, Engines registry)
 │   └─ gui/              its browser board (engine gui)
 │
-├─ chess_engine_v2/      (next) e.g. NNUE engine: own folder, own pom.xml, own jar
+├─ chess_engine_v2/      ENGINE v2: v1's search + NNUE eval learned by self-play (depends on v1)
+│   ├─ nnue/ search/ datagen/ engine/   Java (packages nnue, search, datagen, engine)
+│   ├─ train/            Python: PyTorch trainer, exporter, Lichess download, generation loop
+│   └─ nets/             one trained network per generation; best.nnue is bundled in the jar
 │
 ├─ tools/                SHARED, works with any engine that speaks UCI
 │   ├─ Sprt.java, Ladder.java   SPRT testing lab (fastchess)

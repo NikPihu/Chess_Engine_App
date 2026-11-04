@@ -30,8 +30,22 @@ public final class V2Main {
 
   /** Public so tests and tools (datagen) can use the same setup. */
   public static void registerEngines() {
+    // NNUE_NET (environment) picks a network file, e.g. chess_engine_v2/nets/gen-2.nnue;
+    // otherwise the one bundled in the jar (nets/best.nnue) is used.
+    String chosen = System.getenv("NNUE_NET");
     Network bundled = NetFile.loadDefault();
-    Engines.register("nnue", () -> new NnueSearch(bundled, "bundled nets/best.nnue"));
+    String bundledName = "bundled nets/best.nnue";
+    if (chosen != null && !chosen.isBlank()) {
+      try {
+        bundled = NetFile.load(Path.of(chosen));
+        bundledName = chosen;
+      } catch (IOException e) {
+        System.err.println("NNUE_NET: cannot read " + chosen + " (" + e.getMessage() + ")");
+      }
+    }
+    final Network defaultNet = bundled;
+    final String defaultName = bundledName;
+    Engines.register("nnue", () -> new NnueSearch(defaultNet, defaultName));
     Engines.registerOption(
         "EvalFile",
         "option name EvalFile type string default <bundled>",
@@ -40,7 +54,7 @@ public final class V2Main {
             return; // only the nnue engine has a network
           }
           if (value.isBlank() || value.equals("<bundled>")) {
-            nnue.setNetwork(bundled, "bundled nets/best.nnue");
+            nnue.setNetwork(defaultNet, defaultName);
             return;
           }
           try {

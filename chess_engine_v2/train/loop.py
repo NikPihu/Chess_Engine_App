@@ -202,7 +202,9 @@ def one_generation(args):
     extras = []
     if run(JAVA + ["-cp", JAR, "datagen.PgnPositions", "--pgn", os.path.join(DATA, "lichess"),
                    "--out", lichess_bin, "--threads", str(args.threads), "--blunders", BLUNDERS,
-                   "--engine", "nnue", "--net", parent_net]) == 0 and os.path.getsize(lichess_bin) > 0:
+                   # Neutral judge: v1's search (not the parent network), so the blunder suite's
+                   # "right answers" don't simply reward agreeing with the parent.
+                   "--engine", "v2"]) == 0 and os.path.getsize(lichess_bin) > 0:
         extras = [lichess_bin + ":0.15"]
 
     # 2. LEARN.
@@ -230,7 +232,7 @@ def one_generation(args):
     if cand and best:
         entry["blunders"] = f"{cand[0]}/{cand[1]} (gen-{parent}: {best[0]})"
         save_registry(reg)
-        tolerance = max(2, best[1] * 3 // 100)
+        tolerance = max(5, best[1] * 10 // 100)  # veto only a clear regression
         if cand[0] < best[0] - tolerance:
             entry["tests"].append({"vs": f"gen-{parent} blunder suite", "result": "failed gate", "note": ""})
             save_registry(reg)

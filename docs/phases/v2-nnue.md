@@ -84,3 +84,40 @@ Do this only once a generation has been promoted and beats v1 (see the generatio
    ```bash
    tools\bot
    ```
+
+## Live on Lichess + automatic deployment
+**Start the bot once and leave it running:**
+```bash
+tools\bot
+```
+It plays with chess_engine_v2 by default, and its window prints each game's moves and evals.
+
+**Train a generation whenever you like.** One per command; it then stops:
+```bash
+tools\train
+```
+It runs self-play by the live network (+ new Lichess games), trains, checks the blunder suite,
+then runs an SPRT match vs the live network. **If it wins, it goes live automatically**: `best.nnue`
+is replaced, and the bot's next game uses it, with no bot restart. If it loses, the live
+network stays. Either way the run stops and waits for your next `tools\train`.
+
+| Command | What it does |
+|---|---|
+| `tools\train` | Train the next generation (numbering continues: gen-3, gen-4, …) |
+| `tools\train --status` | Every generation: parent, results, which one is live |
+| `tools\train --rollback 2` | Make gen-2 live again (bot uses it from its next game) |
+| `tools\train --stop` | Stop a running generation from another window (or Ctrl+C in its window) |
+| `tools\train --generations 3` | Several in a row |
+
+**Why the bot switches by itself:** lichess-bot starts a fresh engine for every game, and the
+bot's `config.yml` passes `EvalFile = …/chess_engine_v2/nets/best.nnue`, so each game reads the
+current best network. A game in progress keeps the network it started with. Promotion replaces
+the file atomically, so no game ever sees a half-written network.
+
+**Sharing the laptop:** everything `tools\train` starts runs at below-normal priority on 12 of
+16 threads, so the bot's search always gets CPU first.
+
+**Where to see progress:**
+- `docs/results/v2-generations.md`: every generation and every promotion/rollback, with the bot's Lichess ratings at that moment.
+- `docs/results/lichess-by-generation.md`: the bot's real Lichess W/D/L, split by which generation was live.
+- `chess_engine_v2/nets/registry.json`: the same, machine-readable. Generation numbers never repeat, and every `gen-N.nnue` is kept.

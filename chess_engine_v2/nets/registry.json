@@ -1,0 +1,65 @@
+{
+  "best": 2,
+  "generations": [
+    {
+      "gen": 1,
+      "parent": null,
+      "date": "2026-11-03T23:36:00",
+      "data": [
+        "gen-0.bin",
+        "lichess.bin"
+      ],
+      "positions": 3000018,
+      "tests": [
+        {
+          "vs": "v1 best (v2 search)",
+          "result": "15-140-19 W-L-D, Elo -314, H0",
+          "note": "(invalid: tested with the 22x slower NNUE before the SIMD fix)"
+        }
+      ],
+      "promoted": false
+    },
+    {
+      "gen": 2,
+      "parent": null,
+      "date": "2026-11-04T00:55:00",
+      "data": [
+        "gen-1.bin",
+        "gen-0.bin",
+        "lichess.bin"
+      ],
+      "positions": 6000054,
+      "tests": [
+        {
+          "vs": "v1 best (v2 search)",
+          "result": "34-138-32 W-L-D, Elo -195, H0",
+          "note": "(invalid: slow NNUE before the SIMD fix)"
+        },
+        {
+          "vs": "v1 best (v2 search)",
+          "result": "204-109-125 W-L-D, Elo +76, H1",
+          "note": "(re-test after the SIMD fix)"
+        }
+      ],
+      "promoted": true
+    }
+  ],
+  "events": [
+    {
+      "time": "2026-11-04T09:38:00",
+      "event": "promote",
+      "gen": 2,
+      "lichess": {}
+    },
+    {
+      "time": "2026-11-04T09:59:39",
+      "event": "lichess-deploy",
+      "gen": 2,
+      "lichess": {
+        "bullet": 2257,
+        "blitz": 2263,
+        "rapid": 3000
+      }
+    }
+  ]
+}

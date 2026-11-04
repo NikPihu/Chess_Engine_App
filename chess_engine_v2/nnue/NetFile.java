@@ -30,9 +30,19 @@ public final class NetFile {
 
   private NetFile() {}
 
-  /** Loads (and caches) a network file. Engines share one copy of the weights. */
+  /**
+   * Loads (and caches) a network file. Engines share one copy of the weights. The cache key
+   * includes the file's modification time and size, so when a new generation replaces {@code
+   * best.nnue} the next load reads the new file (this is how a running GUI or the Lichess bot's
+   * next game picks up a promoted network).
+   */
   public static Network load(Path path) throws IOException {
-    String key = path.toAbsolutePath().normalize().toString();
+    String key =
+        path.toAbsolutePath().normalize()
+            + "|"
+            + Files.getLastModifiedTime(path).toMillis()
+            + "|"
+            + Files.size(path);
     Network cached = CACHE.get(key);
     if (cached != null) {
       return cached;

@@ -261,6 +261,8 @@ def one_generation(args):
 
 
 def main():
+    # Windows consoles default to cp1252; results contain symbols like the ledger's check mark.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--generations", type=int, default=1)
     ap.add_argument("--status", action="store_true")

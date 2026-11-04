@@ -1,5 +1,5 @@
 {
-  "best": 2,
+  "best": 3,
   "generations": [
     {
       "gen": 1,
@@ -58,10 +58,15 @@
           "vs": "gen-2 blunder suite",
           "result": "failed gate",
           "note": ""
+        },
+        {
+          "vs": "gen-2",
+          "result": "678-571-613 W-L-D, Elo 19.99 +/- 12.91, \u2705 H1 (better)",
+          "note": "(after gate fix)"
         }
       ],
-      "promoted": false,
-      "blunders": "93/167 (gen-2: 102)"
+      "promoted": true,
+      "blunders": "61/115 (gen-2: 63, neutral suite)"
     }
   ],
   "events": [
@@ -78,6 +83,16 @@
       "lichess": {
         "bullet": 2257,
         "blitz": 2263,
+        "rapid": 3000
+      }
+    },
+    {
+      "time": "2026-11-04T12:49:26",
+      "event": "promote",
+      "gen": 3,
+      "lichess": {
+        "bullet": 2325,
+        "blitz": 2252,
         "rapid": 3000
       }
     }

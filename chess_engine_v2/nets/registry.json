@@ -1,5 +1,5 @@
 {
-  "best": 4,
+  "best": 6,
   "generations": [
     {
       "gen": 1,
@@ -87,6 +87,46 @@
       ],
       "promoted": true,
       "blunders": "81/148 (gen-3: 77)"
+    },
+    {
+      "gen": 5,
+      "parent": 4,
+      "date": "2026-11-04T22:05:24",
+      "data": [
+        "selfplay-gen4-for-gen5.bin",
+        "selfplay-gen3-for-gen4.bin",
+        "lichess.bin"
+      ],
+      "positions": 6000024,
+      "tests": [
+        {
+          "vs": "gen-4",
+          "result": "206-112-180 W-L-D, Elo 66.38 +/- 25.75, \u2705 H1 (better)",
+          "note": ""
+        }
+      ],
+      "promoted": true,
+      "blunders": "82/151 (gen-4: 81)"
+    },
+    {
+      "gen": 6,
+      "parent": 5,
+      "date": "2026-11-05T00:28:43",
+      "data": [
+        "selfplay-gen5-for-gen6.bin",
+        "selfplay-gen4-for-gen5.bin",
+        "lichess.bin"
+      ],
+      "positions": 6000050,
+      "tests": [
+        {
+          "vs": "gen-5",
+          "result": "367-274-309 W-L-D, Elo 34.12 +/- 17.55, \u2705 H1 (better)",
+          "note": ""
+        }
+      ],
+      "promoted": true,
+      "blunders": "81/165 (gen-5: 89)"
     }
   ],
   "events": [
@@ -123,6 +163,26 @@
       "lichess": {
         "bullet": 2359,
         "blitz": 2255,
+        "rapid": 3000
+      }
+    },
+    {
+      "time": "2026-11-04T22:17:59",
+      "event": "promote",
+      "gen": 5,
+      "lichess": {
+        "bullet": 2359,
+        "blitz": 2272,
+        "rapid": 3000
+      }
+    },
+    {
+      "time": "2026-11-05T00:51:40",
+      "event": "promote",
+      "gen": 6,
+      "lichess": {
+        "bullet": 2371,
+        "blitz": 2278,
         "rapid": 3000
       }
     }

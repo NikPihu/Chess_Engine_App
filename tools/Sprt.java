@@ -153,7 +153,7 @@ public final class Sprt {
     List<String> a = new ArrayList<>();
     a.add("-engine");
     a.add("cmd=java");
-    a.add("args=-Xmx256m -XX:+UseSerialGC -jar " + jar);
+    a.add("args=-Xmx256m -XX:+UseSerialGC --add-modules jdk.incubator.vector -jar " + jar);
     a.add("name=" + role + "-" + spec.replaceAll("[^A-Za-z0-9+-]", "_"));
     a.add("option.Engine=" + name);
     a.add("option.Hash=16");

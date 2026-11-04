@@ -82,6 +82,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
+          <!-- Java's Vector API (SIMD) is an incubator module in Java 21 -->
+          <compilerArgs>
+            <arg>--add-modules</arg>
+            <arg>jdk.incubator.vector</arg>
+          </compilerArgs>
           <includes>
             <include>nnue/**/*.java</include>
             <include>search/**/*.java</include>
@@ -97,6 +102,7 @@
         <version>3.5.2</version>
         <configuration>
           <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
+          <argLine>--add-modules jdk.incubator.vector</argLine>
           <includes>
             <include>**/tests/*Test.java</include>
           </includes>

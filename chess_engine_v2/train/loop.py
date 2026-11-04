@@ -89,7 +89,7 @@ def main():
         # 1. Self-play data from the current best engine.
         data = os.path.join(DATA, f"gen-{gen - 1}.bin")
         if not os.path.exists(data):
-            cmd = ["java", "-Xmx4g", "-cp", JAR, "datagen.SelfPlay", "--positions", str(args.positions),
+            cmd = ["java", "-Xmx4g", "--add-modules", "jdk.incubator.vector", "-cp", JAR, "datagen.SelfPlay", "--positions", str(args.positions),
                    "--out", data, "--threads", str(args.threads), "--seed", str(1000 + gen)]
             cmd += ["--engine", "nnue", "--net", best_net] if best_net else ["--engine", "v2"]
             if run(cmd) != 0:
@@ -102,7 +102,7 @@ def main():
         # 1b. Real games from Lichess, re-scored deeper.
         run([sys.executable, os.path.join(V2, "train", "lichess_games.py"), "--out", os.path.join(DATA, "lichess")])
         lichess_bin = os.path.join(DATA, "lichess.bin")
-        cmd = ["java", "-Xmx4g", "-cp", JAR, "datagen.PgnPositions", "--pgn", os.path.join(DATA, "lichess"),
+        cmd = ["java", "-Xmx4g", "--add-modules", "jdk.incubator.vector", "-cp", JAR, "datagen.PgnPositions", "--pgn", os.path.join(DATA, "lichess"),
                "--out", lichess_bin, "--threads", str(args.threads),
                "--blunders", os.path.join(V2, "tests", "lichess-blunders.epd")]
         cmd += ["--engine", "nnue", "--net", best_net] if best_net else ["--engine", "v2"]

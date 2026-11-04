@@ -52,6 +52,7 @@ public class NnueSearch extends Search {
   private Network network;
   private String networkName;
   private int previousScore = 0;
+  private boolean announced = false;
 
   public NnueSearch(Network network, String networkName) {
     for (int i = 0; i < acc.length; i++) {
@@ -88,6 +89,10 @@ public class NnueSearch extends Search {
     previousScore = 0;
     if (network != null) {
       acc[0].refresh(network, position.board());
+      if (!announced) {
+        ctx.info("info string nnue network " + networkName + ", " + nnue.Simd.describe());
+        announced = true;
+      }
     } else {
       ctx.info("info string no NNUE network loaded, using PeSTO evaluation");
     }
@@ -108,8 +113,7 @@ public class NnueSearch extends Search {
   /** Plays {@code move} and prepares the child's accumulator. */
   private void make(int move, int ply) {
     if (network != null) {
-      acc[ply + 1].copyFrom(acc[ply]);
-      acc[ply + 1].applyMove(network, pos.board(), move);
+      acc[ply + 1].update(network, pos.board(), move, acc[ply]);
     }
     pos.makeMove(move);
   }

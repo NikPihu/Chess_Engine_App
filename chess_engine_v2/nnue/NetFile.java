@@ -82,7 +82,8 @@ public final class NetFile {
     header.put((byte) 'N').put((byte) 'N').put((byte) 'U').put((byte) 'E');
     header.putInt(VERSION).putInt(Network.HIDDEN);
     out.writeBytes(header.array());
-    out.writeBytes(shorts(net.featureWeights));
+    out.writeBytes(
+        shorts(java.util.Arrays.copyOf(net.featureWeights, Features.COUNT * Network.HIDDEN)));
     out.writeBytes(shorts(net.featureBias));
     out.writeBytes(shorts(net.outputWeights));
     out.writeBytes(

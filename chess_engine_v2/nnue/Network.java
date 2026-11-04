@@ -35,8 +35,14 @@ public final class Network {
   /** Network output 1.0 = 400 centipawns (the same 400 as the training loss's sigmoid). */
   public static final int SCALE = 400;
 
-  /** featureWeights[feature * HIDDEN + i]. */
+  /**
+   * featureWeights[feature * HIDDEN + i], plus one extra all-zero column at index {@link #ZERO} so
+   * a move update can always add/subtract a fixed number of columns without branches.
+   */
   final short[] featureWeights;
+
+  /** Index of the all-zero "no feature" column. */
+  static final int ZERO = Features.COUNT;
 
   final short[] featureBias;
 
@@ -52,7 +58,7 @@ public final class Network {
         || outputWeights.length != 2 * HIDDEN) {
       throw new IllegalArgumentException("Network arrays have the wrong size");
     }
-    this.featureWeights = featureWeights;
+    this.featureWeights = java.util.Arrays.copyOf(featureWeights, (Features.COUNT + 1) * HIDDEN);
     this.featureBias = featureBias;
     this.outputWeights = outputWeights;
     this.outputBias = outputBias;
@@ -80,13 +86,34 @@ public final class Network {
    * Evaluation in centipawns for the side whose hidden layer is {@code us}, against {@code them}.
    */
   public int evaluate(short[] us, short[] them) {
-    long sum = 0;
-    for (int i = 0; i < HIDDEN; i++) {
-      sum += screlu(us[i]) * outputWeights[i];
-      sum += screlu(them[i]) * outputWeights[HIDDEN + i];
-    }
+    long sum = (long) screluDot(us, 0) + screluDot(them, HIDDEN);
     long output = sum / QA + outputBias; // now = float output * QA * QB
     return (int) (output * SCALE / ((long) QA * QB));
+  }
+
+  /**
+   * Sum of clamp(x, 0, QA)² × weight over one perspective.
+   *
+   * <p>Written for speed: branch-free clamps ({@code Math.min/max}) and plain {@code int} maths, so
+   * the JIT compiles it to SIMD instructions (many lanes per CPU instruction). Computing {@code (c
+   * * w) * c} keeps every step inside an int: |c·w| ≤ 255·127 and the 256-term sum stays below 2³¹
+   * because training clips weights to ±1.98 (|w| ≤ 127 after quantisation).
+   */
+  private int screluDot(short[] acc, int weightOffset) {
+    if (Simd.ENABLED) {
+      return VectorKernels.screluDot(acc, outputWeights, weightOffset);
+    }
+    return scalarScreluDot(acc, weightOffset);
+  }
+
+  /** The plain-Java version of {@link #screluDot} (also used to test the SIMD version). */
+  int scalarScreluDot(short[] acc, int weightOffset) {
+    int sum = 0;
+    for (int i = 0; i < HIDDEN; i++) {
+      int c = Math.min(Math.max(acc[i], 0), QA);
+      sum += c * outputWeights[weightOffset + i] * c;
+    }
+    return sum;
   }
 
   /**
@@ -107,11 +134,5 @@ public final class Network {
       }
     }
     return acc;
-  }
-
-  /** Clamp to [0, QA] then square: the integer version of clamp(x, 0, 1)². */
-  private static long screlu(short x) {
-    int c = x < 0 ? 0 : Math.min(x, QA);
-    return (long) c * c;
   }
 }

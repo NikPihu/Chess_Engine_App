@@ -1,5 +1,5 @@
 {
-  "best": 3,
+  "best": 4,
   "generations": [
     {
       "gen": 1,
@@ -67,6 +67,26 @@
       ],
       "promoted": true,
       "blunders": "61/115 (gen-2: 63, neutral suite)"
+    },
+    {
+      "gen": 4,
+      "parent": 3,
+      "date": "2026-11-04T19:56:39",
+      "data": [
+        "selfplay-gen3-for-gen4.bin",
+        "selfplay-gen2-for-gen3.bin",
+        "lichess.bin"
+      ],
+      "positions": 6000042,
+      "tests": [
+        {
+          "vs": "gen-3",
+          "result": "153-58-89 W-L-D, Elo 113.94 +/- 33.10, \u2705 H1 (better)",
+          "note": ""
+        }
+      ],
+      "promoted": true,
+      "blunders": "81/148 (gen-3: 77)"
     }
   ],
   "events": [
@@ -93,6 +113,16 @@
       "lichess": {
         "bullet": 2325,
         "blitz": 2252,
+        "rapid": 3000
+      }
+    },
+    {
+      "time": "2026-11-04T20:03:59",
+      "event": "promote",
+      "gen": 4,
+      "lichess": {
+        "bullet": 2359,
+        "blitz": 2255,
         "rapid": 3000
       }
     }

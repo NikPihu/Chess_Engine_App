@@ -11,6 +11,7 @@ current best.
 | 1 | v1 data | gen-0.bin, lichess.bin | 3,000,018 | — | v1 best (v2 search) | 15-140-19 W-L-D, Elo -314, H0 (invalid: tested with the 22x slower NNUE before the SIMD fix) | ❌ |
 | 2 | v1 data | gen-1.bin, gen-0.bin, lichess.bin | 6,000,054 | — | v1 best (v2 search) | 34-138-32 W-L-D, Elo -195, H0 (invalid: slow NNUE before the SIMD fix) | ✅ |
 | 2 | v1 data | gen-1.bin, gen-0.bin, lichess.bin | 6,000,054 | — | v1 best (v2 search) | 204-109-125 W-L-D, Elo +76, H1 (re-test after the SIMD fix) | ✅ |
+| 3 | 2 | selfplay-gen2-for-gen3.bin, gen-1.bin, lichess.bin | 6,000,054 | 93/167 (gen-2: 102) | gen-2 blunder suite | failed gate  | ❌ |
 
 ## Events (what was live when)
 

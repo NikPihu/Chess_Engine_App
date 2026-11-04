@@ -26,3 +26,4 @@ tools/versions/
 tools/results/
 config.json
 tools/data/
+__pycache__/

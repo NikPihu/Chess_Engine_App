@@ -42,6 +42,26 @@
         }
       ],
       "promoted": true
+    },
+    {
+      "gen": 3,
+      "parent": 2,
+      "date": "2026-11-04T11:45:29",
+      "data": [
+        "selfplay-gen2-for-gen3.bin",
+        "gen-1.bin",
+        "lichess.bin"
+      ],
+      "positions": 6000054,
+      "tests": [
+        {
+          "vs": "gen-2 blunder suite",
+          "result": "failed gate",
+          "note": ""
+        }
+      ],
+      "promoted": false,
+      "blunders": "93/167 (gen-2: 102)"
     }
   ],
   "events": [

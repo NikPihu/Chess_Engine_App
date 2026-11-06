@@ -17,6 +17,11 @@ chess_engine/
 │   ├─ train/            Python: PyTorch trainer, exporter, Lichess download, generation loop
 │   └─ nets/             one trained network per generation; best.nnue is bundled in the jar
 │
+├─ chess_engine_v3/      ENGINE v3: C++ (CMake + MSVC) - one UCI program, chess_engine_v3/bin/engine_v3.exe
+│   ├─ src/core board movegen uci   C++ engine code (search, nnue, datagen follow)
+│   ├─ tests/            self-contained C++ test runner (perft suite = v1's)
+│   └─ build/ bin/       git-ignored CMake build output; tools\engine3 build|test|bench
+│
 ├─ tools/                SHARED, works with any engine that speaks UCI
 │   ├─ Sprt.java, Ladder.java   SPRT testing lab (fastchess)
 │   ├─ bot.cmd                  run an engine on Lichess (lichess-bot)

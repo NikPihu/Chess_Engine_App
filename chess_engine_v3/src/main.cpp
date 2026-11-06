@@ -17,7 +17,8 @@
 int main(int argc, char** argv) {
   std::ios::sync_with_stdio(false);
   v3::init_all();
-  if (argc > 1 && (std::string(argv[1]) == "datagen" || std::string(argv[1]) == "label"))
+  if (argc > 1 && (std::string(argv[1]) == "datagen" || std::string(argv[1]) == "label" ||
+                   std::string(argv[1]) == "blunders"))
     return v3::datagen::run(argv[1], std::vector<std::string>(argv + 2, argv + argc));
   if (argc > 1 && std::string(argv[1]) == "pgn")
     return v3::datagen::pgn_to_positions(std::vector<std::string>(argv + 2, argv + argc));

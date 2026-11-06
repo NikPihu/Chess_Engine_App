@@ -32,6 +32,7 @@ struct Options {
   int threads = std::max(1u, std::thread::hardware_concurrency() - 4);
   std::uint64_t seed = 1;
   int hash = 16;
+  std::string relabel;
 };
 
 /** One training record, laid out exactly like chess_engine_v2/datagen/Record.java. */
@@ -262,6 +263,81 @@ int label(const Options& o, const std::shared_ptr<const nnue::Network>& net) {
   return 0;
 }
 
+struct EpdLine {
+  std::string fen, bm, rest;
+};
+
+std::vector<EpdLine> read_epd(const std::string& path, std::vector<std::string>* comments) {
+  std::vector<EpdLine> out;
+  std::ifstream in(path);
+  for (std::string line; std::getline(in, line);) {
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    std::size_t bm = line.find(" bm ");
+    if (line.empty() || line[0] == '#' || bm == std::string::npos) {
+      if (comments && !line.empty()) comments->push_back(line);
+      continue;
+    }
+    std::size_t semi = line.find(';', bm);
+    EpdLine e;
+    e.fen = line.substr(0, bm);
+    e.bm = line.substr(bm + 4, semi == std::string::npos ? std::string::npos : semi - bm - 4);
+    e.rest = semi == std::string::npos ? "" : line.substr(semi + 1);
+    out.push_back(e);
+  }
+  return out;
+}
+
+/** Blunder suite: positions the Lichess bot got wrong, with the better move ("bm", SAN).
+ *  Solved = the engine plays that move at a fixed node budget. With --relabel, the suite is
+ *  rewritten with the move our deepest search prefers (so the gate's answers come from the
+ *  strongest judge we have, not from the network being tested). */
+int blunders(const Options& o, const std::shared_ptr<const nnue::Network>& net, const std::string& relabel) {
+  std::vector<std::string> comments;
+  std::vector<EpdLine> lines = read_epd(o.in, &comments);
+  if (lines.empty()) {
+    std::fprintf(stderr, "no positions in %s\n", o.in.c_str());
+    return 1;
+  }
+  std::vector<std::string> found(lines.size());
+  std::vector<int> solved(lines.size(), 0);
+  std::atomic<std::size_t> next{0};
+  std::vector<std::thread> workers;
+  for (int t = 0; t < o.threads; t++) {
+    workers.emplace_back([&]() {
+      auto search = make_searcher(o, net);
+      for (std::size_t i; (i = next++) < lines.size();) {
+        Position pos;
+        if (!pos.set_fen(lines[i].fen)) continue;
+        Move bm = parse_san(pos, lines[i].bm);
+        search->new_game();
+        search->clear_stop();
+        SearchLimits limits;
+        limits.nodes = o.nodes;
+        SearchResult r = search->think(pos, limits, nullptr);
+        found[i] = r.best == MOVE_NONE ? "" : move_to_san(pos, r.best);
+        solved[i] = bm != MOVE_NONE && r.best == bm;
+      }
+    });
+  }
+  for (auto& w : workers) w.join();
+  int total = int(lines.size()), ok = 0;
+  for (int s : solved) ok += s;
+  if (!relabel.empty()) {
+    std::ofstream out(relabel, std::ios::trunc);
+    for (const std::string& c : comments) out << c << '\n';
+    out << "# Re-labelled by chess_engine_v3 at " << o.nodes << " nodes per position (engine_v3 blunders --relabel).\n";
+    int changed = 0;
+    for (std::size_t i = 0; i < lines.size(); i++) {
+      if (found[i].empty()) continue;
+      changed += !solved[i];
+      out << lines[i].fen << " bm " << found[i] << ";" << lines[i].rest << '\n';
+    }
+    std::fprintf(stderr, "relabel: %d of %d best moves changed -> %s\n", changed, total, relabel.c_str());
+  }
+  std::printf("SOLVED %d %d\n", ok, total);
+  return 0;
+}
+
 }  // namespace
 
 int run(const std::string& mode, const std::vector<std::string>& args) {
@@ -278,10 +354,26 @@ int run(const std::string& mode, const std::vector<std::string>& args) {
     else if (k == "--threads") o.threads = std::max(1, std::stoi(v));
     else if (k == "--seed") o.seed = std::stoull(v);
     else if (k == "--hash") o.hash = std::max(1, std::stoi(v));
+    else if (k == "--epd") o.in = v;
+    else if (k == "--relabel") o.relabel = v;
     else {
       std::fprintf(stderr, "unknown option %s\n", k.c_str());
       return 2;
     }
+  }
+  if (mode == "blunders") {
+    if (o.in.empty()) {
+      std::fprintf(stderr, "usage: engine_v3 blunders --epd suite.epd [--net f.nnue] [--nodes 20000] [--threads N] [--relabel out.epd]\n");
+      return 2;
+    }
+    if (o.nodes == 5000) o.nodes = 20000;
+    std::string error;
+    auto net = o.net.empty() ? nnue::load_embedded(error) : nnue::load(o.net, error);
+    if (!net) {
+      std::fprintf(stderr, "network: %s\n", error.c_str());
+      return 1;
+    }
+    return blunders(o, net, o.relabel);
   }
   if (o.out.empty() || (mode == "label" && o.in.empty())) {
     std::fprintf(stderr, "usage: engine_v3 datagen --positions N --out file.bin [--nodes 5000] [--threads N] [--seed S] [--net f.nnue]\n"

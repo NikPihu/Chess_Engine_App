@@ -214,12 +214,12 @@ int Search::evaluate_position(const Position& pos) {
   if (!net_) return material_eval(pos);
   nnue::Accumulator a;
   a.refresh(*net_, pos);
-  return a.evaluate(*net_, pos.side_to_move());
+  return a.evaluate(*net_, pos);
 }
 
 int Search::raw_evaluate(int ply) {
   if (!net_) return material_eval(pos_);
-  return acc_[ply].evaluate(*net_, pos_.side_to_move());
+  return acc_[ply].evaluate(*net_, pos_);
 }
 
 int Search::correction() const {
@@ -243,8 +243,9 @@ void Search::make(Move m, int ply) {
   Stack* s = ss(ply);
   s->move = m;
   s->piece = pos_.piece_on(move_from(m));
-  if (net_) acc_[ply + 1].update(*net_, pos_, m, acc_[ply]);
+  const nnue::Delta delta = net_ ? nnue::delta_for(pos_, m) : nnue::Delta{};
   pos_.make_move(m);
+  if (net_) acc_[ply + 1].update(*net_, pos_, delta, acc_[ply]);
   tt_->prefetch(pos_.key());
 }
 

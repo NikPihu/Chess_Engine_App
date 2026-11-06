@@ -2,87 +2,188 @@
 
 #include <immintrin.h>
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <new>
 #include <vector>
 
 namespace v3::nnue {
 
+void AlignedI16::reset(std::size_t n) {
+  if (data) ::operator delete[](data, std::align_val_t(64));
+  data = static_cast<std::int16_t*>(::operator new[](n * sizeof(std::int16_t), std::align_val_t(64)));
+  size = n;
+  std::memset(data, 0, n * sizeof(std::int16_t));
+}
+
+AlignedI16::~AlignedI16() {
+  if (data) ::operator delete[](data, std::align_val_t(64));
+}
+
 namespace {
 
-/** Sum over i of clamp(acc[i], 0, QA)^2 * w[i], 256 terms, AVX2.
- *  c*w fits in int16 (|c| <= 255, |w| <= 127 because training clips weights), so: mullo16(c, w),
- *  then madd16 with c sums pairs into int32. Same integers as v2's Java loop, so the same result. */
-inline std::int32_t screlu_dot(const std::int16_t* acc, const std::int16_t* w) {
+/** Sum over i < n of clamp(acc[i], 0, QA)^2 * w[i], with AVX2.
+ *  mullo16(c, w) is exact (|c*w| <= 255*127), madd16(c*w, c) adds neighbouring pairs into int32
+ *  lanes. Each lane sums only n/8 products (<= 128 * 8.3M < 2^31), then the lanes are added in
+ *  64 bits, so no width of network can overflow. */
+inline std::int64_t screlu_dot(const std::int16_t* acc, const std::int16_t* w, int n) {
   const __m256i zero = _mm256_setzero_si256();
   const __m256i qa = _mm256_set1_epi16(QA);
   __m256i sum = _mm256_setzero_si256();
-  for (int i = 0; i < HIDDEN; i += 16) {
+  for (int i = 0; i < n; i += 16) {
     __m256i c = _mm256_load_si256(reinterpret_cast<const __m256i*>(acc + i));
     c = _mm256_min_epi16(_mm256_max_epi16(c, zero), qa);
     __m256i weight = _mm256_load_si256(reinterpret_cast<const __m256i*>(w + i));
-    __m256i cw = _mm256_mullo_epi16(c, weight);
-    sum = _mm256_add_epi32(sum, _mm256_madd_epi16(cw, c));
+    sum = _mm256_add_epi32(sum, _mm256_madd_epi16(_mm256_mullo_epi16(c, weight), c));
   }
-  __m128i s = _mm_add_epi32(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
-  s = _mm_add_epi32(s, _mm_shuffle_epi32(s, _MM_SHUFFLE(1, 0, 3, 2)));
-  s = _mm_add_epi32(s, _mm_shuffle_epi32(s, _MM_SHUFFLE(2, 3, 0, 1)));
-  return _mm_cvtsi128_si32(s);
+  alignas(32) std::int32_t lanes[8];
+  _mm256_store_si256(reinterpret_cast<__m256i*>(lanes), sum);
+  std::int64_t total = 0;
+  for (int l = 0; l < 8; l++) total += lanes[l];
+  return total;
+}
+
+inline void add_column(std::int16_t* v, const std::int16_t* col, int n) {
+  for (int i = 0; i < n; i += 16) {
+    __m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(v + i));
+    __m256i b = _mm256_load_si256(reinterpret_cast<const __m256i*>(col + i));
+    _mm256_store_si256(reinterpret_cast<__m256i*>(v + i), _mm256_add_epi16(a, b));
+  }
 }
 
 }  // namespace
 
-int Network::evaluate(const std::int16_t* us, const std::int16_t* them) const {
-  std::int64_t sum = std::int64_t(screlu_dot(us, output_weights)) +
-                     screlu_dot(them, output_weights + HIDDEN);
-  std::int64_t output = sum / QA + output_bias;  // = float output * QA * QB
+int Network::king_state(Color perspective, Square king) const {
+  int k = perspective == WHITE ? king : king ^ 56;
+  bool mirrored = mirror && file_of(k) >= 4;
+  if (mirrored) k ^= 7;
+  return bucket_map[k] * 2 + (mirrored ? 1 : 0);
+}
+
+int Network::feature_index(Color perspective, int state, Piece p, Square sq) const {
+  int relation = color_of(p) == perspective ? 0 : 1;
+  int s = perspective == WHITE ? sq : sq ^ 56;
+  if (state & 1) s ^= 7;
+  return (state >> 1) * FEATURES_PER_BUCKET + relation * 384 + type_of(p) * 64 + s;
+}
+
+int Network::evaluate(const std::int16_t* us, const std::int16_t* them, int bucket) const {
+  const std::int16_t* w = output_weights.data + std::size_t(bucket) * 2 * hidden;
+  std::int64_t sum = screlu_dot(us, w, hidden) + screlu_dot(them, w + hidden, hidden);
+  std::int64_t output = sum / QA + output_bias[bucket];  // = float output * QA * QB
   return int(output * SCALE / (std::int64_t(QA) * QB));
 }
 
 int Network::evaluate_features(const int* us, int n_us, const int* them, int n_them) const {
-  alignas(64) std::int16_t a[2][HIDDEN];
+  alignas(64) std::int16_t a[2][MAX_HIDDEN];
   const int* lists[2] = {us, them};
   int sizes[2] = {n_us, n_them};
   for (int p = 0; p < 2; p++) {
-    std::memcpy(a[p], feature_bias, sizeof(feature_bias));
+    std::memcpy(a[p], feature_bias.data, sizeof(std::int16_t) * hidden);
     for (int k = 0; k < sizes[p]; k++) {
       int f = lists[p][k];
-      if (f < 0 || f >= FEATURES) continue;
-      for (int i = 0; i < HIDDEN; i++) a[p][i] = std::int16_t(a[p][i] + feature_weights[f * HIDDEN + i]);
+      if (f < 0 || f >= FEATURES_PER_BUCKET) continue;
+      add_column(a[p], feature_weights.data + std::size_t(f) * hidden, hidden);
     }
   }
-  return evaluate(a[0], a[1]);
+  return evaluate(a[0], a[1], 0);
 }
+
+std::string Network::describe() const {
+  return "(768x" + std::to_string(king_buckets) + (mirror ? " mirrored" : "") + " -> " +
+         std::to_string(hidden) + ")x2 -> " + std::to_string(output_buckets);
+}
+
+// ---------------------------------------------------------------- file formats
+
+namespace {
+
+struct Reader {
+  const char* p;
+  const char* end;
+  bool ok = true;
+  template <typename T>
+  T get() {
+    T v{};
+    if (end - p < std::ptrdiff_t(sizeof(T))) {
+      ok = false;
+      return v;
+    }
+    std::memcpy(&v, p, sizeof(T));
+    p += sizeof(T);
+    return v;
+  }
+  void bytes(void* out, std::size_t n) {
+    if (std::size_t(end - p) < n) {
+      ok = false;
+      return;
+    }
+    std::memcpy(out, p, n);
+    p += n;
+  }
+};
+
+}  // namespace
 
 std::shared_ptr<const Network> parse(const char* data, std::size_t size, const std::string& name,
                                      std::string& error) {
-  const std::size_t expected = 12 + 2 * (FEATURES * HIDDEN + HIDDEN + 2 * HIDDEN) + 4;
-  if (size < 12 || std::memcmp(data, "NNUE", 4) != 0) {
+  if (size < 12) {
+    error = name + " is too small to be a network";
+    return nullptr;
+  }
+  Reader r{data + 4, data + size};
+  auto net = std::make_shared<Network>();
+  if (std::memcmp(data, "NNUE", 4) == 0) {
+    // v2: "NNUE" | version 1 | hidden 256 | ft[768*256] | bias[256] | out[512] | out bias int32
+    std::int32_t version = r.get<std::int32_t>(), hidden = r.get<std::int32_t>();
+    if (version != 1 || hidden != 256) {
+      error = name + ": unsupported v2 network (version " + std::to_string(version) + ", hidden " +
+              std::to_string(hidden) + ")";
+      return nullptr;
+    }
+    net->hidden = 256;
+  } else if (std::memcmp(data, "NNV3", 4) == 0) {
+    // v3: "NNV3" | version 3 | hidden | king buckets | output buckets | mirror | bucket map[64]
+    //     | ft[KB*768*H] | bias[H] | out[OB*2H] | out bias int32[OB]
+    std::int32_t version = r.get<std::int32_t>();
+    net->hidden = r.get<std::int32_t>();
+    net->king_buckets = r.get<std::int32_t>();
+    net->output_buckets = r.get<std::int32_t>();
+    net->mirror = r.get<std::int32_t>() != 0;
+    for (int& b : net->bucket_map) b = r.get<std::int32_t>();
+    bool shape_ok = r.ok && version == 3 && net->hidden > 0 && net->hidden <= MAX_HIDDEN &&
+                    net->hidden % 16 == 0 && net->king_buckets >= 1 && net->king_buckets <= 32 &&
+                    net->output_buckets >= 1 && net->output_buckets <= 8;
+    for (int b : net->bucket_map) shape_ok = shape_ok && b >= 0 && b < net->king_buckets;
+    if (!shape_ok) {
+      error = name + ": unsupported or corrupt v3 network header";
+      return nullptr;
+    }
+  } else {
     error = name + " is not a .nnue file (bad magic)";
     return nullptr;
   }
-  std::int32_t version, hidden;
-  std::memcpy(&version, data + 4, 4);
-  std::memcpy(&hidden, data + 8, 4);
-  if (version != 1 || hidden != HIDDEN) {
-    error = name + ": unsupported network (version " + std::to_string(version) + ", hidden " +
-            std::to_string(hidden) + ")";
-    return nullptr;
-  }
+
+  const std::size_t H = std::size_t(net->hidden);
+  const std::size_t ft = std::size_t(net->king_buckets) * FEATURES_PER_BUCKET * H;
+  const std::size_t expected = std::size_t(r.p - data) + 2 * ft + 2 * H +
+                               2 * std::size_t(net->output_buckets) * 2 * H + 4 * net->output_buckets;
   if (size != expected) {
     error = name + ": wrong size " + std::to_string(size) + ", expected " + std::to_string(expected);
     return nullptr;
   }
-  auto net = std::make_shared<Network>();
-  const char* p = data + 12;
-  std::memcpy(net->feature_weights, p, 2 * FEATURES * HIDDEN);
-  p += 2 * FEATURES * HIDDEN;
-  std::memset(net->feature_weights + FEATURES * HIDDEN, 0, 2 * HIDDEN);  // the zero column
-  std::memcpy(net->feature_bias, p, 2 * HIDDEN);
-  p += 2 * HIDDEN;
-  std::memcpy(net->output_weights, p, 4 * HIDDEN);
-  p += 4 * HIDDEN;
-  std::memcpy(&net->output_bias, p, 4);
+  net->feature_weights.reset(ft + H);  // + the all-zero column
+  net->feature_bias.reset(H);
+  net->output_weights.reset(std::size_t(net->output_buckets) * 2 * H);
+  r.bytes(net->feature_weights.data, 2 * ft);
+  r.bytes(net->feature_bias.data, 2 * H);
+  r.bytes(net->output_weights.data, 2 * net->output_weights.size);
+  for (int b = 0; b < net->output_buckets; b++) net->output_bias[b] = r.get<std::int32_t>();
+  if (!r.ok) {
+    error = name + ": truncated";
+    return nullptr;
+  }
   return net;
 }
 
@@ -107,55 +208,73 @@ std::shared_ptr<const Network> load_embedded(std::string& error) {
   return parse(reinterpret_cast<const char*>(EMBEDDED_NET), EMBEDDED_NET_SIZE, "<embedded>", error);
 }
 
-void Accumulator::refresh(const Network& net, const Position& pos) {
-  for (int persp = 0; persp < 2; persp++) {
-    std::memcpy(v[persp], net.feature_bias, sizeof(v[persp]));
-    Bitboard occ = pos.pieces();
-    while (occ) {
-      Square sq = pop_lsb(occ);
-      const std::int16_t* col =
-          net.feature_weights + feature_index(Color(persp), pos.piece_on(sq), sq) * HIDDEN;
-      for (int i = 0; i < HIDDEN; i++) v[persp][i] = std::int16_t(v[persp][i] + col[i]);
-    }
+// ---------------------------------------------------------------- accumulator
+
+Delta delta_for(const Position& pos, Move m) {
+  Delta d;
+  d.from = move_from(m);
+  d.to = move_to(m);
+  d.moved = pos.piece_on(d.from);
+  const Color us = color_of(d.moved);
+  d.placed = is_promotion(m) ? make_piece(us, promotion_type(m)) : d.moved;
+  const int flag = move_flag(m);
+  if (flag == FLAG_EN_PASSANT) {
+    d.sub2_sq = Square(d.to + (us == WHITE ? -8 : 8));
+    d.sub2 = pos.piece_on(d.sub2_sq);
+  } else if (flag == FLAG_CASTLE) {
+    bool kingside = d.to > d.from;
+    d.sub2 = d.add2 = make_piece(us, ROOK);
+    d.sub2_sq = make_square(kingside ? 7 : 0, rank_of(d.from));
+    d.add2_sq = make_square(kingside ? 5 : 3, rank_of(d.from));
+  } else if (pos.piece_on(d.to) != NO_PIECE) {
+    d.sub2 = pos.piece_on(d.to);
+    d.sub2_sq = d.to;
+  }
+  return d;
+}
+
+void Accumulator::refresh_side(const Network& net, const Position& pos, Color persp) {
+  const int H = net.hidden;
+  king_state[persp] = net.king_state(persp, pos.king_square(persp));
+  std::memcpy(v[persp], net.feature_bias.data, sizeof(std::int16_t) * H);
+  Bitboard occ = pos.pieces();
+  while (occ) {
+    Square sq = pop_lsb(occ);
+    int f = net.feature_index(persp, king_state[persp], pos.piece_on(sq), sq);
+    add_column(v[persp], net.feature_weights.data + std::size_t(f) * H, H);
   }
 }
 
-void Accumulator::update(const Network& net, const Position& pos, Move m, const Accumulator& parent) {
-  const Square from = move_from(m), to = move_to(m);
-  const int flag = move_flag(m);
-  const Piece piece = pos.piece_on(from);
-  const Color us = color_of(piece);
-  const Piece placed = is_promotion(m) ? make_piece(us, promotion_type(m)) : piece;
+void Accumulator::refresh(const Network& net, const Position& pos) {
+  refresh_side(net, pos, WHITE);
+  refresh_side(net, pos, BLACK);
+}
 
-  Piece sub2 = NO_PIECE, add2 = NO_PIECE;
-  Square sub2_sq = A1, add2_sq = A1;
-  if (flag == FLAG_EN_PASSANT) {
-    sub2_sq = Square(to + (us == WHITE ? -8 : 8));
-    sub2 = pos.piece_on(sub2_sq);
-  } else if (flag == FLAG_CASTLE) {
-    bool kingside = to > from;
-    sub2 = add2 = make_piece(us, ROOK);
-    sub2_sq = make_square(kingside ? 7 : 0, rank_of(from));
-    add2_sq = make_square(kingside ? 5 : 3, rank_of(from));
-  } else if (pos.piece_on(to) != NO_PIECE) {
-    sub2 = pos.piece_on(to);
-    sub2_sq = to;
-  }
-
-  for (int persp = 0; persp < 2; persp++) {
-    Color c = Color(persp);
-    auto column = [&](Piece p, Square sq) {
-      int f = p == NO_PIECE ? FEATURES : feature_index(c, p, sq);
-      return net.feature_weights + f * HIDDEN;
+void Accumulator::update(const Network& net, const Position& after, const Delta& d,
+                         const Accumulator& parent) {
+  const int H = net.hidden;
+  for (int p = 0; p < 2; p++) {
+    const Color persp = Color(p);
+    const int state = parent.king_state[p];
+    // Our king crossed into another bucket or mirror half: every feature index changes.
+    if (type_of(d.moved) == KING && color_of(d.moved) == persp &&
+        net.king_state(persp, after.king_square(persp)) != state) {
+      refresh_side(net, after, persp);
+      continue;
+    }
+    king_state[p] = state;
+    auto column = [&](Piece pc, Square sq) {
+      int f = pc == NO_PIECE ? net.zero_column() : net.feature_index(persp, state, pc, sq);
+      return net.feature_weights.data + std::size_t(f) * H;
     };
-    const std::int16_t* s1 = column(piece, from);
-    const std::int16_t* s2 = column(sub2, sub2_sq);
-    const std::int16_t* a1 = column(placed, to);
-    const std::int16_t* a2 = column(add2, add2_sq);
-    const std::int16_t* in = parent.v[persp];
-    std::int16_t* out = v[persp];
+    const std::int16_t* s1 = column(d.moved, d.from);
+    const std::int16_t* s2 = column(d.sub2, d.sub2_sq);
+    const std::int16_t* a1 = column(d.placed, d.to);
+    const std::int16_t* a2 = column(d.add2, d.add2_sq);
+    const std::int16_t* in = parent.v[p];
+    std::int16_t* out = v[p];
     // One fused pass: out = in - s1 - s2 + a1 + a2 (16 lanes of wrapping int16 at a time).
-    for (int i = 0; i < HIDDEN; i += 16) {
+    for (int i = 0; i < H; i += 16) {
       auto ld = [i](const std::int16_t* x) {
         return _mm256_load_si256(reinterpret_cast<const __m256i*>(x + i));
       };

@@ -59,7 +59,13 @@ tools\engine3 test
 **Why nodes per second drops** (6.5M → 2.3M): pruning removes the cheapest nodes, mostly quiescence leaves. The remaining nodes are the expensive ones (move generation, ordering, SEE). This is normal. What matters is strength per second, which is what the SPRT measures.
 
 ## Result
-<!-- SPRT_RESULT -->
+| Test | TC | Games | W-L-D | Elo | Result |
+|---|---|---|---|---|---|
+| v3.1 (all switches, `v3`) vs v3.0 (`proven`, step 2 build) | 8+0.08 | 184 | 125-5-54 | **+271 ± 45** (nElo +446 ± 50) | ✅ H1 |
+
+**What it means:** this is the biggest single step so far. One caveat: it is measured against the engine's own previous version, and the gen-2…gen-8 review showed that self-play gains shrink against other opponents. The binary is kept as `tools/versions/engine-v3.1.exe`.
+
+**Still to do (when the CPU is free):** single-switch ablations (`v3` vs `v3,-name`) to find any switch that costs Elo on its own, then tuning of the margins (SPSA, P7).
 
 ## Next: step 4 = Lazy SMP
 - **Threads:** several search threads share the TT; each searches the same position with slightly different timing, so they fill the table for each other.

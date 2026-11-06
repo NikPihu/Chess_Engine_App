@@ -304,6 +304,100 @@ TEST(nnue_matches_every_v2_golden_file) {
   CHECK(files >= 7);
 }
 
+namespace {
+/** v3-format networks with golden files: chess_engine_v3/nets (committed) and tools/data (local). */
+std::vector<std::string> v3_golden_files() {
+  std::vector<std::string> found;
+  for (const char* dir : {"nets", "../tools/data", "chess_engine_v3/nets", "tools/data"}) {
+    if (!std::filesystem::is_directory(dir)) continue;
+    for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+      std::string path = entry.path().string();
+      if (path.size() < 11 || path.substr(path.size() - 11) != ".golden.txt") continue;
+      std::string net = path.substr(0, path.size() - 11) + ".nnue";
+      std::ifstream in(net, std::ios::binary);
+      char magic[4] = {};
+      if (in.read(magic, 4) && std::memcmp(magic, "NNV3", 4) == 0) found.push_back(path);
+    }
+  }
+  return found;
+}
+}  // namespace
+
+TEST(nnue_v3_matches_python_golden_files) {
+  auto files = v3_golden_files();
+  if (files.empty()) {
+    std::printf("  (no v3 network with a golden file yet - skipped)\n");
+    return;
+  }
+  for (const std::string& path : files) {
+    std::string error;
+    auto net = nnue::load(path.substr(0, path.size() - 11) + ".nnue", error);
+    CHECK(net != nullptr);
+    if (!net) continue;
+    std::ifstream in(path);
+    std::string line;
+    int n = 0;
+    while (std::getline(in, line)) {
+      std::stringstream ss(line);
+      std::string fen, expected;
+      std::getline(ss, fen, ';');
+      std::getline(ss, expected, ';');
+      Position pos;
+      CHECK(pos.set_fen(fen));
+      nnue::Accumulator acc;
+      acc.refresh(*net, pos);
+      int got = acc.evaluate(*net, pos);
+      if (got != std::stoi(expected)) std::printf("  %s: %s -> %d\n", path.c_str(), line.c_str(), got);
+      CHECK_EQ(got, std::stoi(expected));
+      n++;
+    }
+    std::printf("  %s: %s, %d positions\n", path.c_str(), net->describe().c_str(), n);
+  }
+}
+
+TEST(nnue_v3_incremental_with_king_buckets) {
+  auto files = v3_golden_files();
+  if (files.empty()) {
+    std::printf("  (no v3 network yet - skipped)\n");
+    return;
+  }
+  std::string error;
+  auto net = nnue::load(files[0].substr(0, files[0].size() - 11) + ".nnue", error);
+  CHECK(net != nullptr);
+  if (!net) return;
+  std::mt19937_64 rng(11);
+  auto acc = std::make_unique<nnue::Accumulator[]>(300);
+  int refreshes = 0;
+  for (const PerftCase& c : PERFT_SUITE) {
+    for (int game = 0; game < 4; game++) {
+      Position pos;
+      pos.set_fen(c.fen);
+      acc[0].refresh(*net, pos);
+      for (int ply = 0; ply < 200; ply++) {
+        MoveList list;
+        generate(pos, list);
+        if (list.size == 0) break;
+        Move m = list.moves[rng() % list.size];
+        nnue::Delta d = nnue::delta_for(pos, m);
+        pos.make_move(m);
+        acc[ply + 1].update(*net, pos, d, acc[ply]);
+        if (acc[ply + 1].king_state[0] != acc[ply].king_state[0] ||
+            acc[ply + 1].king_state[1] != acc[ply].king_state[1])
+          refreshes++;
+        nnue::Accumulator fresh;
+        fresh.refresh(*net, pos);
+        bool same = std::memcmp(fresh.v[0], acc[ply + 1].v[0], 2 * net->hidden) == 0 &&
+                    std::memcmp(fresh.v[1], acc[ply + 1].v[1], 2 * net->hidden) == 0;
+        if (!same) std::printf("  mismatch after %s in %s\n", move_to_uci(m).c_str(), pos.fen().c_str());
+        CHECK(same);
+        if (!same) return;
+      }
+    }
+  }
+  std::printf("  %d king-bucket/mirror refreshes exercised\n", refreshes);
+  CHECK(refreshes > 0);
+}
+
 TEST(nnue_rejects_bad_files) {
   std::string error;
   CHECK(nnue::load("does-not-exist.nnue", error) == nullptr);
@@ -329,11 +423,13 @@ TEST(nnue_incremental_accumulator_equals_refresh) {
         generate(pos, list);
         if (list.size == 0) break;
         Move m = list.moves[rng() % list.size];
-        acc[ply + 1].update(*net, pos, m, acc[ply]);
+        nnue::Delta d = nnue::delta_for(pos, m);
         pos.make_move(m);
+        acc[ply + 1].update(*net, pos, d, acc[ply]);
         nnue::Accumulator fresh;
         fresh.refresh(*net, pos);
-        bool same = std::memcmp(fresh.v, acc[ply + 1].v, sizeof fresh.v) == 0;
+        bool same = std::memcmp(fresh.v[0], acc[ply + 1].v[0], 2 * net->hidden) == 0 &&
+                    std::memcmp(fresh.v[1], acc[ply + 1].v[1], 2 * net->hidden) == 0;
         if (!same) std::printf("  mismatch after %s in %s\n", move_to_uci(m).c_str(), pos.fen().c_str());
         CHECK(same);
         if (!same) return;

@@ -587,11 +587,12 @@ TEST(pgn_mode_strips_comments_and_filters_elo) {
       "1. e4 { [%eval 0.3] } e5 2. Nf3 (2. Bc4 Nf6) Nc6 3. Bb5 a6 $1 4. Ba4 Nf6 5. O-O Be7 1-0\n\n"
       "[Event \"low\"]\n[WhiteElo \"1500\"]\n[BlackElo \"2450\"]\n[Result \"0-1\"]\n\n"
       "1. d4 d5 0-1\n";
-  std::filesystem::create_directories("build");
-  { std::ofstream f("build/test.pgn"); f << pgn; }
-  CHECK_EQ(datagen::pgn_to_positions({"--in", "build/test.pgn", "--out", "build/test.txt",
+  const std::string dir = (std::filesystem::temp_directory_path() / "v3_tests").string();
+  std::filesystem::create_directories(dir);
+  { std::ofstream f(dir + "/test.pgn"); f << pgn; }
+  CHECK_EQ(datagen::pgn_to_positions({"--in", dir + "/test.pgn", "--out", dir + "/test.txt",
                                       "--min-elo", "2200", "--skip-plies", "2", "--every", "2"}), 0);
-  std::ifstream in("build/test.txt");
+  std::ifstream in(dir + "/test.txt");
   std::vector<std::string> lines;
   for (std::string l; std::getline(in, l);) lines.push_back(l);
   // Plies 2,4,6,8,10 of the first game only (the second is filtered by Elo).

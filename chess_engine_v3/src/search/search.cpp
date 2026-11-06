@@ -428,6 +428,7 @@ SearchResult Search::think(const Position& root, const SearchLimits& limits, con
     std::int64_t elapsed = now_ms() - start_ms_;
     if (info && id_ == 0) info(info_line(depth, score, elapsed));
     if (id_ != 0) continue;  // only the main thread decides when to stop
+    if (limits.soft_nodes && nodes_ >= limits.soft_nodes) break;
 
     bool mate_found = std::abs(score) >= MATE_THRESHOLD;
     if (mate_found && limits.depth < 0 && depth >= MATE - std::abs(score)) break;

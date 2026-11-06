@@ -81,7 +81,8 @@ struct SearchLimits {
   int moves_to_go = 0;
   std::int64_t move_time = -1;  // ms
   int depth = -1;
-  std::uint64_t nodes = 0;  // 0 = no node limit
+  std::uint64_t nodes = 0;  // 0 = no node limit (hard: stops mid-iteration)
+  std::uint64_t soft_nodes = 0;  // 0 = none; no new iteration starts after this many nodes
   bool infinite = false;
   bool has_clock() const { return time[WHITE] >= 0 || time[BLACK] >= 0; }
 };

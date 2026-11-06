@@ -34,13 +34,29 @@ else()
   add_compile_definitions(V3_BMI2=1)
 endif()
 
+# The default network is built into the exe (v2's best.nnue for now; v3's own nets from P5).
+# Override with: cmake ... -DV3_DEFAULT_NET=path/to/net.nnue
+set(V3_DEFAULT_NET "${CMAKE_SOURCE_DIR}/../chess_engine_v2/nets/best.nnue" CACHE FILEPATH
+    "Network embedded in engine_v3.exe")
+set(EMBEDDED_NET_CPP "${CMAKE_BINARY_DIR}/embedded_net.cpp")
+add_custom_command(
+  OUTPUT ${EMBEDDED_NET_CPP}
+  COMMAND ${CMAKE_COMMAND} -DINPUT=${V3_DEFAULT_NET} -DOUTPUT=${EMBEDDED_NET_CPP}
+          -P ${CMAKE_SOURCE_DIR}/cmake/embed.cmake
+  DEPENDS ${V3_DEFAULT_NET} ${CMAKE_SOURCE_DIR}/cmake/embed.cmake
+  COMMENT "Embedding network ${V3_DEFAULT_NET}")
+
 # The engine core is a library so the engine and the tests share exactly the same code.
 add_library(v3core STATIC
   src/core/bitboard.cpp
   src/board/position.cpp
   src/movegen/movegen.cpp
   src/movegen/perft.cpp
+  src/nnue/nnue.cpp
+  src/search/tt.cpp
+  src/search/search.cpp
   src/uci/uci.cpp
+  ${EMBEDDED_NET_CPP}
 )
 target_include_directories(v3core PUBLIC src)
 
@@ -51,4 +67,4 @@ add_executable(v3_tests tests/tests.cpp)
 target_link_libraries(v3_tests PRIVATE v3core)
 
 enable_testing()
-add_test(NAME v3_tests COMMAND v3_tests)
+add_test(NAME v3_tests COMMAND v3_tests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

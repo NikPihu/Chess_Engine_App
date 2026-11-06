@@ -31,6 +31,14 @@ import java.util.regex.Pattern;
  * <p>An engine spec is {@code name[:Option=value;Option=value]}: the name is our UCI "Engine"
  * option (any name in uci/Engines.java), the rest are extra UCI options.
  *
+ * <p>Native engines (chess_engine_v3, C++): pass an {@code .exe} as {@code --jar} / {@code
+ * --base-jar}. The exe is started directly, the spec's name is only a label, and the options after
+ * ':' still apply:
+ *
+ * <pre>
+ *   java tools/Sprt.java v3 nnue --jar chess_engine_v3/bin/engine_v3.exe --label "v3.0 port"
+ * </pre>
+ *
  * <p><b>SPRT</b> (sequential probability ratio test) answers "is NEW at least elo1 better, or at
  * most elo0?" and stops as soon as the evidence is strong enough (error rates alpha = beta = 5%).
  * H1 accepted = the change is an improvement; H0 accepted = it isn't (reject it). See
@@ -89,12 +97,12 @@ public final class Sprt {
 
     // Snapshot the jar so rebuilding during a long test can't change the engines mid-match.
     String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
-    Path snapshot = ROOT.resolve("tools/versions/engine-" + stamp + ".jar");
+    Path snapshot = ROOT.resolve("tools/versions/engine-" + stamp + extension(jar));
     Files.createDirectories(snapshot.getParent());
     Files.copy(jar, snapshot, StandardCopyOption.REPLACE_EXISTING);
     Path baseSnapshot = snapshot;
     if (!baseJar.equals(jar)) {
-      baseSnapshot = ROOT.resolve("tools/versions/engine-" + stamp + "-base.jar");
+      baseSnapshot = ROOT.resolve("tools/versions/engine-" + stamp + "-base" + extension(baseJar));
       Files.copy(baseJar, baseSnapshot, StandardCopyOption.REPLACE_EXISTING);
     }
     Path results = ROOT.resolve("tools/results");
@@ -152,10 +160,17 @@ public final class Sprt {
     String name = parts[0];
     List<String> a = new ArrayList<>();
     a.add("-engine");
-    a.add("cmd=java");
-    a.add("args=-Xmx256m -XX:+UseSerialGC --add-modules jdk.incubator.vector -jar " + jar);
+    boolean nativeExe = jar.toString().toLowerCase().endsWith(".exe");
+    if (nativeExe) {
+      a.add("cmd=" + jar);
+    } else {
+      a.add("cmd=java");
+      a.add("args=-Xmx256m -XX:+UseSerialGC --add-modules jdk.incubator.vector -jar " + jar);
+    }
     a.add("name=" + role + "-" + spec.replaceAll("[^A-Za-z0-9+-]", "_"));
-    a.add("option.Engine=" + name);
+    if (!nativeExe) {
+      a.add("option.Engine=" + name);
+    }
     a.add("option.Hash=16");
     if (parts.length > 1) {
       for (String option : parts[1].split(";")) {
@@ -201,6 +216,11 @@ public final class Sprt {
             elo, nelo, llr, elo0, elo1, verdict, stamp);
     Files.writeString(LEDGER, row, StandardOpenOption.APPEND);
     System.out.println("\nLedger updated: " + verdict.substring(2) + "  (" + LEDGER + ")");
+  }
+
+  /** ".exe" for native engines, ".jar" otherwise (snapshots keep the right extension). */
+  private static String extension(Path engine) {
+    return engine.toString().toLowerCase().endsWith(".exe") ? ".exe" : ".jar";
   }
 
   /** Last match of the pattern's first group, or "?" (fastchess prints running totals). */

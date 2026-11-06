@@ -10,9 +10,16 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <chrono>
+#include <thread>
 #include <vector>
 
+#include <filesystem>
+#include <fstream>
+
 #include "board/position.h"
+#include "nnue/nnue.h"
+#include "search/search.h"
 #include "movegen/movegen.h"
 #include "movegen/perft.h"
 #include "uci/uci.h"
@@ -209,6 +216,169 @@ TEST(uci_position_and_moves) {
   std::ostringstream hello;
   uci.command("uci", hello);
   CHECK(hello.str().find("uciok") != std::string::npos);
+}
+
+
+// ---------------------------------------------------------------- NNUE (step 2)
+
+namespace {
+std::filesystem::path v2_nets() {
+  // Tests run from chess_engine_v3/ (ctest) or the repo root.
+  for (const char* p : {"../chess_engine_v2/nets", "chess_engine_v2/nets"})
+    if (std::filesystem::is_directory(p)) return p;
+  return {};
+}
+std::vector<int> parse_ints(const std::string& text) {
+  std::vector<int> v;
+  std::stringstream ss(text);
+  std::string item;
+  while (std::getline(ss, item, ',')) v.push_back(std::stoi(item));
+  return v;
+}
+}  // namespace
+
+TEST(nnue_matches_every_v2_golden_file) {
+  auto dir = v2_nets();
+  CHECK(!dir.empty());
+  int files = 0, lines = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+    std::string path = entry.path().string();
+    if (path.size() < 11 || path.substr(path.size() - 11) != ".golden.txt") continue;
+    std::string net_path = path.substr(0, path.size() - 11) + ".nnue";
+    if (!std::filesystem::exists(net_path)) continue;
+    std::string error;
+    auto net = nnue::load(net_path, error);
+    CHECK(net != nullptr);
+    if (!net) continue;
+    files++;
+    std::ifstream in(path);
+    std::string line;
+    while (std::getline(in, line)) {
+      if (line.empty()) continue;
+      std::stringstream ss(line);
+      std::string us, them, expected;
+      std::getline(ss, us, ';');
+      std::getline(ss, them, ';');
+      std::getline(ss, expected, ';');
+      auto u = parse_ints(us), t = parse_ints(them);
+      int got = net->evaluate_features(u.data(), int(u.size()), t.data(), int(t.size()));
+      if (got != std::stoi(expected)) std::printf("  %s: %s\n", path.c_str(), line.c_str());
+      CHECK_EQ(got, std::stoi(expected));
+      lines++;
+    }
+  }
+  std::printf("  %d networks, %d positions\n", files, lines);
+  CHECK(files >= 7);
+}
+
+TEST(nnue_rejects_bad_files) {
+  std::string error;
+  CHECK(nnue::load("does-not-exist.nnue", error) == nullptr);
+  const char junk[] = "NOPE....";
+  CHECK(nnue::parse(junk, sizeof junk, "junk", error) == nullptr);
+  CHECK(nnue::load_embedded(error) != nullptr);
+}
+
+TEST(nnue_incremental_accumulator_equals_refresh) {
+  std::string error;
+  auto net = nnue::load_embedded(error);
+  CHECK(net != nullptr);
+  if (!net) return;
+  std::mt19937_64 rng(5);
+  auto acc = std::make_unique<nnue::Accumulator[]>(400);
+  for (const PerftCase& c : PERFT_SUITE) {
+    for (int game = 0; game < 5; game++) {
+      Position pos;
+      pos.set_fen(c.fen);
+      acc[0].refresh(*net, pos);
+      for (int ply = 0; ply < 200; ply++) {
+        MoveList list;
+        generate(pos, list);
+        if (list.size == 0) break;
+        Move m = list.moves[rng() % list.size];
+        acc[ply + 1].update(*net, pos, m, acc[ply]);
+        pos.make_move(m);
+        nnue::Accumulator fresh;
+        fresh.refresh(*net, pos);
+        bool same = std::memcmp(fresh.v, acc[ply + 1].v, sizeof fresh.v) == 0;
+        if (!same) std::printf("  mismatch after %s in %s\n", move_to_uci(m).c_str(), pos.fen().c_str());
+        CHECK(same);
+        if (!same) return;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- search (step 2)
+
+namespace {
+SearchResult search_fen(const char* fen, int depth) {
+  auto s = std::make_unique<Search>();
+  std::string error;
+  s->set_network(nnue::load_embedded(error));
+  Position pos;
+  pos.set_fen(fen);
+  SearchLimits limits;
+  limits.depth = depth;
+  return s->think(pos, limits, nullptr);
+}
+}  // namespace
+
+TEST(search_finds_mates) {
+  // Mate in 1 (back rank), mate in 2, and being mated: the score reports the distance.
+  SearchResult r = search_fen("6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", 4);
+  CHECK_EQ(move_to_uci(r.best), std::string("a1a8"));
+  CHECK_EQ(r.score, MATE - 1);
+  r = search_fen("r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4", 4);
+  CHECK_EQ(move_to_uci(r.best), std::string("h5f7"));
+  r = search_fen("k7/8/1K6/8/8/8/8/7R w - - 0 1", 6);  // Rh8# (Kb6 guards a7/b7)
+  CHECK_EQ(move_to_uci(r.best), std::string("h1h8"));
+  CHECK(r.score >= MATE_THRESHOLD);
+}
+
+TEST(search_handles_stalemate_and_no_moves) {
+  SearchResult r = search_fen("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1", 3);  // black is stalemated
+  CHECK_EQ(r.best, MOVE_NONE);
+  r = search_fen("k7/8/1QK5/8/8/8/8/8 w - - 0 1", 5);  // must not stalemate (Qb7 is mate)
+  CHECK(r.score >= MATE_THRESHOLD);
+}
+
+TEST(search_is_deterministic_at_fixed_depth) {
+  const char* fen = "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+  SearchResult a = search_fen(fen, 9), b = search_fen(fen, 9);
+  CHECK_EQ(a.nodes, b.nodes);
+  CHECK_EQ(a.best, b.best);
+  CHECK(a.best != MOVE_NONE);
+}
+
+TEST(uci_go_and_stop) {
+  Uci uci;
+  std::ostringstream out;
+  uci.command("position startpos moves e2e4", out);
+  uci.command("go depth 6", out);
+  uci.wait();
+  CHECK(out.str().find("bestmove ") != std::string::npos);
+  CHECK(out.str().find("info depth 6 ") != std::string::npos);
+
+  std::ostringstream out2;
+  uci.command("go infinite", out2);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  uci.command("stop", out2);
+  CHECK(out2.str().find("bestmove ") != std::string::npos);
+
+  std::ostringstream out3;
+  uci.command("position startpos", out3);
+  uci.command("go wtime 1000 btime 1000", out3);
+  uci.wait();
+  CHECK(out3.str().find("bestmove ") != std::string::npos);
+
+  std::ostringstream out4;
+  uci.command("setoption name Features value all,-nmp", out4);
+  CHECK_EQ(uci.search().features(), features::KILLERS | features::HISTORY | features::PVS |
+                                        features::LMR | features::CHECK_EXTENSION |
+                                        features::ASPIRATION | features::REVERSE_FUTILITY);
+  uci.command("setoption name EvalFile value nope.nnue", out4);
+  CHECK(out4.str().find("keeping the current network") != std::string::npos);
 }
 
 int main(int argc, char** argv) {

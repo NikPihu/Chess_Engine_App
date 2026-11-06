@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -33,6 +34,7 @@ struct Options {
   std::uint64_t seed = 1;
   int hash = 16;
   std::string relabel;
+  std::size_t chunk = 50'000;  // label: lines per checkpoint
 };
 
 /** One training record, laid out exactly like chess_engine_v2/datagen/Record.java. */
@@ -161,14 +163,54 @@ void progress(const char* what, const Output& out, std::int64_t start) {
                (unsigned long long)out.games.load(), n / secs);
 }
 
+/** Resumable output: data goes to <out>.part; <out>.progress records how much is safely on disk.
+ *  Only a finished job is renamed to <out>, so a crash can never leave a file that looks complete. */
+struct Checkpoint {
+  std::string out, part, progress;
+  explicit Checkpoint(const std::string& path) : out(path), part(path + ".part"), progress(path + ".progress") {}
+
+  /** Returns {units done, bytes} from a previous run (0, 0 if none) and truncates the .part file
+   *  back to that size, dropping anything written after the last checkpoint. */
+  std::pair<std::uint64_t, std::uint64_t> restore() const {
+    std::uint64_t done = 0, bytes = 0;
+    std::ifstream in(progress);
+    if (!(in >> done >> bytes) || !std::filesystem::exists(part)) return {0, 0};
+    if (std::filesystem::file_size(part) < bytes) return {0, 0};
+    std::filesystem::resize_file(part, bytes);
+    return {done, bytes};
+  }
+  void save(std::uint64_t done, std::uint64_t bytes) const {
+    std::string tmp = progress + ".tmp";
+    {
+      std::ofstream f(tmp, std::ios::trunc);
+      f << done << ' ' << bytes << '\n';
+    }
+    std::filesystem::rename(tmp, progress);
+  }
+  void finish() const {
+    std::filesystem::rename(part, out);
+    std::filesystem::remove(progress);
+  }
+};
+
 int self_play(const Options& o, const std::shared_ptr<const nnue::Network>& net) {
+  // Records go to <out>.part; an interrupted run keeps its whole records and continues (games are
+  // independent, so nothing is lost but the games that were in progress).
+  Checkpoint cp(o.out);
+  std::uint64_t have = 0;
+  if (std::filesystem::exists(cp.part)) {
+    have = std::filesystem::file_size(cp.part) / RECORD_SIZE;
+    std::filesystem::resize_file(cp.part, have * RECORD_SIZE);
+  }
   Output out;
   out.target = o.positions;
-  out.file.open(o.out, std::ios::binary | std::ios::trunc);
+  out.written = have;
+  out.file.open(cp.part, std::ios::binary | (have ? std::ios::app : std::ios::trunc));
   if (!out.file) {
-    std::fprintf(stderr, "cannot write %s\n", o.out.c_str());
+    std::fprintf(stderr, "cannot write %s\n", cp.part.c_str());
     return 1;
   }
+  if (have) std::fprintf(stderr, "self-play: resuming with %llu positions already written\n", (unsigned long long)have);
   std::fprintf(stderr, "self-play: %llu positions -> %s, %llu nodes, %d threads, net %s\n",
                (unsigned long long)o.positions, o.out.c_str(), (unsigned long long)o.nodes, o.threads,
                net ? net->describe().c_str() : "none");
@@ -177,7 +219,8 @@ int self_play(const Options& o, const std::shared_ptr<const nnue::Network>& net)
   for (int t = 0; t < o.threads; t++) {
     workers.emplace_back([&, t]() {
       auto search = make_searcher(o, net);
-      std::mt19937_64 rng(o.seed * 1000003ULL + std::uint64_t(t) * 7919ULL);
+      // A resumed run gets new seeds, so it does not replay the games already written.
+      std::mt19937_64 rng(o.seed * 1000003ULL + std::uint64_t(t) * 7919ULL + have * 104729ULL);
       while (out.written.load() < out.target) {
         std::vector<char> data = play_game(*search, rng, o.nodes);
         if (!data.empty()) out.write(data);
@@ -195,6 +238,7 @@ int self_play(const Options& o, const std::shared_ptr<const nnue::Network>& net)
   for (auto& w : workers) w.join();
   reporter.join();
   out.file.close();
+  cp.finish();
   progress("done", out, start);
   return 0;
 }
@@ -208,58 +252,80 @@ int label(const Options& o, const std::shared_ptr<const nnue::Network>& net) {
   std::vector<std::string> lines;
   for (std::string line; std::getline(in, line);)
     if (!line.empty()) lines.push_back(line);
-  Output out;
-  out.target = lines.size();
-  out.file.open(o.out, std::ios::binary | std::ios::trunc);
-  if (!out.file) {
-    std::fprintf(stderr, "cannot write %s\n", o.out.c_str());
+
+  // Work in chunks; after each chunk the records are appended and the progress file updated, so
+  // after a crash or power loss the job continues from the last finished chunk.
+  const std::size_t CHUNK = std::max<std::size_t>(1, o.chunk);
+  Checkpoint cp(o.out);
+  auto [done, bytes] = cp.restore();
+  std::ofstream file(cp.part, std::ios::binary | (done ? std::ios::app : std::ios::trunc));
+  if (!file) {
+    std::fprintf(stderr, "cannot write %s\n", cp.part.c_str());
     return 1;
   }
-  std::fprintf(stderr, "label: %zu positions from %s -> %s, %llu nodes, %d threads\n", lines.size(),
-               o.in.c_str(), o.out.c_str(), (unsigned long long)o.nodes, o.threads);
-  std::atomic<std::size_t> next{0};
+  std::fprintf(stderr, "label: %zu positions from %s -> %s, %llu nodes, %d threads%s\n", lines.size(),
+               o.in.c_str(), o.out.c_str(), (unsigned long long)o.nodes, o.threads,
+               done ? (", resuming after line " + std::to_string(done)).c_str() : "");
   std::atomic<std::uint64_t> skipped{0};
+  std::uint64_t written = bytes / RECORD_SIZE;
   const std::int64_t start = now_ms();
-  std::vector<std::thread> workers;
-  for (int t = 0; t < o.threads; t++) {
-    workers.emplace_back([&]() {
-      auto search = make_searcher(o, net);
-      std::vector<char> rec(RECORD_SIZE);
-      for (std::size_t i; (i = next++) < lines.size();) {
-        std::stringstream ss(lines[i]);
-        std::string fen, result_text, weight_text;
-        std::getline(ss, fen, ';');
-        std::getline(ss, result_text, ';');
-        std::getline(ss, weight_text, ';');
-        Position pos;
-        MoveList list;
-        bool ok = pos.set_fen(fen) && !pos.in_check();
-        if (ok) generate(pos, list);
-        if (!ok || list.size == 0) {
-          skipped++;
-          continue;
+  const std::uint64_t first = done;
+  std::vector<std::unique_ptr<Search>> searchers;
+  for (int t = 0; t < o.threads; t++) searchers.push_back(make_searcher(o, net));
+
+  for (std::size_t chunk = done; chunk < lines.size(); chunk += CHUNK) {
+    const std::size_t stop = std::min(lines.size(), chunk + CHUNK);
+    std::atomic<std::size_t> next{chunk};
+    std::vector<std::vector<char>> buffers(o.threads);
+    std::vector<std::thread> workers;
+    for (int t = 0; t < o.threads; t++) {
+      workers.emplace_back([&, t]() {
+        Search& search = *searchers[t];
+        std::vector<char>& buf = buffers[t];
+        for (std::size_t i; (i = next++) < stop;) {
+          std::stringstream ss(lines[i]);
+          std::string fen, result_text, weight_text;
+          std::getline(ss, fen, ';');
+          std::getline(ss, result_text, ';');
+          std::getline(ss, weight_text, ';');
+          Position pos;
+          MoveList list;
+          bool ok = pos.set_fen(fen) && !pos.in_check();
+          if (ok) generate(pos, list);
+          if (!ok || list.size == 0) {
+            skipped++;
+            continue;
+          }
+          search.clear_stop();
+          SearchResult r = search.think(pos, node_limits(o.nodes), nullptr);
+          int white_score = pos.side_to_move() == WHITE ? r.score : -r.score;
+          if (r.best == MOVE_NONE || !is_quiet(pos, r.best) || std::abs(r.score) >= MATE_THRESHOLD ||
+              std::abs(white_score) >= 3000) {
+            skipped++;
+            continue;
+          }
+          int result = result_text.empty() ? 1 : std::clamp(std::atoi(result_text.c_str()), 0, 2);
+          int weight = weight_text.empty() ? 1 : std::clamp(std::atoi(weight_text.c_str()), 1, 255);
+          buf.resize(buf.size() + RECORD_SIZE);
+          write_record(buf.data() + buf.size() - RECORD_SIZE, pos, white_score, result, weight);
         }
-        search->clear_stop();
-        SearchResult r = search->think(pos, node_limits(o.nodes), nullptr);
-        int white_score = pos.side_to_move() == WHITE ? r.score : -r.score;
-        if (r.best == MOVE_NONE || !is_quiet(pos, r.best) || std::abs(r.score) >= MATE_THRESHOLD ||
-            std::abs(white_score) >= 3000) {
-          skipped++;
-          continue;
-        }
-        int result = result_text.empty() ? 1 : std::clamp(std::atoi(result_text.c_str()), 0, 2);
-        int weight = weight_text.empty() ? 1 : std::clamp(std::atoi(weight_text.c_str()), 1, 255);
-        write_record(rec.data(), pos, white_score, result, weight);
-        out.write(rec);
-        out.games++;
-      }
-    });
+      });
+    }
+    for (auto& w : workers) w.join();
+    for (const auto& buf : buffers) {
+      file.write(buf.data(), std::streamsize(buf.size()));
+      written += buf.size() / RECORD_SIZE;
+    }
+    file.flush();
+    cp.save(stop, written * RECORD_SIZE);
+    double secs = std::max(1e-3, (now_ms() - start) / 1000.0);
+    std::fprintf(stderr, "label: %zu / %zu lines, %llu records, %.0f lines/s\n", stop, lines.size(),
+                 (unsigned long long)written, (stop - first) / secs);
   }
-  for (auto& w : workers) w.join();
-  out.file.close();
+  file.close();
+  cp.finish();
   std::fprintf(stderr, "label: wrote %llu records, skipped %llu (check, tactical or mate) in %.0f s\n",
-               (unsigned long long)out.written.load(), (unsigned long long)skipped.load(),
-               (now_ms() - start) / 1000.0);
+               (unsigned long long)written, (unsigned long long)skipped.load(), (now_ms() - start) / 1000.0);
   return 0;
 }
 
@@ -356,6 +422,7 @@ int run(const std::string& mode, const std::vector<std::string>& args) {
     else if (k == "--hash") o.hash = std::max(1, std::stoi(v));
     else if (k == "--epd") o.in = v;
     else if (k == "--relabel") o.relabel = v;
+    else if (k == "--chunk") o.chunk = std::stoull(v);
     else {
       std::fprintf(stderr, "unknown option %s\n", k.c_str());
       return 2;

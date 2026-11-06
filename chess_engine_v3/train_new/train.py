@@ -14,6 +14,11 @@ mapped files (72 bytes each, paged in by the OS) and each batch is converted on 
 data set can be as big as the disk.
 
 Writes <out>.nnue (engine), <out>.pt (to continue training) and <out>.golden.txt (C++ check).
+
+Crash-safe: after every epoch the full training state (weights, optimizer, learning-rate schedule,
+random generator) is saved to <out>.ckpt. Run the same command again with --resume and training
+continues with the next epoch. <out>.nnue is only written at the very end, so its existence means
+"finished".
 """
 
 import argparse
@@ -112,6 +117,7 @@ def main():
     ap.add_argument("--threads", type=int, default=max(1, (os.cpu_count() or 4) - 4))
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--max-steps", type=int, default=0, help="stop early (smoke tests)")
+    ap.add_argument("--resume", action="store_true", help="continue from <out>.ckpt if it exists")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -148,9 +154,20 @@ def main():
         return (w * (pred - tgt) ** 2).sum() / w.sum()
 
     step = 0
+    first_epoch = 1
+    ckpt_path = args.out + ".ckpt"
+    if args.resume and os.path.exists(ckpt_path):
+        ckpt = torch.load(ckpt_path, weights_only=False)
+        model.load_state_dict(ckpt["model"])
+        opt.load_state_dict(ckpt["opt"])
+        sched.load_state_dict(ckpt["sched"])
+        rng.bit_generator.state = ckpt["rng"]
+        step = ckpt["step"]
+        first_epoch = ckpt["epoch"] + 1
+        print(f"resuming after epoch {ckpt['epoch']} (step {step})", flush=True)
     print(f"model {layout.king_buckets}x768 -> {args.hidden} x2 -> {args.output_buckets} heads, "
           f"{sum(p.numel() for p in model.parameters()):,} parameters, {args.threads} threads", flush=True)
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(first_epoch, args.epochs + 1):
         start = time.time()
         model.train()
         parts, rows = data.epoch_index()
@@ -178,12 +195,20 @@ def main():
         print(f"epoch {epoch:2d}/{args.epochs}  train {total / max(n, 1):.5f}  val {val_loss:.5f}"
               f"  ({time.time() - start:.0f}s)", flush=True)
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-        torch.save(model.state_dict(), args.out + ".pt")  # checkpoint every epoch
+        torch.save(model.state_dict(), args.out + ".pt")
+        # Full state for --resume, written atomically (a power cut mid-write can't corrupt it).
+        torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(),
+                    "rng": rng.bit_generator.state, "step": step, "epoch": epoch}, ckpt_path + ".tmp")
+        os.replace(ckpt_path + ".tmp", ckpt_path)
         if step >= total_steps:
             break
 
-    write_nnue(model, layout, args.out + ".nnue")
+    net_path = args.out + ".nnue"
     worst = write_golden(model, layout, val, args.out + ".golden.txt")
+    write_nnue(model, layout, net_path + ".tmp")
+    os.replace(net_path + ".tmp", net_path)
+    if os.path.exists(ckpt_path):
+        os.remove(ckpt_path)
     print(f"wrote {args.out}.nnue  (quantisation error on 200 positions: max {worst:.1f} cp)")
 
 

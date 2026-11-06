@@ -21,6 +21,12 @@ One generation:
   5. PROMOTE  only if gates a and b pass: chess_engine_v3/nets/best.nnue is replaced atomically
 
 The Lichess bot is NOT touched: it keeps playing v2 until you switch it yourself.
+
+Crash-safe (laptop sleep, power cut): just run tools\train_new again. The interrupted generation
+is resumed - same number, same parent - and every finished stage is skipped: self-play and
+labelling continue from their last checkpoint, training from its last finished epoch, and gates
+that already have a result are not replayed. Only an SPRT/anchor match that was in progress
+starts over (match games can't be resumed).
 Generation 1 (the first run) trains from scratch on all existing v2 data.
 """
 
@@ -46,6 +52,7 @@ EXE_BUILT = os.path.join(V3, "bin", "engine_v3.exe")
 EXE = os.path.join(ROOT, "tools", "versions", "loop-engine-v3.exe")
 ANCHOR_NET = os.path.join(ROOT, "chess_engine_v2", "nets", "gen-8.nnue")
 PIDFILE = os.path.join(V3DATA, "train.pid")
+CURRENT = os.path.join(V3DATA, "current.json")  # the generation in progress (for resuming)
 GENERATIONS_MD = os.path.join(ROOT, "docs", "results", "v3-generations.md")
 LEDGER = os.path.join(ROOT, "docs", "results", "elo-ledger.md")
 BLUNDERS = os.path.join(V3, "tests", "data", "lichess-blunders-v3.epd")
@@ -206,12 +213,19 @@ def label_new_elite(net, threads):
 
 def one_generation(args):
     reg = load_registry()
-    parent = reg["best"]
-    parent_net = os.path.join(NETS, f"gen-{parent}.nnue") if parent else None
-    gen = next_number(reg)
-    print(f"\n===== chess_engine_v3: training gen-{gen} (parent: {'gen-' + str(parent) if parent else 'none, from scratch'}) =====",
-          flush=True)
     os.makedirs(V3DATA, exist_ok=True)
+    current = json.load(open(CURRENT)) if os.path.exists(CURRENT) else None
+    if current and current.get("parent") == reg["best"]:
+        gen, parent = current["gen"], current["parent"]
+        resumed = True
+    else:
+        gen, parent = next_number(reg), reg["best"]
+        resumed = False
+        with open(CURRENT, "w") as f:
+            json.dump({"gen": gen, "parent": parent, "started": now()}, f)
+    parent_net = os.path.join(NETS, f"gen-{parent}.nnue") if parent else None
+    print(f"\n===== chess_engine_v3: {'RESUMING' if resumed else 'training'} gen-{gen} "
+          f"(parent: {'gen-' + str(parent) if parent else 'none, from scratch'}) =====", flush=True)
 
     # 1. PLAY (skipped for gen-1: it learns from all of v2's existing data first).
     if parent:
@@ -239,41 +253,54 @@ def one_generation(args):
     shape = f"(768x{args.king_buckets} -> {args.hidden})x2 -> {args.output_buckets}"
     cmd = [sys.executable, os.path.join(TRAIN, "train.py"), "--data", *datasets, "--out", out,
            "--epochs", str(args.epochs), "--threads", str(args.threads), "--hidden", str(args.hidden),
-           "--king-buckets", str(args.king_buckets), "--output-buckets", str(args.output_buckets)]
+           "--king-buckets", str(args.king_buckets), "--output-buckets", str(args.output_buckets),
+           "--resume"]
     if extras:
         cmd += ["--extra", *extras]
     parent_entry = gen_entry(reg, parent) if parent else None
     if parent and parent_entry and parent_entry.get("shape") == shape and os.path.exists(os.path.join(NETS, f"gen-{parent}.pt")):
         cmd += ["--init", os.path.join(NETS, f"gen-{parent}.pt")]
-    if run(cmd)[0] != 0:
+    if os.path.exists(out + ".nnue"):
+        print(f"gen-{gen}.nnue already trained - skipping training", flush=True)
+    elif run(cmd)[0] != 0:
         sys.exit("training failed")
 
-    entry = {"gen": gen, "parent": parent, "date": now(), "shape": shape,
-             "data": [os.path.basename(d) for d in datasets] + [os.path.basename(e.rsplit(":", 1)[0]) for e in extras],
-             "positions": positions, "promoted": False}
-    reg["generations"].append(entry)
-    save_registry(reg)
+    entry = gen_entry(reg, gen)
+    if entry is None:
+        entry = {"gen": gen, "parent": parent, "date": now(), "shape": shape,
+                 "data": [os.path.basename(d) for d in datasets] + [os.path.basename(e.rsplit(":", 1)[0]) for e in extras],
+                 "positions": positions, "promoted": False}
+        reg["generations"].append(entry)
+        save_registry(reg)
 
     # 4a. GATE: the bot's real blunders (live = parent, or v2's gen-8 for the first v3 network).
     reference = parent_net or ANCHOR_NET
-    cand, live = blunder_score(out + ".nnue", args.threads), blunder_score(reference, args.threads)
-    if cand and live:
-        entry["blunders"] = f"{cand[0]}/{cand[1]} ({live[0]})"
-        save_registry(reg)
-        if cand[0] < live[0] - args.blunder_tolerance:
+    if "blunder_scores" not in entry:
+        cand, live = blunder_score(out + ".nnue", args.threads), blunder_score(reference, args.threads)
+        if cand and live:
+            entry["blunder_scores"] = [cand[0], cand[1], live[0]]
+            entry["blunders"] = f"{cand[0]}/{cand[1]} ({live[0]})"
+            save_registry(reg)
+    if "blunder_scores" in entry:
+        c, _, l = entry["blunder_scores"]
+        if c < l - args.blunder_tolerance:
             entry["sprt"] = "not run (blunder gate)"
             save_registry(reg)
-            print(f"===== gen-{gen}: failed the blunder gate ({cand[0]} < {live[0]}), not promoted =====")
+            os.remove(CURRENT)
+            print(f"===== gen-{gen}: failed the blunder gate ({c} < {l}), not promoted =====")
             return
 
     # 4b. SPRT vs the live network.
-    accepted, summary = sprt(out + ".nnue", reference, args,
-                             f"v3 gen-{gen} vs {'gen-' + str(parent) if parent else 'v2 gen-8 net'} (v3 search)")
-    entry["sprt"] = summary + (" ✅ H1" if accepted else " ❌")
-    save_registry(reg)
+    if "sprt_accepted" not in entry:
+        accepted, summary = sprt(out + ".nnue", reference, args,
+                                 f"v3 gen-{gen} vs {'gen-' + str(parent) if parent else 'v2 gen-8 net'} (v3 search)")
+        entry["sprt"] = summary + (" ✅ H1" if accepted else " ❌")
+        entry["sprt_accepted"] = accepted
+        save_registry(reg)
+    accepted = entry["sprt_accepted"]
 
     # 4c. ANCHOR: fixed match vs the fixed opponent, every generation.
-    if args.anchor_games:
+    if args.anchor_games and "anchor" not in entry:
         _, anchor = sprt(out + ".nnue", ANCHOR_NET, args, f"v3 gen-{gen} anchor match vs v2 gen-8 net (v3 search)",
                          games=args.anchor_games)
         entry["anchor"] = anchor
@@ -286,6 +313,7 @@ def one_generation(args):
         print(f"===== gen-{gen} PROMOTED: chess_engine_v3/nets/best.nnue (the Lichess bot is unchanged) =====")
     else:
         print(f"===== gen-{gen} not better; {'gen-' + str(parent) if parent else 'no v3 network'} stays live =====")
+    os.remove(CURRENT)
 
 
 # ---------------------------------------------------------------- commands
@@ -348,6 +376,8 @@ def main():
         ELITE = os.path.join(V3DATA, "elite")
         REGISTRY, BEST = os.path.join(NETS, "registry.json"), os.path.join(NETS, "best.nnue")
         PIDFILE, GENERATIONS_MD = os.path.join(V3DATA, "train.pid"), os.path.join(box, "v3-generations.md")
+        global CURRENT
+        CURRENT = os.path.join(V3DATA, "current.json")
         os.makedirs(NETS, exist_ok=True)
         print(f"sandbox: {box}")
 
@@ -360,7 +390,13 @@ def main():
 
     os.makedirs(V3DATA, exist_ok=True)
     if os.path.exists(PIDFILE):
-        sys.exit("a generation is already running (tools\\train_new --stop to stop it)")
+        pid = open(PIDFILE).read().strip()
+        alive = pid and pid in subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                                              capture_output=True, text=True).stdout
+        if alive:
+            sys.exit("a generation is already running (tools\\train_new --stop to stop it)")
+        print(f"(removing a stale lock from a run that was interrupted: pid {pid} is not running)")
+        os.remove(PIDFILE)
     if not os.path.exists(EXE_BUILT):
         sys.exit("build the engine first: tools\\engine3 build")
     with open(PIDFILE, "w") as f:

@@ -6,8 +6,9 @@
 // act on "stop" while the engine thinks; the search prints "bestmove" when it ends. Output from
 // both threads goes through one mutex so lines never interleave.
 //
-// Options: Hash (MB), EvalFile (a .nnue path, or <embedded>), Move Overhead (ms kept in reserve per
-// move for network lag), Features (search switches for A/B tests, see search.h).
+// Options: Threads (Lazy SMP search threads), Hash (MB), EvalFile (a .nnue path, or <embedded>),
+// Move Overhead (ms kept in reserve per move for network lag), Features (search switches for A/B
+// tests, see search.h).
 
 #include <iosfwd>
 #include <memory>
@@ -33,7 +34,7 @@ class Uci {
   void wait();
 
   const Position& position() const { return pos_; }
-  Search& search() { return *search_; }
+  Engine& search() { return *search_; }
 
  private:
   void set_position(std::istringstream& args, std::ostream& out);
@@ -44,7 +45,7 @@ class Uci {
   bool load_network(const std::string& value, std::ostream& out);
 
   Position pos_;
-  std::unique_ptr<Search> search_;
+  std::unique_ptr<Engine> search_;
   std::thread thread_;
   std::mutex out_mutex_;
   int move_overhead_ms_ = 30;

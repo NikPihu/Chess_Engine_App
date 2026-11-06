@@ -27,9 +27,11 @@
 
 #include <atomic>
 #include <cstdint>
+#include <thread>
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "board/position.h"
 #include "movegen/movegen.h"
@@ -105,15 +107,20 @@ struct SearchResult {
   std::uint64_t nodes = 0;
 };
 
+/** One search thread. On its own (tests, bench) it owns a TT and a stop flag; inside an Engine
+ *  (Lazy SMP) all threads share the Engine's TT, and helper threads stop on the Engine's signal. */
 class Search {
  public:
   using InfoFn = std::function<void(const std::string&)>;
 
   Search();
+  /** A worker of a thread pool: shares {@code tt}; helpers ({@code id} > 0) stop on {@code stop}. */
+  Search(TranspositionTable* tt, std::atomic<bool>* stop, int id,
+         const std::vector<std::unique_ptr<Search>>* pool);
 
   void set_network(std::shared_ptr<const nnue::Network> net) { net_ = std::move(net); }
   bool has_network() const { return net_ != nullptr; }
-  void set_hash_mb(int mb) { tt_.resize(mb); }
+  void set_hash_mb(int mb) { tt_->resize(mb); }
   void set_features(std::uint32_t f) { features_ = f; }
   std::uint32_t features() const { return features_; }
   void new_game();
@@ -121,9 +128,11 @@ class Search {
   /** Searches {@code root} within {@code limits}; prints UCI "info" lines through {@code info}. */
   SearchResult think(const Position& root, const SearchLimits& limits, const InfoFn& info);
   /** Can be called from another thread (UCI "stop"). */
-  void stop() { stop_.store(true, std::memory_order_relaxed); }
+  void stop() { stop_->store(true, std::memory_order_relaxed); }
   /** Called before starting a new search (not inside think(), so an early "stop" is never lost). */
-  void clear_stop() { stop_.store(false, std::memory_order_relaxed); }
+  void clear_stop() { stop_->store(false, std::memory_order_relaxed); }
+  /** Nodes searched by this thread so far (published every 2048 nodes, safe to read from others). */
+  std::uint64_t published_nodes() const { return published_nodes_.load(std::memory_order_relaxed); }
 
   /** Static evaluation of a position (NNUE, or material if no network): the "eval" command. */
   int evaluate_position(const Position& pos);
@@ -154,10 +163,17 @@ class Search {
   bool on(std::uint32_t f) const { return (features_ & f) != 0; }
   std::string info_line(int depth, int score, std::int64_t elapsed_ms) const;
   std::int16_t* cont_entry(int ply_back, int ply, Piece p, Square to) const;
+  std::uint64_t total_nodes() const;
 
   Position pos_;
   std::shared_ptr<const nnue::Network> net_;
-  TranspositionTable tt_{16};
+  std::unique_ptr<TranspositionTable> own_tt_;
+  TranspositionTable* tt_;
+  std::atomic<bool> own_stop_{false};
+  std::atomic<bool>* stop_;
+  int id_ = 0;  // 0 = main thread (owns time management and output)
+  const std::vector<std::unique_ptr<Search>>* pool_ = nullptr;
+  std::atomic<std::uint64_t> published_nodes_{0};
   std::uint32_t features_ = features::V3;
 
   nnue::Accumulator acc_[MAX_PLY + 2];
@@ -180,7 +196,6 @@ class Search {
   std::int16_t pawn_corr_[2][CORR_SIZE];
   std::int16_t non_pawn_corr_[2][2][CORR_SIZE];  // [stm][colour whose pieces][index]
 
-  std::atomic<bool> stop_{false};
   bool aborted_ = false;
   std::uint64_t nodes_ = 0;
   std::uint64_t node_limit_ = 0;
@@ -190,6 +205,40 @@ class Search {
   int previous_score_ = 0;
   std::int64_t start_ms_ = 0;
   std::int64_t hard_deadline_ms_ = 0;
+};
+
+/**
+ * Lazy SMP: N threads search the same position at the same time and share one transposition
+ * table. They don't divide the work explicitly; each one naturally explores a slightly different
+ * part of the tree (timing, history tables), and every result one thread stores in the TT helps
+ * the others. Thread 0 is the "main" thread: it owns the clock, prints info and picks the move;
+ * when it finishes, the helpers are stopped.
+ */
+class Engine {
+ public:
+  Engine();
+  ~Engine();
+
+  void set_network(std::shared_ptr<const nnue::Network> net);
+  bool has_network() const { return workers_[0]->has_network(); }
+  void set_hash_mb(int mb) { tt_.resize(mb); }
+  void set_features(std::uint32_t f);
+  std::uint32_t features() const { return workers_[0]->features(); }
+  void set_threads(int n);
+  int threads() const { return int(workers_.size()); }
+  void new_game();
+
+  SearchResult think(const Position& root, const SearchLimits& limits, const Search::InfoFn& info);
+  void stop() { stop_.store(true, std::memory_order_relaxed); }
+  void clear_stop() { stop_.store(false, std::memory_order_relaxed); }
+  int evaluate_position(const Position& pos) { return workers_[0]->evaluate_position(pos); }
+
+ private:
+  TranspositionTable tt_{16};
+  std::atomic<bool> stop_{false};          // UCI "stop": seen by the main thread
+  std::atomic<bool> helpers_stop_{false};  // set when the main thread is done
+  std::vector<std::unique_ptr<Search>> workers_;
+  std::shared_ptr<const nnue::Network> net_;
 };
 
 /** Milliseconds from a steady clock. */

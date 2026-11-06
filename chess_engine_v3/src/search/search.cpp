@@ -168,12 +168,33 @@ int history_bonus(int depth) { return std::min(1600, 170 * depth - 70); }
 
 // ---------------------------------------------------------------- setup
 
-Search::Search() : cont_history_(std::make_unique<std::int16_t[]>(13 * 64 * PIECE_NB * 64)) {
+Search::Search()
+    : own_tt_(std::make_unique<TranspositionTable>(16)),
+      tt_(own_tt_.get()),
+      stop_(&own_stop_),
+      cont_history_(std::make_unique<std::int16_t[]>(13 * 64 * PIECE_NB * 64)) {
   new_game();
 }
 
+Search::Search(TranspositionTable* tt, std::atomic<bool>* stop, int id,
+               const std::vector<std::unique_ptr<Search>>* pool)
+    : tt_(tt),
+      stop_(stop),
+      id_(id),
+      pool_(pool),
+      cont_history_(std::make_unique<std::int16_t[]>(13 * 64 * PIECE_NB * 64)) {
+  new_game();
+}
+
+std::uint64_t Search::total_nodes() const {
+  if (!pool_) return nodes_;
+  std::uint64_t total = 0;
+  for (const auto& w : *pool_) total += w.get() == this ? nodes_ : w->published_nodes();
+  return total;
+}
+
 void Search::new_game() {
-  tt_.clear();
+  if (own_tt_) tt_->clear();
   std::memset(killers_, 0, sizeof(killers_));
   std::memset(history_, 0, sizeof(history_));
   std::memset(capture_history_, 0, sizeof(capture_history_));
@@ -224,7 +245,7 @@ void Search::make(Move m, int ply) {
   s->piece = pos_.piece_on(move_from(m));
   if (net_) acc_[ply + 1].update(*net_, pos_, m, acc_[ply]);
   pos_.make_move(m);
-  tt_.prefetch(pos_.key());
+  tt_->prefetch(pos_.key());
 }
 
 void Search::make_null(int ply) {
@@ -236,7 +257,8 @@ void Search::make_null(int ply) {
 }
 
 void Search::check_limits() {
-  if (stop_.load(std::memory_order_relaxed) || (node_limit_ && nodes_ >= node_limit_) ||
+  published_nodes_.store(nodes_, std::memory_order_relaxed);
+  if (stop_->load(std::memory_order_relaxed) || (node_limit_ && nodes_ >= node_limit_) ||
       (hard_deadline_ms_ > 0 && now_ms() >= hard_deadline_ms_))
     aborted_ = true;
 }
@@ -364,8 +386,9 @@ SearchResult Search::think(const Position& root, const SearchLimits& limits, con
   aborted_ = false;
   sel_depth_ = 0;
   previous_score_ = 0;
-  node_limit_ = limits.nodes;
-  tt_.new_search();
+  node_limit_ = id_ == 0 ? limits.nodes : 0;
+  published_nodes_.store(0, std::memory_order_relaxed);
+  if (id_ == 0) tt_->new_search();  // helpers share the main thread's TT generation
   std::memset(killers_, 0, sizeof(killers_));
   std::memset(root_nodes_, 0, sizeof(root_nodes_));
   for (Stack& s : stack_) s = Stack{};
@@ -382,7 +405,8 @@ SearchResult Search::think(const Position& root, const SearchLimits& limits, con
 
   TimeManager time(limits, pos_.side_to_move());
   start_ms_ = now_ms();
-  hard_deadline_ms_ = time.hard_ms() > 0 ? start_ms_ + time.hard_ms() : 0;
+  // Helpers have no clock: they search until the main thread tells them to stop.
+  hard_deadline_ms_ = id_ == 0 && time.hard_ms() > 0 ? start_ms_ + time.hard_ms() : 0;
   int max_depth = limits.depth > 0 ? std::min(limits.depth, MAX_PLY - 1) : MAX_PLY - 1;
 
   result.best = root_moves.moves[0];
@@ -401,12 +425,17 @@ SearchResult Search::think(const Position& root, const SearchLimits& limits, con
     result.score = score;
     result.depth = depth;
     std::int64_t elapsed = now_ms() - start_ms_;
-    if (info) info(info_line(depth, score, elapsed));
+    if (info && id_ == 0) info(info_line(depth, score, elapsed));
+    if (id_ != 0) continue;  // only the main thread decides when to stop
 
     bool mate_found = std::abs(score) >= MATE_THRESHOLD;
     if (mate_found && limits.depth < 0 && depth >= MATE - std::abs(score)) break;
 
-    if (!time.clock()) continue;
+    if (!time.clock()) {
+      last_best = result.best;
+      last_score = score;
+      continue;
+    }
     if (on(features::SMART_TM)) {
       // Spend more time when the best move keeps changing, the score is dropping, or the best
       // move took only a small share of the effort (the alternatives were hard to refute).
@@ -424,7 +453,8 @@ SearchResult Search::think(const Position& root, const SearchLimits& limits, con
     last_best = result.best;
     last_score = score;
   }
-  result.nodes = nodes_;
+  published_nodes_.store(nodes_, std::memory_order_relaxed);
+  result.nodes = total_nodes();
   return result;
 }
 
@@ -482,7 +512,7 @@ int Search::search(int depth, int ply, int alpha, int beta, bool allow_null) {
   // --- transposition table
   const Key key = pos_.key();
   TTHit tt;
-  const bool tt_hit = tt_.probe(key, ply, tt);
+  const bool tt_hit = tt_->probe(key, ply, tt);
   const Move tt_move = tt_hit ? tt.move : MOVE_NONE;
   if (tt_hit && !pv_node && !excluded && tt.depth >= depth &&
       (tt.bound == BOUND_EXACT || (tt.bound == BOUND_LOWER && tt.score >= beta) ||
@@ -664,7 +694,7 @@ int Search::search(int depth, int ply, int alpha, int beta, bool allow_null) {
                       : best_score > original_alpha ? BOUND_EXACT
                                                     : BOUND_UPPER;
   if (!excluded) {
-    tt_.store(key, best_move, best_score, raw_eval, depth, bound, ply);
+    tt_->store(key, best_move, best_score, raw_eval, depth, bound, ply);
     // Correction history learns how far the static eval was from what the search found -
     // only from trustworthy, quiet results (a capture's score says little about the eval).
     if (on(features::CORR_HIST) && !in_check && (best_move == MOVE_NONE || is_quiet(pos_, best_move)) &&
@@ -688,7 +718,7 @@ int Search::quiescence(int ply, int alpha, int beta) {
 
   const Key key = pos_.key();
   TTHit tt;
-  const bool tt_hit = on(features::QS_TT) && tt_.probe(key, ply, tt);
+  const bool tt_hit = on(features::QS_TT) && tt_->probe(key, ply, tt);
   if (tt_hit && !pv_node &&
       (tt.bound == BOUND_EXACT || (tt.bound == BOUND_LOWER && tt.score >= beta) ||
        (tt.bound == BOUND_UPPER && tt.score <= alpha)))
@@ -746,7 +776,7 @@ int Search::quiescence(int ply, int alpha, int beta) {
     }
   }
   if (on(features::QS_TT))
-    tt_.store(key, best_move, best_score, raw_eval, 0, best_score >= beta ? BOUND_LOWER : BOUND_UPPER, ply);
+    tt_->store(key, best_move, best_score, raw_eval, 0, best_score >= beta ? BOUND_LOWER : BOUND_UPPER, ply);
   return best_score;
 }
 
@@ -760,10 +790,56 @@ std::string Search::info_line(int depth, int score, std::int64_t elapsed_ms) con
   } else {
     o << " score cp " << score;
   }
-  o << " nodes " << nodes_ << " nps " << (elapsed_ms > 0 ? nodes_ * 1000 / elapsed_ms : nodes_)
-    << " hashfull " << tt_.hashfull() << " time " << elapsed_ms << " pv";
+  const std::uint64_t nodes = total_nodes();
+  o << " nodes " << nodes << " nps " << (elapsed_ms > 0 ? nodes * 1000 / elapsed_ms : nodes)
+    << " hashfull " << tt_->hashfull() << " time " << elapsed_ms << " pv";
   for (int i = 0; i < pv_length_[0]; i++) o << ' ' << move_to_uci(pv_[0][i]);
   return o.str();
+}
+
+// ---------------------------------------------------------------- Lazy SMP engine
+
+Engine::Engine() { set_threads(1); }
+
+Engine::~Engine() = default;
+
+void Engine::set_threads(int n) {
+  n = std::clamp(n, 1, 256);
+  std::uint32_t f = workers_.empty() ? features::V3 : workers_[0]->features();
+  workers_.clear();
+  for (int i = 0; i < n; i++) {
+    std::atomic<bool>* stop = i == 0 ? &stop_ : &helpers_stop_;
+    workers_.push_back(std::make_unique<Search>(&tt_, stop, i, &workers_));
+    workers_.back()->set_network(net_);
+    workers_.back()->set_features(f);
+  }
+}
+
+void Engine::set_network(std::shared_ptr<const nnue::Network> net) {
+  net_ = std::move(net);
+  for (auto& w : workers_) w->set_network(net_);
+}
+
+void Engine::set_features(std::uint32_t f) {
+  for (auto& w : workers_) w->set_features(f);
+}
+
+void Engine::new_game() {
+  tt_.clear();
+  for (auto& w : workers_) w->new_game();
+}
+
+SearchResult Engine::think(const Position& root, const SearchLimits& limits, const Search::InfoFn& info) {
+  helpers_stop_.store(false, std::memory_order_relaxed);
+  std::vector<std::thread> helpers;
+  SearchLimits helper_limits;  // no clock, no depth or node limit: they run until told to stop
+  helper_limits.infinite = true;
+  for (std::size_t i = 1; i < workers_.size(); i++)
+    helpers.emplace_back([this, i, &root, &helper_limits]() { workers_[i]->think(root, helper_limits, nullptr); });
+  SearchResult result = workers_[0]->think(root, limits, info);
+  helpers_stop_.store(true, std::memory_order_relaxed);
+  for (auto& t : helpers) t.join();
+  return result;
 }
 
 }  // namespace v3

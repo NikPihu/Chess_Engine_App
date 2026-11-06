@@ -418,6 +418,33 @@ TEST(uci_go_and_stop) {
   CHECK(out4.str().find("keeping the current network") != std::string::npos);
 }
 
+TEST(lazy_smp_threads_search_and_stop) {
+  Uci uci;
+  std::ostringstream out;
+  uci.command("setoption name Threads value 4", out);
+  CHECK_EQ(uci.search().threads(), 4);
+  uci.command("position fen r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", out);
+  uci.command("go depth 12", out);
+  uci.wait();
+  CHECK(out.str().find("info depth 12 ") != std::string::npos);
+  CHECK(out.str().find("bestmove ") != std::string::npos);
+
+  std::ostringstream out2;
+  uci.command("go infinite", out2);
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  uci.command("stop", out2);
+  CHECK(out2.str().find("bestmove ") != std::string::npos);
+
+  // Mates are still found with several threads, and Threads can be changed back.
+  std::ostringstream out3;
+  uci.command("position fen 6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", out3);
+  uci.command("go depth 6", out3);
+  uci.wait();
+  CHECK(out3.str().find("bestmove a1a8") != std::string::npos);
+  uci.command("setoption name Threads value 1", out3);
+  CHECK_EQ(uci.search().threads(), 1);
+}
+
 int main(int argc, char** argv) {
   init_all();
   const char* filter = argc > 1 ? argv[1] : "";

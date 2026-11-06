@@ -11,7 +11,7 @@
 
 namespace v3 {
 
-Uci::Uci() : search_(std::make_unique<Search>()) {
+Uci::Uci() : search_(std::make_unique<Engine>()) {
   std::ostringstream ignore;
   load_network("<embedded>", ignore);
 }
@@ -65,6 +65,7 @@ bool Uci::command(const std::string& line, std::ostream& out) {
   if (cmd == "uci") {
     std::lock_guard<std::mutex> lock(out_mutex_);
     out << "id name chess_engine_v3\nid author NikPihu\n"
+        << "option name Threads type spin default 1 min 1 max 256\n"
         << "option name Hash type spin default 16 min 1 max 4096\n"
         << "option name EvalFile type string default <embedded>\n"
         << "option name Move Overhead type spin default 30 min 0 max 5000\n"
@@ -133,7 +134,9 @@ void Uci::set_option(std::istringstream& args, std::ostream& out) {
   }
   std::string key = name;
   std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return char(std::tolower(c)); });
-  if (key == "hash") {
+  if (key == "threads") {
+    search_->set_threads(std::clamp(std::atoi(value.c_str()), 1, 256));
+  } else if (key == "hash") {
     search_->set_hash_mb(std::clamp(std::atoi(value.c_str()), 1, 4096));
   } else if (key == "evalfile") {
     load_network(value, out);

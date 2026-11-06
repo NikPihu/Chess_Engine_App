@@ -8,6 +8,7 @@
 
 #include "movegen/movegen.h"
 #include "movegen/perft.h"
+#include "search/syzygy.h"
 
 namespace v3 {
 
@@ -70,6 +71,7 @@ bool Uci::command(const std::string& line, std::ostream& out) {
         << "option name EvalFile type string default <embedded>\n"
         << "option name Move Overhead type spin default 30 min 0 max 5000\n"
         << "option name Features type string default v3\n"
+        << "option name SyzygyPath type string default <empty>\n"
         << "uciok" << std::endl;
   } else if (cmd == "isready") {
     say(out, "readyok");
@@ -140,6 +142,10 @@ void Uci::set_option(std::istringstream& args, std::ostream& out) {
     search_->set_hash_mb(std::clamp(std::atoi(value.c_str()), 1, 4096));
   } else if (key == "evalfile") {
     load_network(value, out);
+  } else if (key == "syzygypath") {
+    int n = syzygy::init(value);
+    say(out, n ? "info string syzygy: " + std::to_string(n) + "-piece tablebases loaded from " + value
+               : "info string syzygy: no tablebases found at '" + value + "'");
   } else if (key == "move overhead") {
     move_overhead_ms_ = std::clamp(std::atoi(value.c_str()), 0, 5000);
   } else if (key == "features") {

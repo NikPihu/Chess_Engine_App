@@ -7,6 +7,7 @@
 // both threads goes through one mutex so lines never interleave.
 //
 // Options: Threads (Lazy SMP search threads), Hash (MB), EvalFile (a .nnue path, or <embedded>),
+// SyzygyPath (folder(s) with Syzygy tablebases, ';'-separated),
 // Move Overhead (ms kept in reserve per move for network lag), Features (search switches for A/B
 // tests, see search.h).
 

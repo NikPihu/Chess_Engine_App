@@ -21,6 +21,7 @@
 #include "datagen/datagen.h"
 #include "nnue/nnue.h"
 #include "search/search.h"
+#include "search/syzygy.h"
 #include "movegen/movegen.h"
 #include "movegen/perft.h"
 #include "uci/uci.h"
@@ -597,6 +598,58 @@ TEST(pgn_mode_strips_comments_and_filters_elo) {
   CHECK_EQ(int(lines.size()), 5);
   if (!lines.empty()) CHECK_EQ(lines[0], std::string("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2;2;1"));
   if (lines.size() == 5) CHECK(lines[4].find("r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq") == 0);
+}
+
+TEST(syzygy_tablebases) {
+  std::string dir;
+  for (const char* d : {"../tools/data/syzygy", "tools/data/syzygy"})
+    if (std::filesystem::exists(std::string(d) + "/KRvK.rtbz")) dir = d;
+  if (dir.empty()) {
+    std::printf("  (no Syzygy tables in tools/data/syzygy - skipped)\n");
+    return;
+  }
+  CHECK_EQ(syzygy::init(dir), 5);
+  struct Case {
+    const char* fen;
+    int wdl;
+  };
+  const Case cases[] = {
+      {"8/8/8/4k3/8/8/8/R3K3 w - - 0 1", 2},       // KR v K: win
+      {"8/8/8/4k3/8/8/8/R3K3 b - - 0 1", -2},      // ...lost for the side without the rook
+      {"8/8/8/4k3/8/8/8/N3K3 w - - 0 1", 0},       // KN v K: draw
+      {"8/8/8/8/8/2k5/8/K1q5 w - - 0 1", -2},      // KQ v K, white in check but not mated: lost
+      {"8/8/8/4k3/8/8/8/1B2K3 w - - 0 1", 0},      // KB v K: draw
+  };
+  for (const Case& c : cases) {
+    Position pos;
+    CHECK(pos.set_fen(c.fen));
+    int wdl = 99;
+    CHECK(syzygy::probe_wdl(pos, wdl));
+    if (wdl != c.wdl) std::printf("  wdl %s = %d\n", c.fen, wdl);
+    CHECK_EQ(wdl, c.wdl);
+  }
+  // Root: the engine plays the tablebase move and the game is converted: play KR v K out.
+  Uci uci;
+  std::ostringstream out;
+  uci.command("setoption name SyzygyPath value " + dir, out);
+  Position pos;
+  pos.set_fen("8/8/8/4k3/8/8/8/R3K3 w - - 0 1");
+  Engine& engine = uci.search();
+  bool mated = false;
+  for (int ply = 0; ply < 80 && !mated; ply++) {
+    engine.clear_stop();
+    SearchLimits limits;
+    limits.depth = 6;
+    SearchResult r = engine.think(pos, limits, nullptr);
+    CHECK(r.best != MOVE_NONE);
+    if (r.best == MOVE_NONE) break;
+    pos.make_move(r.best);
+    MoveList list;
+    generate(pos, list);
+    mated = list.size == 0 && pos.in_check();
+  }
+  CHECK(mated);  // KR v K is mate in at most 16 moves (32 plies) with perfect play
+  syzygy::init("");
 }
 
 int main(int argc, char** argv) {

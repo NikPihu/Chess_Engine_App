@@ -199,6 +199,7 @@ class Search {
 
   bool aborted_ = false;
   std::uint64_t nodes_ = 0;
+  std::uint64_t tb_hits_ = 0;
   std::uint64_t node_limit_ = 0;
   std::uint64_t root_nodes_[64][64];  // nodes spent below each root move (time management)
   int root_depth_ = 0;

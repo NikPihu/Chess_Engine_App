@@ -1,5 +1,7 @@
 #include "search/search.h"
 
+#include "search/syzygy.h"
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -384,6 +386,7 @@ void Search::update_capture_stats(Move best, int depth, const Move* tried, int n
 SearchResult Search::think(const Position& root, const SearchLimits& limits, const InfoFn& info) {
   pos_ = root;
   nodes_ = 0;
+  tb_hits_ = 0;
   aborted_ = false;
   sel_depth_ = 0;
   previous_score_ = 0;
@@ -520,6 +523,20 @@ int Search::search(int depth, int ply, int alpha, int beta, bool allow_null) {
       (tt.bound == BOUND_EXACT || (tt.bound == BOUND_LOWER && tt.score >= beta) ||
        (tt.bound == BOUND_UPPER && tt.score <= alpha)))
     return tt.score;
+
+  // --- endgame tablebases: a solved position needs no search
+  if (!root && !excluded && syzygy::largest() > 0 && popcount(pos_.pieces()) <= syzygy::largest()) {
+    int wdl;
+    if (syzygy::probe_wdl(pos_, wdl)) {
+      tb_hits_++;
+      const int value = syzygy::wdl_to_score(wdl, ply);
+      const Bound b = wdl == 2 ? BOUND_LOWER : wdl == -2 ? BOUND_UPPER : BOUND_EXACT;
+      if (b == BOUND_EXACT || (b == BOUND_LOWER && value >= beta) || (b == BOUND_UPPER && value <= alpha)) {
+        tt_->store(key, MOVE_NONE, value, NO_EVAL, std::min(MAX_PLY - 1, depth + 6), b, ply);
+        return value;
+      }
+    }
+  }
 
   // --- static evaluation (corrected by correction history, refined by the TT score)
   int raw_eval = NO_EVAL, eval = -INFINITE_SCORE;
@@ -794,7 +811,7 @@ std::string Search::info_line(int depth, int score, std::int64_t elapsed_ms) con
   }
   const std::uint64_t nodes = total_nodes();
   o << " nodes " << nodes << " nps " << (elapsed_ms > 0 ? nodes * 1000 / elapsed_ms : nodes)
-    << " hashfull " << tt_->hashfull() << " time " << elapsed_ms << " pv";
+    << " hashfull " << tt_->hashfull() << " tbhits " << tb_hits_ << " time " << elapsed_ms << " pv";
   for (int i = 0; i < pv_length_[0]; i++) o << ' ' << move_to_uci(pv_[0][i]);
   return o.str();
 }
@@ -832,6 +849,19 @@ void Engine::new_game() {
 }
 
 SearchResult Engine::think(const Position& root, const SearchLimits& limits, const Search::InfoFn& info) {
+  // A solved endgame at the root: play the tablebase move (keeps the result, respects the
+  // 50-move rule) instead of searching.
+  int wdl = 0;
+  if (Move tb = syzygy::probe_root(root, wdl); tb != MOVE_NONE) {
+    SearchResult r;
+    r.best = tb;
+    r.score = syzygy::wdl_to_score(wdl, 0);
+    r.depth = 1;
+    if (info)
+      info("info depth 1 seldepth 1 score cp " + std::to_string(r.score) +
+           " nodes 0 tbhits 1 time 0 pv " + move_to_uci(tb));
+    return r;
+  }
   helpers_stop_.store(false, std::memory_order_relaxed);
   std::vector<std::thread> helpers;
   SearchLimits helper_limits;  // no clock, no depth or node limit: they run until told to stop

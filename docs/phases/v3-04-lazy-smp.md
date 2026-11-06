@@ -44,7 +44,11 @@ tools\engine3 "setoption name Threads value 4" "setoption name Hash value 64" "p
 | 4 | 21 | 4.52 M |
 
 ## Result
-<!-- SPRT_RESULT -->
+| Test | TC | Games | W-L-D | Elo | Result |
+|---|---|---|---|---|---|
+| v3, 4 threads vs 1 thread (same binary, same network) | 8+0.08 | 220 | 108-6-106 | **+174 ± 32** (nElo +295 ± 46) | ✅ H1 |
+
+**Read it with care:** this is a bit above the usual +100–130 for four threads. Part of the reason: v3's pruning-heavy search benefits from the shared TT, and the test ran while the machine was otherwise busy. The point stands: on Lichess, the bot should use 4 threads.
 
 ## On Lichess (when you decide to switch)
 - **The plan's setting:** 4 threads + 256 MB hash, which leaves 12 of 16 hardware threads for training.

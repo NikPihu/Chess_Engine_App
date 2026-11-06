@@ -58,9 +58,19 @@ add_library(v3core STATIC
   src/uci/uci.cpp
   src/datagen/datagen.cpp
   src/datagen/pgn.cpp
+  src/search/syzygy.cpp
+  third_party/fathom/tbprobe.c
   ${EMBEDDED_NET_CPP}
 )
-target_include_directories(v3core PUBLIC src)
+target_include_directories(v3core PUBLIC src third_party/fathom)
+# Fathom (Syzygy tablebase probing, MIT) is C code that also compiles as C++; built as C++ so MSVC
+# needs no C11-atomics switch. Third-party code: its warnings are not ours to fix.
+set_source_files_properties(third_party/fathom/tbprobe.c PROPERTIES LANGUAGE CXX)
+if(MSVC)
+  set_source_files_properties(third_party/fathom/tbprobe.c PROPERTIES COMPILE_OPTIONS "/W0;/TP")
+else()
+  set_source_files_properties(third_party/fathom/tbprobe.c PROPERTIES COMPILE_OPTIONS "-w;-xc++")
+endif()
 
 add_executable(engine_v3 src/main.cpp)
 target_link_libraries(engine_v3 PRIVATE v3core)

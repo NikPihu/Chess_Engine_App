@@ -168,6 +168,8 @@ TEST(incremental_keys_and_generator_split_on_random_games) {
         played.push_back(m);
         CHECK_EQ(pos.key(), pos.compute_key());
         CHECK_EQ(pos.pawn_key(), pos.compute_pawn_key());
+        CHECK_EQ(pos.non_pawn_key(WHITE), pos.compute_non_pawn_key(WHITE));
+        CHECK_EQ(pos.non_pawn_key(BLACK), pos.compute_non_pawn_key(BLACK));
         // The FEN printed and re-read gives the same key (ep square handling agrees).
         Position copy;
         CHECK(copy.set_fen(pos.fen()));
@@ -218,6 +220,37 @@ TEST(uci_position_and_moves) {
   CHECK(hello.str().find("uciok") != std::string::npos);
 }
 
+
+TEST(see_static_exchange) {
+  struct Case {
+    const char* fen;
+    const char* move;
+    int threshold;
+    bool expected;
+  };
+  const Case cases[] = {
+      {"4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1", "e4d5", 100, true},    // free pawn
+      {"4k3/8/2p5/3p4/4P3/8/8/4K3 w - - 0 1", "e4d5", 1, false},   // PxP, PxP: even
+      {"4k3/8/2p5/3p4/4P3/8/8/4K3 w - - 0 1", "e4d5", 0, true},
+      {"4k3/8/2p5/3r4/4P3/8/8/4K3 w - - 0 1", "e4d5", 400, true},  // PxR, PxP: +400
+      {"4k3/8/2p5/3p4/8/8/3Q4/4K3 w - - 0 1", "d2d5", 0, false},   // QxP defended by a pawn
+      {"4k3/3r4/8/3p4/8/8/3R4/3RK3 w - - 0 1", "d2d5", 0, true},   // x-ray: RxP RxR RxR
+      {"4k3/3r4/3r4/3p4/8/8/3R4/3RK3 w - - 0 1", "d2d5", 0, false},
+      {"4k3/8/8/8/8/5n2/8/4K1N1 w - - 0 1", "g1f3", 300, true},    // takes an undefended knight
+      {"4k3/8/8/8/8/8/4P3/4K3 w - - 0 1", "e2e4", 0, true},        // quiet, nothing attacks e4
+      {"4k3/8/8/8/3p4/8/8/R3K3 w Q - 0 1", "a1a4", 0, true},       // rook to a safe square
+      {"4k3/8/8/1p6/8/8/8/R3K3 w Q - 0 1", "a1a4", 0, false},      // rook to a square a pawn hits
+  };
+  for (const Case& c : cases) {
+    Position pos;
+    CHECK(pos.set_fen(c.fen));
+    Move m = parse_uci_move(pos, c.move);
+    CHECK(m != MOVE_NONE);
+    bool got = pos.see_ge(m, c.threshold);
+    if (got != c.expected) std::printf("  see %s %s >= %d\n", c.fen, c.move, c.threshold);
+    CHECK_EQ(got, c.expected);
+  }
+}
 
 // ---------------------------------------------------------------- NNUE (step 2)
 
@@ -374,9 +407,13 @@ TEST(uci_go_and_stop) {
 
   std::ostringstream out4;
   uci.command("setoption name Features value all,-nmp", out4);
-  CHECK_EQ(uci.search().features(), features::KILLERS | features::HISTORY | features::PVS |
-                                        features::LMR | features::CHECK_EXTENSION |
-                                        features::ASPIRATION | features::REVERSE_FUTILITY);
+  std::uint32_t all = 0;
+  CHECK(features::parse("all", all));
+  CHECK_EQ(uci.search().features(), all & ~features::NULL_MOVE);
+  std::uint32_t f = 0;
+  CHECK(features::parse("v3,-se,+check", f));
+  CHECK_EQ(f, (features::V3 & ~features::SINGULAR) | features::CHECK_EXTENSION);
+  CHECK(!features::parse("v3,-nonsense", f));
   uci.command("setoption name EvalFile value nope.nnue", out4);
   CHECK(out4.str().find("keeping the current network") != std::string::npos);
 }

@@ -68,7 +68,7 @@ bool Uci::command(const std::string& line, std::ostream& out) {
         << "option name Hash type spin default 16 min 1 max 4096\n"
         << "option name EvalFile type string default <embedded>\n"
         << "option name Move Overhead type spin default 30 min 0 max 5000\n"
-        << "option name Features type string default proven\n"
+        << "option name Features type string default v3\n"
         << "uciok" << std::endl;
   } else if (cmd == "isready") {
     say(out, "readyok");

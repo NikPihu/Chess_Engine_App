@@ -136,6 +136,8 @@ bool Position::set_fen(const std::string& fen) {
   game_ply_ = 2 * (fullmove > 0 ? fullmove - 1 : 0) + (stm_ == BLACK);
   st.key = compute_key();
   st.pawn_key = compute_pawn_key();
+  st.non_pawn_key[WHITE] = compute_non_pawn_key(WHITE);
+  st.non_pawn_key[BLACK] = compute_non_pawn_key(BLACK);
   st.checkers = attackers_to(king_square(stm_), pieces()) & pieces(~stm_);
   // The side that just moved must not be in check.
   if (attacked_by(stm_, king_square(~stm_))) return false;
@@ -207,6 +209,70 @@ Key Position::compute_pawn_key() const {
   return k;
 }
 
+Key Position::compute_non_pawn_key(Color c) const {
+  Key k = 0;
+  Bitboard b = pieces(c) & ~pieces(PAWN);
+  while (b) {
+    Square sq = pop_lsb(b);
+    k ^= zobrist::piece_square[board_[sq]][sq];
+  }
+  return k;
+}
+
+// Static exchange evaluation: play out all captures on the target square, cheapest attacker first,
+// with x-rays (a rook behind a rook joins in once the front one has captured). Returns whether the
+// side making the move ends up at least `threshold` ahead. The standard "swap" algorithm: instead
+// of building the whole capture sequence it tracks whether the side to move wins the exchange.
+bool Position::see_ge(Move m, int threshold) const {
+  static constexpr int VALUE[PIECE_TYPE_NB] = {100, 300, 300, 500, 900, 0};
+  if (move_flag(m) != FLAG_NONE && move_flag(m) != FLAG_DOUBLE_PUSH)
+    return 0 >= threshold;  // castling, en passant, promotions: treated as neutral
+  const Square from = move_from(m), to = move_to(m);
+  int swap = (piece_on(to) == NO_PIECE ? 0 : VALUE[type_of(piece_on(to))]) - threshold;
+  if (swap < 0) return false;
+  swap = VALUE[type_of(piece_on(from))] - swap;
+  if (swap <= 0) return true;
+
+  Bitboard occupied = pieces() ^ bb(from) ^ bb(to);
+  Color stm = color_of(piece_on(from));
+  Bitboard attackers = attackers_to(to, occupied);
+  const Bitboard bishops = pieces(BISHOP) | pieces(QUEEN);
+  const Bitboard rooks = pieces(ROOK) | pieces(QUEEN);
+  int res = 1;
+  while (true) {
+    stm = ~stm;
+    attackers &= occupied;
+    Bitboard mine = attackers & pieces(stm);
+    if (!mine) break;
+    res ^= 1;
+    Bitboard b;
+    if ((b = mine & pieces(PAWN))) {
+      if ((swap = VALUE[PAWN] - swap) < res) break;
+      occupied ^= bb(lsb(b));
+      attackers |= attacks::bishop(to, occupied) & bishops;
+    } else if ((b = mine & pieces(KNIGHT))) {
+      if ((swap = VALUE[KNIGHT] - swap) < res) break;
+      occupied ^= bb(lsb(b));
+    } else if ((b = mine & pieces(BISHOP))) {
+      if ((swap = VALUE[BISHOP] - swap) < res) break;
+      occupied ^= bb(lsb(b));
+      attackers |= attacks::bishop(to, occupied) & bishops;
+    } else if ((b = mine & pieces(ROOK))) {
+      if ((swap = VALUE[ROOK] - swap) < res) break;
+      occupied ^= bb(lsb(b));
+      attackers |= attacks::rook(to, occupied) & rooks;
+    } else if ((b = mine & pieces(QUEEN))) {
+      if ((swap = VALUE[QUEEN] - swap) < res) break;
+      occupied ^= bb(lsb(b));
+      attackers |= (attacks::bishop(to, occupied) & bishops) | (attacks::rook(to, occupied) & rooks);
+    } else {
+      // Only the king is left: it may capture only if the opponent has no attacker left.
+      return (attackers & ~pieces(stm)) ? (res ^ 1) != 0 : res != 0;
+    }
+  }
+  return res != 0;
+}
+
 Bitboard Position::attackers_to(Square sq, Bitboard occupied) const {
   return (attacks::pawn[BLACK][sq] & pieces(WHITE, PAWN)) |
          (attacks::pawn[WHITE][sq] & pieces(BLACK, PAWN)) |
@@ -251,6 +317,7 @@ void Position::make_move(Move m) {
     Piece rook = board_[rook_from];
     move_piece(rook_from, rook_to);
     key ^= zobrist::piece_square[rook][rook_from] ^ zobrist::piece_square[rook][rook_to];
+    st.non_pawn_key[us] ^= zobrist::piece_square[rook][rook_from] ^ zobrist::piece_square[rook][rook_to];
   } else {
     Square cap_sq = flag == FLAG_EN_PASSANT ? Square(to + (us == WHITE ? -8 : 8)) : to;
     Piece captured = board_[cap_sq];
@@ -258,6 +325,7 @@ void Position::make_move(Move m) {
       remove(cap_sq);
       key ^= zobrist::piece_square[captured][cap_sq];
       if (type_of(captured) == PAWN) st.pawn_key ^= zobrist::piece_square[captured][cap_sq];
+      else st.non_pawn_key[them] ^= zobrist::piece_square[captured][cap_sq];
       st.captured = captured;
       st.rule50 = 0;
     }
@@ -267,6 +335,8 @@ void Position::make_move(Move m) {
   key ^= zobrist::piece_square[piece][from] ^ zobrist::piece_square[piece][to];
   if (type_of(piece) == PAWN || type_of(piece) == KING)
     st.pawn_key ^= zobrist::piece_square[piece][from] ^ zobrist::piece_square[piece][to];
+  if (type_of(piece) != PAWN)
+    st.non_pawn_key[us] ^= zobrist::piece_square[piece][from] ^ zobrist::piece_square[piece][to];
 
   if (type_of(piece) == PAWN) {
     st.rule50 = 0;
@@ -276,6 +346,7 @@ void Position::make_move(Move m) {
       put(promoted, to);
       key ^= zobrist::piece_square[piece][to] ^ zobrist::piece_square[promoted][to];
       st.pawn_key ^= zobrist::piece_square[piece][to];
+      st.non_pawn_key[us] ^= zobrist::piece_square[promoted][to];
     } else if (flag == FLAG_DOUBLE_PUSH) {
       Square ep = Square((from + to) / 2);
       // Check against the opponent's pawns: they are the ones who could capture.

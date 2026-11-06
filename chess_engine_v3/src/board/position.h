@@ -26,7 +26,8 @@ void init();
 /** Everything make_move changes that unmake_move cannot recompute. One per ply. */
 struct StateInfo {
   Key key = 0;
-  Key pawn_key = 0;  // pawns + kings only (for pawn-structure caches / correction history later)
+  Key pawn_key = 0;  // pawns + kings only (pawn correction history)
+  Key non_pawn_key[2] = {0, 0};  // per colour: that side's pieces other than pawns
   int castling = 0;
   Square ep = SQ_NONE;  // set only when an en passant capture is actually possible (pseudo-legally)
   int rule50 = 0;       // half-moves since the last capture or pawn move
@@ -66,6 +67,7 @@ class Position {
   const StateInfo& state() const { return states_.back(); }
   Key key() const { return state().key; }
   Key pawn_key() const { return state().pawn_key; }
+  Key non_pawn_key(Color c) const { return state().non_pawn_key[c]; }
   int castling_rights() const { return state().castling; }
   Square ep_square() const { return state().ep; }
   int rule50() const { return state().rule50; }
@@ -87,6 +89,11 @@ class Position {
   /** Recomputes the Zobrist key from scratch (the tests compare it with the incremental key). */
   Key compute_key() const;
   Key compute_pawn_key() const;
+  Key compute_non_pawn_key(Color c) const;
+
+  /** Static exchange evaluation: does {@code m} win at least {@code threshold} centipawns after
+   *  all recaptures on its target square (cheapest attacker first)? */
+  bool see_ge(Move m, int threshold) const;
 
  private:
   void clear();

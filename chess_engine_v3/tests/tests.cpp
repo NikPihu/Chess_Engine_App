@@ -18,6 +18,7 @@
 #include <fstream>
 
 #include "board/position.h"
+#include "datagen/datagen.h"
 #include "nnue/nnue.h"
 #include "search/search.h"
 #include "movegen/movegen.h"
@@ -539,6 +540,63 @@ TEST(lazy_smp_threads_search_and_stop) {
   CHECK(out3.str().find("bestmove a1a8") != std::string::npos);
   uci.command("setoption name Threads value 1", out3);
   CHECK_EQ(uci.search().threads(), 1);
+}
+
+TEST(san_round_trip_and_examples) {
+  std::mt19937_64 rng(3);
+  int checked = 0;
+  for (const PerftCase& c : PERFT_SUITE) {
+    Position pos;
+    pos.set_fen(c.fen);
+    for (int ply = 0; ply < 80; ply++) {
+      MoveList list;
+      generate(pos, list);
+      if (list.size == 0) break;
+      for (Move m : list) {
+        std::string san = datagen::move_to_san(pos, m);
+        Move back = datagen::parse_san(pos, san + "+");
+        if (back != m) std::printf("  %s: %s -> %s\n", pos.fen().c_str(), san.c_str(), move_to_uci(back).c_str());
+        CHECK_EQ(back, m);
+        checked++;
+      }
+      pos.make_move(list.moves[rng() % list.size]);
+    }
+  }
+  CHECK(checked > 10000);
+  Position pos;
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "g1f3")), std::string("Nf3"));
+  pos.set_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "e1g1")), std::string("O-O"));
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "e5f7")), std::string("Nxf7"));
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "c3b1")), std::string("Nb1"));
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "d5e6")), std::string("dxe6"));
+  pos.set_fen("4k3/8/8/8/8/8/8/1N2KN2 w - - 0 1");  // both knights reach d2
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "b1d2")), std::string("Nbd2"));
+  pos.set_fen("4k3/8/8/8/8/8/R7/R3K3 w - - 0 1");  // the a2 rook blocks the a1 rook: plain Ra3
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "a2a3")), std::string("Ra3"));
+  pos.set_fen("4k3/8/8/R7/8/8/8/R3K3 w - - 0 1");  // same file: rank disambiguates
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "a1a3")), std::string("R1a3"));
+  pos.set_fen("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1");
+  CHECK_EQ(datagen::move_to_san(pos, parse_uci_move(pos, "b7b8n")), std::string("b8=N"));
+}
+
+TEST(pgn_mode_strips_comments_and_filters_elo) {
+  const char* pgn =
+      "[Event \"test\"]\n[WhiteElo \"2500\"]\n[BlackElo \"2450\"]\n[Result \"1-0\"]\n\n"
+      "1. e4 { [%eval 0.3] } e5 2. Nf3 (2. Bc4 Nf6) Nc6 3. Bb5 a6 $1 4. Ba4 Nf6 5. O-O Be7 1-0\n\n"
+      "[Event \"low\"]\n[WhiteElo \"1500\"]\n[BlackElo \"2450\"]\n[Result \"0-1\"]\n\n"
+      "1. d4 d5 0-1\n";
+  std::filesystem::create_directories("build");
+  { std::ofstream f("build/test.pgn"); f << pgn; }
+  CHECK_EQ(datagen::pgn_to_positions({"--in", "build/test.pgn", "--out", "build/test.txt",
+                                      "--min-elo", "2200", "--skip-plies", "2", "--every", "2"}), 0);
+  std::ifstream in("build/test.txt");
+  std::vector<std::string> lines;
+  for (std::string l; std::getline(in, l);) lines.push_back(l);
+  // Plies 2,4,6,8,10 of the first game only (the second is filtered by Elo).
+  CHECK_EQ(int(lines.size()), 5);
+  if (!lines.empty()) CHECK_EQ(lines[0], std::string("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2;2;1"));
+  if (lines.size() == 5) CHECK(lines[4].find("r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq") == 0);
 }
 
 int main(int argc, char** argv) {

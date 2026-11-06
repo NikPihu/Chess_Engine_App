@@ -21,9 +21,18 @@
 #include <string>
 #include <vector>
 
+#include "board/position.h"
+
 namespace v3::datagen {
 
 /** Entry point for "datagen" / "label"; args are the words after the command. Returns exit code. */
 int run(const std::string& mode, const std::vector<std::string>& args);
+
+/** "pgn" mode (src/datagen/pgn.cpp): PGN games -> "fen;result;1" lines for `label`. */
+int pgn_to_positions(const std::vector<std::string>& args);
+/** Standard algebraic notation of a legal move, without check marks ("Nbd7", "exd6", "e8=Q"). */
+std::string move_to_san(const Position& pos, Move m);
+/** The legal move written as {@code san} ("+", "#", "!", "?" ignored), or MOVE_NONE. */
+Move parse_san(const Position& pos, const std::string& san);
 
 }  // namespace v3::datagen

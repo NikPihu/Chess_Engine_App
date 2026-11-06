@@ -19,6 +19,8 @@ int main(int argc, char** argv) {
   v3::init_all();
   if (argc > 1 && (std::string(argv[1]) == "datagen" || std::string(argv[1]) == "label"))
     return v3::datagen::run(argv[1], std::vector<std::string>(argv + 2, argv + argc));
+  if (argc > 1 && std::string(argv[1]) == "pgn")
+    return v3::datagen::pgn_to_positions(std::vector<std::string>(argv + 2, argv + argc));
   v3::Uci uci;
   if (argc > 1) {
     for (int i = 1; i < argc; i++) {

@@ -57,6 +57,7 @@ add_library(v3core STATIC
   src/search/search.cpp
   src/uci/uci.cpp
   src/datagen/datagen.cpp
+  src/datagen/pgn.cpp
   ${EMBEDDED_NET_CPP}
 )
 target_include_directories(v3core PUBLIC src)

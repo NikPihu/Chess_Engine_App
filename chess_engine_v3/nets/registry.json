@@ -1,5 +1,5 @@
 {
-  "best": 1,
+  "best": 2,
   "generations": [
     {
       "gen": 1,
@@ -32,6 +32,39 @@
       "sprt": "1638 games 511-419-708 W-L-D, Elo 19.53 +/- 12.16 \u2705 H1 (test SPRT after gate tolerance change)",
       "sprt_accepted": true,
       "anchor": "1638 games 511-419-708 W-L-D, Elo 19.53 +/- 12.16 (same opponent as anchor)"
+    },
+    {
+      "gen": 2,
+      "parent": 1,
+      "date": "2026-11-07T23:35:41",
+      "shape": "(768x4 -> 768)x2 -> 8",
+      "data": [
+        "selfplay-gen1-for-gen2.bin",
+        "selfplay-gen7-for-gen8.bin",
+        "selfplay-gen6-for-gen7.bin",
+        "selfplay-gen5-for-gen6.bin",
+        "selfplay-gen4-for-gen5.bin",
+        "selfplay-gen3-for-gen4.bin",
+        "selfplay-gen2-for-gen3.bin",
+        "gen-2.bin",
+        "gen-1.bin",
+        "gen-0.bin",
+        "elite-2025-09.bin",
+        "elite-2025-10.bin",
+        "elite-2025-11.bin",
+        "lichess.bin"
+      ],
+      "positions": 32000242,
+      "promoted": true,
+      "blunder_scores": [
+        51,
+        140,
+        54
+      ],
+      "blunders": "51/140 (54)",
+      "sprt": "397-311-828 W-L-D, Elo 19.47 +/- 11.82 \u2705 H1",
+      "sprt_accepted": true,
+      "anchor": "63-50-87 W-L-D, Elo 22.62 +/- 32.04"
     }
   ],
   "events": [
@@ -39,6 +72,11 @@
       "time": "2026-11-07T14:18:54",
       "event": "promote (by hand: blunder gate tolerance 0->5, test SPRT H1)",
       "gen": 1
+    },
+    {
+      "time": "2026-11-08T00:51:10",
+      "event": "promote",
+      "gen": 2
     }
   ]
 }

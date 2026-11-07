@@ -365,7 +365,8 @@ def main():
     ap.add_argument("--threads", type=int, default=12)
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--anchor-games", type=int, default=200)
-    ap.add_argument("--blunder-tolerance", type=int, default=0)
+    ap.add_argument("--blunder-tolerance", type=int, default=5,
+                    help="allowed drop in solved blunder positions (140 is a small, noisy suite)")
     ap.add_argument("--sandbox", help="dry run: keep nets, registry and new data in this folder")
     args = ap.parse_args()
 

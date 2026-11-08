@@ -20,7 +20,9 @@ One generation:
                  self-play inflation the v2 review found
   5. PROMOTE  only if gates a and b pass: chess_engine_v3/nets/best.nnue is replaced atomically
 
-The Lichess bot is NOT touched: it keeps playing v2 until you switch it yourself.
+Automatic promotion: the v3 Lichess bot (tools\bot_new) reads chess_engine_v3/nets/best.nnue at the
+start of every game, so a promoted generation goes live on the bot from its next game, as in v2.
+The v2 bot (tools\bot) is never touched.
 
 Crash-safe (laptop sleep, power cut): just run tools\train_new again. The interrupted generation
 is resumed - same number, same parent - and every finished stage is skipped: self-play and
@@ -38,6 +40,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 V3 = os.path.join(ROOT, "chess_engine_v3")
@@ -102,7 +105,16 @@ def next_number(reg):
 def make_live(reg, n, event):
     """Atomically replace chess_engine_v3/nets/best.nnue with gen-n."""
     shutil.copy(os.path.join(NETS, f"gen-{n}.nnue"), BEST + ".tmp")
-    os.replace(BEST + ".tmp", BEST)
+    # The v3 Lichess bot reads best.nnue at the start of every game. On Windows the swap fails
+    # if an engine has the file open at that instant (it only reads it for a moment), so retry.
+    for attempt in range(60):
+        try:
+            os.replace(BEST + ".tmp", BEST)
+            break
+        except PermissionError:
+            if attempt == 59:
+                raise
+            time.sleep(1)
     with open(os.path.join(NETS, "best.txt"), "w") as f:
         f.write(str(n))
     reg["best"] = n
@@ -118,7 +130,7 @@ def write_generations_md(reg):
         "A generation becomes the live v3 network (`chess_engine_v3/nets/best.nnue`) only after the",
         "blunder gate and SPRT H1 vs the current one. **Anchor** = a fixed 200-game match against the",
         "same opponent every time (v3 search + v2's gen-8 net), so its Elo column is directly comparable",
-        "across generations. The Lichess bot is switched to v3 only by hand.",
+        "across generations. The v3 Lichess bot (tools\bot_new) plays best.nnue, so promotions go live automatically.",
         "",
         f"**Live v3 network: {'gen-' + str(reg['best']) if reg['best'] else 'none yet'}**",
         "",
@@ -310,7 +322,7 @@ def one_generation(args):
     if accepted:
         entry["promoted"] = True
         make_live(reg, gen, "promote")
-        print(f"===== gen-{gen} PROMOTED: chess_engine_v3/nets/best.nnue (the Lichess bot is unchanged) =====")
+        print(f"===== gen-{gen} PROMOTED: chess_engine_v3/nets/best.nnue (the v3 bot plays it from its next game) =====")
     else:
         print(f"===== gen-{gen} not better; {'gen-' + str(parent) if parent else 'no v3 network'} stays live =====")
     os.remove(CURRENT)

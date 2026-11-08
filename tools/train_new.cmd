@@ -6,7 +6,8 @@ rem   tools\train_new --status           every generation and which one is live
 rem   tools\train_new --rollback 2       make v3 gen-2 live again
 rem   tools\train_new --stop             stop a running generation from another window
 rem   tools\train_new --generations 3    several in a row
-rem The Lichess bot is not touched: it keeps playing v2 until you switch it.
+rem Promotion is automatic: the v3 bot (toolsot_new) plays chess_engine_v3
+etsest.nnue from its next game.
 rem Build first: tools\engine3 build
 setlocal
 pushd "%~dp0.."

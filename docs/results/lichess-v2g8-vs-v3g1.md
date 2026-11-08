@@ -16,8 +16,8 @@ Most v3 gen-1 games were played **while gen-2 was training and running its SPRT*
 |---|---|---|---|---|---|---|
 | v2 gen-8 blitz | 71 | 30-24-17 | 54% | 2290 | ~2319 | 2293 → 2304 |
 | v2 gen-8 bullet | 16 | 9-3-4 | 69% | 2303 | ~2440 | 2355 → 2385 |
-| **v3 gen-1 blitz** | 27 | 22-2-3 | **87%** | ~2310 | **~2626** | 2304 → 2396 |
-| **v3 gen-1 bullet** | 6 | 5-0-1 | **92%** | ~2280 | ~2700 | 2385 → 2411 |
+| **v3 gen-1 blitz** | 27 | 22-2-3 | **87%** | 2295 | **~2626** | 2304 → 2396 |
+| **v3 gen-1 bullet** | 6 | 5-0-1 | **92%** | 2286 | ~2700 | 2385 → 2411 |
 | v3 all (gen-1 + later), blitz | 40 | 30-4-6 | 82% | 2344 | ~2614 | 2304 → 2437 |
 | v3 all, bullet | 9 | 7-0-2 | 89% | 2297 | ~2658 | 2385 → 2419 |
 
@@ -57,7 +57,7 @@ Every move of every game was re-checked by engine_v3 with the gen-2 net (300k no
 
 - **gen-8 throws away a win: [2AdimV0H](https://lichess.org/2AdimV0H)** (black vs Chess3Bot 2261, Pseudo-Benko).
   - After 18.Bf3+ the bot was **+3.7**.
-  - 21...Re8 dropped it to +0.5. Then the bot drifted into a worse rook endgame, and 33...Ra4 (−5.6 → −11.7) lost outright.
+  - 21...Re8 dropped it to +0.5. Then the bot drifted into a worse endgame, and 33...Ra4 (−5.6 → −11.7) lost outright.
   - This is the typical v2 pattern: an advantage reached in the middlegame, then a lost thread that can't be repaired.
 - **gen-8 drifts, then collapses: [Ib3QwNvh](https://lichess.org/Ib3QwNvh)** (black vs OpeningsBot 2422).
   - The bot was **+3.6 at move 15** from a kingside pawn storm (…h5–h4).
@@ -65,19 +65,19 @@ Every move of every game was re-checked by engine_v3 with the gen-2 net (300k no
   - gen-8's search was too shallow to see that the h-file it had opened would later be used against its own king.
 - **v3 squeezes: [90bavFLI](https://lichess.org/90bavFLI)** (white vs RavenEngine 2210, Slav Exchange).
   - A quiet, symmetrical opening, level until move 25.
-  - v3 then built up on the c-file (Rac1, Na4–c5, doubled rooks) and gave up the exchange with 41.Rxc6 for a strong passed pawn and active pieces.
+  - v3 built up on the c-file (Rac1, Na4–c5, Rc2 and Rfc1 doubling the rooks), then gave up the exchange with 22.Rxc6 bxc6 23.Nxe5 for pawns and active pieces.
   - The eval rose steadily: +1 at move 25, +3.5 at 30, +6 at 40, +11.6 at 50, then mate.
   - No single swing was bigger than about 1.5 pawns. It's a long, positional plan, the kind a deeper search plus a better evaluation makes possible.
 - **v3 converts a small endgame edge: [ttKhHDGd](https://lichess.org/ttKhHDGd)** (white vs AconcaguaBot 2288).
-  - The queens came off at move 11 (…Qxd1+). v3 held about +3 through a long minor-piece endgame from move 20 to move 40 without letting it slip.
+  - The queens came off at move 6 (6...Qxd1+). v3 held about +3 through a long minor-piece endgame from move 20 to move 40 without letting it slip.
   - It then broke through on the kingside, and the opponent resigned.
   - gen-8 used to draw this kind of endgame.
 - **v3 vs a stronger bot: [ZbLVbcHO](https://lichess.org/ZbLVbcHO)** (white vs KirinChessBot 2466, Semi-Tarrasch).
-  - v3 built a classical centre and slowly increased the pressure (+1.5 → +4.6 → +7.7 → +11).
+  - v3 built a big pawn centre (e4 and d4) and slowly increased the pressure (+1.5 → +4.6 → +7.7 → +11).
   - It finished with mate, against a bot rated about 130 points above it.
 - **v3's one squandered win: [Cdn04uWa](https://lichess.org/Cdn04uWa)** (black vs Ndr1sn 2235, Najdorf-style Sicilian).
-  - The bot reached **+5.4** after 29.Rfe1.
-  - 28...f6 had already weakened the e6 square, and from there the rook endgame slipped away to a loss.
+  - The bot reached **+5.4** after the opponent's mistake 29.Rfe1.
+  - It then gave the advantage back over the next 15 moves, and 45...Ra4 lost the rook endgame.
   - It shows v3 still has weak spots in sharp, open-king middlegames.
 
 ## Summary

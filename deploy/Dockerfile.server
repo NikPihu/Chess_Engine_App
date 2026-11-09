@@ -17,7 +17,7 @@ RUN cmake -S chess_engine_v3 -B build -DCMAKE_BUILD_TYPE=Release -DV3_MARCH=hasw
  && /src/chess_engine_v3/bin/engine_v3 bench 2>/dev/null | tail -1
 
 # ---- 2. The server jar (and chess_engine_v1, whose rules it uses) ------------------------------
-FROM maven:3.9-eclipse-temurin-21 AS server
+FROM maven:3.9-eclipse-temurin-26 AS server
 WORKDIR /src
 COPY pom.xml .
 COPY chess_engine_v1 chess_engine_v1

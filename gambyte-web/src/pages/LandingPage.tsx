@@ -45,7 +45,7 @@ export default function LandingPage() {
 
           <div className="mt-8 grid items-end gap-8 md:grid-cols-[minmax(0,22rem)_1fr_auto]">
             <div className="animate-rise space-y-5 [animation-delay:250ms]">
-              <p className="text-sm leading-relaxed text-noir-300 sm:text-base">
+              <p className="text-sm leading-relaxed text-noir-200 [text-shadow:0_1px_14px_rgba(0,0,0,0.95)] sm:text-base">
                 Live rated games, a coach that explains every mistake, and puzzles found by our own engine. Free, forever.
               </p>
               <div className="flex flex-col items-start gap-2.5">

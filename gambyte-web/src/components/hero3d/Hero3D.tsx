@@ -54,6 +54,9 @@ export function Hero3D() {
         ref={canvasRef}
         className={`absolute inset-0 h-full w-full transition-opacity duration-[1400ms] max-md:translate-y-[12%] ${ready ? 'opacity-100 max-md:opacity-55' : 'opacity-0'}`}
       />
+      {/* Scrim behind the headline column so the copy stays readable over the pieces */}
+      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-noir-950/85 via-noir-950/35 to-transparent md:w-[60%]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-noir-950/90 to-transparent md:hidden" />
       {/* Vignette and fade into the page */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_75%_at_55%_45%,transparent_45%,#050505_96%)]" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-noir-950 to-transparent" />

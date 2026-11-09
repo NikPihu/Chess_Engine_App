@@ -1,11 +1,11 @@
 /**
  * The landing page's 3D still life, rendered live with three.js: a lacquered black king standing
- * and a porcelain queen toppling against it on a glossy board, lit like a studio product shot -
+ * and a porcelain-white king toppling against it on a glossy board, lit like a studio product shot -
  * a soft white key light, and an ember-red rim light behind the pieces (the reference's mood).
  *
  * Why build the pieces in code: Staunton chess pieces are "surfaces of revolution" (turned on a
  * lathe), so each body is a 2-D profile spun around its axis with LatheGeometry. Only the king's
- * cross and the queen's coronet prongs are extra parts. No model files to download or license.
+ * crosses are extra parts. No model files to download or license.
  *
  * Framework-free on purpose: `createHeroScene(canvas)` returns a disposer, and the React wrapper
  * (Hero3D.tsx) only mounts and unmounts it.
@@ -36,14 +36,6 @@ const KING: [number, number][] = [
   [0.22, 3.12], [0.12, 3.2], [0.0, 3.22],
 ];
 
-/** Queen: slimmer stem, collar, then a wide open cup (the coronet) with a small inner dome. */
-const QUEEN: [number, number][] = [
-  ...BASE,
-  [0.42, 0.9], [0.36, 1.3], [0.32, 1.7], [0.31, 1.9], [0.43, 1.96], [0.5, 2.02], [0.42, 2.08],
-  [0.35, 2.14], [0.38, 2.24], [0.5, 2.5], [0.62, 2.7], [0.66, 2.76], [0.6, 2.8], [0.42, 2.78],
-  [0.3, 2.8], [0.2, 2.86], [0.1, 2.94], [0.0, 2.96],
-];
-
 function buildKing(material: THREE.Material): THREE.Group {
   const g = new THREE.Group();
   const body = new THREE.Mesh(lathe(KING), material);
@@ -70,41 +62,6 @@ function buildKing(material: THREE.Material): THREE.Group {
   const horizontal = bar(0.5, 0.15, 0.15);
   horizontal.position.y = 3.56;
   g.add(vertical, horizontal);
-  g.traverse((o) => {
-    if (o instanceof THREE.Mesh) {
-      o.castShadow = true;
-      o.receiveShadow = true;
-    }
-  });
-  return g;
-}
-
-function buildQueen(material: THREE.Material): THREE.Group {
-  const g = new THREE.Group();
-  g.add(new THREE.Mesh(lathe(QUEEN), material));
-  // Coronet: nine prongs leaning outwards around the rim, each with a bead on its tip.
-  const prongs = 8;
-  const prongGeo = new THREE.ConeGeometry(0.085, 0.3, 32);
-  const beadGeo = new THREE.SphereGeometry(0.07, 32, 16);
-  for (let i = 0; i < prongs; i++) {
-    const a = (i / prongs) * Math.PI * 2;
-    const holder = new THREE.Group();
-    holder.position.set(Math.cos(a) * 0.56, 2.82, Math.sin(a) * 0.56);
-    holder.rotation.y = -a;
-    const lean = new THREE.Group();
-    lean.rotation.z = -0.22; // tip slightly outwards
-    const prong = new THREE.Mesh(prongGeo, material);
-    prong.position.y = 0.13;
-    const bead = new THREE.Mesh(beadGeo, material);
-    bead.position.y = 0.29;
-    lean.add(prong, bead);
-    holder.add(lean);
-    g.add(holder);
-  }
-  // Finial: a ball on top of the inner dome.
-  const finial = new THREE.Mesh(new THREE.SphereGeometry(0.13, 48, 24), material);
-  finial.position.y = 3.06;
-  g.add(finial);
   g.traverse((o) => {
     if (o instanceof THREE.Mesh) {
       o.castShadow = true;
@@ -157,6 +114,8 @@ export function createHeroScene(canvas: HTMLCanvasElement, opts: HeroSceneOption
 
   const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 60);
   const lookAt = new THREE.Vector3(0.35, 1.95, 0);
+  const DISTANCE = 12.5;
+  let framingShiftX = 0;
 
   // ---------------------------------------------------------------- materials
   const lacquer = new THREE.MeshPhysicalMaterial({
@@ -184,17 +143,16 @@ export function createHeroScene(canvas: HTMLCanvasElement, opts: HeroSceneOption
   king.rotation.y = 0.4;
   scene.add(king);
 
-  // The queen falls to the right, crossing in front of the king, her base resting on the board.
-  const queen = buildQueen(porcelain);
-  const queenPivot = new THREE.Group();
+  // The white king falls to the right, crossing in front of the black king, resting on its base.
+  const whiteKing = buildKing(porcelain);
+  const fallenPivot = new THREE.Group();
   const tilt = 0.82;
   // A fallen piece rests on the rim of its base: lift the pivot by sin(tilt) x base radius so
   // the lowest edge touches the board instead of sinking through it.
-  queenPivot.position.set(0.05, Math.sin(tilt) * 1.02 + 0.02, 0.55);
-  queenPivot.rotation.set(0.12, -0.35, -tilt);
-  queen.position.set(0, 0, 0);
-  queenPivot.add(queen);
-  scene.add(queenPivot);
+  fallenPivot.position.set(0.05, Math.sin(tilt) * 1.02 + 0.02, 0.55);
+  fallenPivot.rotation.set(0.12, -0.6, -tilt);
+  fallenPivot.add(whiteKing);
+  scene.add(fallenPivot);
 
   // ---------------------------------------------------------------- board
   const board = new THREE.Mesh(
@@ -226,7 +184,7 @@ export function createHeroScene(canvas: HTMLCanvasElement, opts: HeroSceneOption
   rim.target.position.set(0.2, 1.6, 0);
   scene.add(rim, rim.target);
 
-  // A second, warmer kick from the right-back to catch the queen's crown.
+  // A second, warmer kick from the right-back to catch the fallen king's crown.
   const kick = new THREE.PointLight(0xff4a1a, 40, 12, 1.8);
   kick.position.set(2.8, 3.2, -2.2);
   scene.add(kick);
@@ -248,9 +206,15 @@ export function createHeroScene(canvas: HTMLCanvasElement, opts: HeroSceneOption
     const h = canvas.clientHeight;
     if (w === 0 || h === 0) return;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    // Keep the pieces framed on tall (phone) screens too.
-    camera.fov = w / h < 0.8 ? 38 : 26;
+    const aspect = w / h;
+    camera.aspect = aspect;
+    // Frame the pieces by the window's shape: the view must hold ~5.6 units of height and ~8 of
+    // width, whichever is tighter, so they never overflow short wide windows or narrow phones.
+    const needHeight = Math.max(5.6, 8 / aspect);
+    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(needHeight / 2 / DISTANCE));
+    // On wide screens push the pieces right, leaving the left column clear for the headline copy.
+    const visibleWidth = needHeight * aspect;
+    framingShiftX = aspect > 1.2 ? -Math.min(visibleWidth * 0.17, 2.6) : 0;
     camera.updateProjectionMatrix();
   };
   const ro = new ResizeObserver(resize);
@@ -281,8 +245,8 @@ export function createHeroScene(canvas: HTMLCanvasElement, opts: HeroSceneOption
     const drift = opts.reducedMotion ? 0 : Math.sin(t * 0.25) * 0.25;
     camX += ((opts.reducedMotion ? 0 : pointerX * 0.6) + drift - camX) * 0.04;
     camY += ((opts.reducedMotion ? 0 : -pointerY * 0.25) - camY) * 0.04;
-    camera.position.set(1.6 + camX, 2.7 + camY, 12.5);
-    camera.lookAt(lookAt);
+    camera.position.set(1.6 + framingShiftX + camX, 2.7 + camY, DISTANCE);
+    camera.lookAt(lookAt.x + framingShiftX, lookAt.y, lookAt.z);
     rim.intensity = 520 + (opts.reducedMotion ? 0 : Math.sin(t * 0.8) * 60); // the glow breathes
     renderer.render(scene, camera);
   };

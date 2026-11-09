@@ -18,6 +18,8 @@ export const DEFAULT_SETTINGS: Required<Settings> = {
 export function useSettings(): Required<Settings> {
   const { data: me } = useMe();
   const settings = { ...DEFAULT_SETTINGS, ...(me?.settings ?? {}) };
-  useEffect(() => setSoundEnabled(settings.sound), [settings.sound]);
+  useEffect(() => {
+    setSoundEnabled(settings.sound);
+  }, [settings.sound]);
   return settings;
 }

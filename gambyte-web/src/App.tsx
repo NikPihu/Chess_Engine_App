@@ -3,7 +3,8 @@
  * only what the current page needs, which keeps the landing page fast on phones.
  */
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Layout } from '@/components/Layout';
 import { Spinner } from '@/components/Spinner';
 import { useMe } from '@/features/auth/useAuth';
@@ -50,8 +51,10 @@ function RequireStaff({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  const { pathname } = useLocation();
   return (
     <Layout>
+      <ErrorBoundary resetKey={pathname}>
       <Suspense fallback={<Spinner />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -81,6 +84,7 @@ export function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </Layout>
   );
 }

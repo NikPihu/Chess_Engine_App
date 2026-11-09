@@ -6,7 +6,11 @@ import type { ChatMessage } from './useLiveGame';
 export function GameChat({ messages, onSend }: { messages: ChatMessage[]; onSend: (text: string) => void }) {
   const [text, setText] = useState('');
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [messages]);
+  // Braces matter: an effect may only return a clean-up function, and newer browsers make
+  // scrollIntoView() return a Promise. Returning it crashed the whole page (black screen).
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'nearest' });
+  }, [messages]);
 
   return (
     <div className="card flex flex-col p-3">

@@ -27,3 +27,9 @@ tools/results/
 config.json
 tools/data/
 __pycache__/
+
+# Gambyte web app
+gambyte-web/node_modules/
+gambyte-web/dist/
+gambyte-web/test-results/
+gambyte-web/playwright-report/

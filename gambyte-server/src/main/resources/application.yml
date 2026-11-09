@@ -36,6 +36,8 @@ spring:
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
+      repositories:
+        enabled: false     # Redis is used directly (sessions, pools, snapshots), not via repositories
   session:
     timeout: 30d             # stay logged in for a month (sessions live in Redis)
     redis:

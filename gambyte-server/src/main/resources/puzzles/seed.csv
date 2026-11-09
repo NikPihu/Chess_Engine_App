@@ -1,0 +1,350 @@
+id,fen,moves,rating,themes
+m00001,8/3r1p2/5kpp/5b2/1p2B3/1P5P/P4RP1/6K1 w - - 0 33,g2g4 f6e5 e4f5 g6f5 f2f5,1895,advantage middlegame long quietMove
+m00002,1k1rr3/ppp2pp1/5n1p/3PnN1b/qbPB4/1N3PPB/PPQ2K1P/R2R4 w - - 4 21,f5g7 h5f3 d4e5 f3d1 e5c7,1550,advantage opening long
+m00003,r1bq3k/p5bp/1pnpr3/2pB2p1/2PnN1N1/3P3P/PP1Q4/4RRK1 w - - 4 25,e4g5 d8e7 g5f7 h8g8 g4h6,1550,advantage middlegame long
+m00004,k1b4Q/1p6/3Pq3/p6p/P4p2/K4P1P/BP1R2P1/r7 w - - 3 37,b2b3 a1a2 a3a2 e6d7 h8h5,1892,crushing middlegame long quietMove
+m00005,2br4/1p2r3/p1p1pk2/P3Rp2/2NP1n1p/2PB1P2/1P4P1/4R1K1 w - - 2 37,d3f5 e7g7 f5g4 f4d3 e5e6,1562,advantage middlegame long
+m00006,4q1k1/5pp1/1p5p/p2p4/3P1N2/P3r1P1/1PRKR2P/8 w - - 0 37,e2e3 e8a4 f4e2 a4d7 e3e5,1589,crushing middlegame long
+m00007,6k1/5pp1/p1Qbn2p/4P3/p2r4/8/1P3P1P/6K1 w - - 0 33,e5d6 g7g6 h2h3 a6a5 g1g2,1577,advantage middlegame long
+m00008,r2q1rk1/1b1n1ppp/pp1bpn2/8/2PQP3/1PN2N2/P3BPPP/R2R2K1 w - - 0 13,d4d6 d7c5 d6f4 d8e7 d1d4,1553,advantage opening long
+m00009,8/8/4pkp1/2p4p/1pP2PP1/1P1K2P1/8/8 w - - 0 41,g4h5 g6h5 d3e4 f6f7 e4e5,1646,crushing endgame long
+m00010,r2r2k1/1pp1qb2/1n1b1pBB/p3p2Q/P1pP3P/2P3P1/5P2/4RRK1 w - - 8 21,d4e5 d6e5 f2f4 d8d3 g6f7,1559,advantage middlegame long
+m00011,8/7p/3R4/2p5/2n1Pk2/3p3P/1Pb2KB1/8 w - - 6 33,d6f6 f4g5 f6f5 g5h6 g2f3,1604,advantage endgame long
+m00012,2r1r1k1/1p3p1p/p1nRb1pb/7n/4Pp2/1PN3P1/P1P1N1BP/1KB4R w - - 2 17,g3f4 h6f8 d6d1 b7b5 h1e1,1556,advantage middlegame long
+m00013,5k2/8/8/6p1/2R4p/7P/4r1PK/8 w - - 0 45,c4c5 f8g7 c5g5 g7h6 g5g4,1922,advantage endgame long quietMove
+m00014,6rk/p4Qpn/6q1/1p1p4/3P4/PP2P2R/5P2/5K2 w - - 0 33,f7g6 g8a8 g6h7,1177,mate mateIn2 middlegame short
+m00015,b7/5kp1/1pp4p/5p2/3P1p2/5P2/5P2/2R3K1 w - - 0 45,c1a1 b6b5 a1a8 f7e6 g1f1,1925,crushing middlegame long quietMove
+m00016,8/8/2B4p/p3kn2/P5KP/8/8/8 w - - 20 57,g4h5 e5f6 c6d7 f5e7 h5h6,1928,advantage endgame long quietMove
+m00017,6k1/R4rpp/8/6q1/3pP3/1B1P2PP/1PP4K/1r6 w - - 0 33,a7a8 g5d8 a8d8,1198,mate mateIn2 middlegame short
+m00018,1n1qkbnr/Q4ppp/2b1p3/8/1pPP4/5N2/5PPP/1NB1KB1R w Kk - 0 13,d4d5 e6d5 c4d5 c6d5 f1b5,1850,advantage middlegame long quietMove
+m00019,1r1br1k1/B2n1ppp/4b3/1p1Np1P1/1P5P/2n5/P1P2PB1/2KR3R w - - 0 21,d5c3 b8c8 c3b5 d8e7 a2a3,1565,crushing middlegame long
+m00020,2r2rk1/pp1b1pp1/1q5p/3pP3/B2n1B2/5P2/P2Q2PP/R4R1K w - - 0 21,a4d7 c8c2 d2d3 b6c7 f4e3,1550,crushing middlegame long
+m00021,8/8/8/5k2/7p/7P/8/1NK5 w - - 3 65,b1c3 f5f4 c3e2 f4f3 c1d2,1949,advantage endgame long quietMove
+m00022,8/5Pp1/3npb1p/p6P/K4k2/1B6/8/8 w - - 1 69,f7f8q d6e4 b3e6 f4g5 f8a3,1934,crushing endgame long quietMove
+m00023,r3r2k/1p1nRp1p/3p1n2/q2P1pQ1/p1P5/2R4P/PP3PP1/1B4K1 w - - 1 29,e7f7 e8e1 g1h2 a8g8 g5f5,1550,advantage middlegame long
+m00024,2rk4/5b1R/p3p1p1/1pnp2P1/8/P3R3/2P5/1K6 w - - 0 37,h7f7 c8c7 e3f3 c7f7 f3f7,1589,advantage middlegame long
+m00025,4r1k1/pp1R3N/6p1/5p1p/3B1n2/2P2P2/5KnP/7r w - - 4 33,d7g7 g8h8 g7b7 h8g8 b7g7,1601,crushing middlegame long
+m00026,4Q3/1p3pkp/6p1/P7/8/1P3P2/5qPP/7K w - - 1 29,e8e5 g7g8 h2h3 f2d2 h1h2,1592,advantage middlegame long
+m00027,3r2k1/5p1p/6p1/4pP2/PqN1PbP1/1P3QnP/6K1/3R4 w - - 0 37,d1d8 g8g7 a4a5 g3e4 f3e4,1556,crushing middlegame long
+m00028,r7/P1b1k1p1/R4p2/1p2pP2/1Pp1N1P1/7P/2K5/3r4 w - - 0 37,c2d1 e7d7 e4c3 d7c8 c3b5,1601,advantage middlegame long
+m00029,3q1k1r/6n1/4p2p/p1rpPppP/Pp6/1P1B1P2/2PQ1P2/1K1R3R w - f6 0 25,e5f6 d8f6 d2e3 d5d4 e3e4,1871,advantage middlegame long quietMove
+m00030,8/8/4k3/6p1/5pP1/1p2pP2/4B2P/5K2 w - - 0 49,e2c4 e6e5 c4b3 e5d4 f1e2,1640,crushing endgame long
+m00031,4R3/1r5k/8/4pp2/8/7P/6P1/5K2 w - - 0 45,e8e5 h7g6 f1f2 g6g5 f2f3,1619,advantage endgame long
+m00032,r1bq1rk1/p3pp1p/6p1/2np4/3N4/1P5P/PNP2PP1/2RQ1RK1 w - - 2 17,d4c6 d8d6 d1d5 c8b7 d5d6,1877,advantage middlegame long quietMove
+m00033,r4r1k/pb1BQ3/1p1B3p/4P1p1/2P1q3/6R1/P4P1P/5RK1 w - - 3 33,f2f3 e4d3 g3h3 d3g6 e7e6,1850,crushing middlegame long quietMove
+m00034,8/5k2/8/7p/4K1p1/6P1/5P2/8 w - - 0 65,e4f5 f7g7 f5g5 h5h4 g5h4,1943,crushing endgame long quietMove
+m00035,8/1p6/3R2p1/p4pk1/P2p1pn1/6P1/1q4P1/4Q1K1 w - - 0 41,e1e7 g5h6 e7h4 h6g7 d6d7,1430,mate middlegame long
+m00036,2rqr3/1p3p1k/p4p1p/8/2N3Q1/3bP2P/PP3PP1/2R2RK1 w - - 2 21,f1d1 b7b5 c4d2 c8c1 d1c1,1850,advantage middlegame long quietMove
+m00037,1qrr2k1/4bppp/ppbppn2/8/P1PNP3/1PN3Q1/1B3PPP/2R1R1K1 w - - 0 17,c3d5 c6d5 e4d5 d8e8 d5e6,1850,advantage opening long quietMove
+m00038,2r2r2/1p3kpQ/p4qR1/3p1p2/5K2/1P1p4/P7/7R w - - 3 37,g6f6 f7f6 h1g1 f8f7 g1g7,1568,crushing middlegame long
+m00039,1b6/p7/6k1/P2K3N/1p6/1P6/8/8 w - - 3 57,d5c6 b8h2 c6b7 g6h5 b7a7,1937,advantage endgame long quietMove
+m00040,5knr/ppBrqpbp/4p1p1/1N6/P2p4/5Q2/1PP3PP/R4RK1 w - - 4 17,c7d6 d7d6 b5d6 g8f6 d6c8,1850,advantage middlegame long quietMove
+m00041,1n4k1/1pb5/6p1/3P1b1p/qP6/5Q1P/2P2PP1/B2KR3 w - - 1 25,f3c3 f5c2 d1e2 a4b5 e2d2,1859,crushing middlegame long quietMove
+m00042,5n2/3r4/6P1/1p1P3P/4PP1K/1k6/1p6/3R4 w - - 0 45,f4f5 d7c7 d1b1 b3a2 b1b2,1913,advantage endgame long quietMove
+m00043,r3rbk1/p1q2p2/1p4pp/2p1Pp2/2P2P2/2NQP1P1/P5bP/1R1R2K1 w - - 0 21,g1g2 a8d8 c3d5 c7c8 e3e4,1562,advantage middlegame long
+m00044,1rbqr1k1/p4pbp/3p1np1/1BpP4/4PP2/5N2/PPQB2PP/3R1RK1 w - - 1 17,b5e8 d8e8 f1e1 c8g4 d2c3,1550,advantage middlegame long
+m00045,2r3k1/p2q2b1/P1pP2b1/1pP4Q/1N4P1/1P2R2P/8/6K1 w - - 0 41,h5g6 d7f7 g6f7 g8f7 e3e7,1574,crushing middlegame long
+m00046,1r4k1/q5b1/3p3p/1prP2p1/4n3/PQ2P1P1/1P4BP/3R1RK1 w - - 0 25,g2e4 a7a4 b3d3 g7b2 e4f5,1574,advantage middlegame long
+m00047,r2qr1k1/5pp1/p2b3p/1P1p4/4b3/PBPp1P2/1P1B2PP/R1Q1R1K1 w - - 1 21,f3e4 d8h4 h2h3 d5e4 e1f1,1571,advantage middlegame long
+m00048,6rk/1p5p/p4q2/P3p3/8/2P4P/1P4P1/5R1K w - - 0 33,f1f6 g8c8 f6b6 c8c5 b6b7,1613,advantage middlegame long
+m00049,r3k3/p2nbp2/1qp1p1p1/1p1pP2r/3P1PQP/3B2n1/PPP2B2/1K1R3R w q - 0 21,g4g3 e8c8 f4f5 e6f5 e5e6,1553,advantage middlegame long
+m00050,8/8/6r1/2p1p1Pp/1P1k3P/4p1R1/4P1K1/8 w - - 0 49,b4c5 d4e4 g2h2 e4d4 h2h3,1634,advantage endgame long
+m00051,2kr1n1r/pp1qbpp1/2p5/3pBPNp/3Pb1nP/P1N1Q3/1PPRB3/2K3R1 w - - 0 21,e2g4 e7g5 h4g5 h5g4 c3e4,1550,advantage opening long
+m00052,8/5p1p/1p2kp2/pP6/P2R1KPP/4P3/8/2r5 w - - 1 33,d4e4 e6d5 f4f5 c1h1 h4h5,1622,crushing middlegame long
+m00053,r4bk1/7p/4N1p1/4p3/1P6/p4P2/6PP/R3K3 w - - 1 33,e6f8 g8f8 e1d2 f8e7 d2c3,1598,advantage middlegame long
+m00054,1br5/6k1/4p2p/1p1p2pP/p1qP4/P1P2NP1/1P3PK1/1Q6 w - - 0 29,b1g6 g7f8 g6h6 f8e7 h6g7,1586,advantage middlegame long
+m00055,2r3k1/6b1/p2p3p/1p3P2/4n3/3B4/PPP3PP/2K4R w - - 0 25,d3e4 c8c5 g2g3 g7e5 h1e1,1604,advantage middlegame long
+m00056,1r3r1k/2R2Rpp/8/4n3/2B5/1P6/5KPP/8 w - - 3 29,f7f8 b8f8 f2e3 h7h5 b3b4,1580,advantage middlegame long
+m00057,6k1/2q2pb1/3r1r2/p2PR2p/2p1P1Q1/P1P1B3/1p3P1P/1B4K1 w - - 0 37,e5e8 g8h7 e4e5 f6g6 e5d6,1550,crushing middlegame long
+m00058,5bk1/p2r4/P2p1nn1/2pPp2p/2N1P1p1/2BP1pP1/5P1P/Rr3BK1 w - - 0 29,a1b1 h5h4 c4e3 d7h7 b1b8,1598,advantage middlegame long
+m00059,r5k1/pbqnbrpp/4pn2/1pp1P3/8/1P1P1NP1/PBP3BP/R3QRK1 w - - 1 17,f3g5 b7g2 g1g2 c7c6 g2h3,1859,advantage opening long quietMove
+m00060,r3k2r/pp2bpp1/2pp4/q7/2PQPP1p/2N1n2B/PP6/R4RK1 w kq - 0 17,d4e3 e8g8 g1h2 a8e8 a1d1,1550,advantage middlegame long
+m00061,r2qkb1r/1p3ppp/p2p1nn1/3Pp3/4PP2/8/PP3P1P/RNBQRBK1 w kq - 1 13,f4f5 g6e7 c1g5 h7h6 g5f6,1865,advantage opening long quietMove
+m00062,Q2r1b1r/1ppkqppp/p7/3P3b/2B1n3/2N1B1R1/PP3P1P/R4K2 w - - 8 17,a8b7 e4g3 h2g3 d7e8 b7a6,1550,crushing middlegame long
+m00063,1K6/8/3N4/3B4/5k2/8/8/5N1q w - - 0 65,d5h1 f4e5 d6b5 e5f6 b8c7,1580,crushing endgame long
+m00064,8/5n2/KP6/6k1/7p/8/8/8 w - - 0 45,b6b7 g5g4 b7b8q f7g5 b8c8,1955,advantage endgame long quietMove
+m00065,8/p4pk1/4pq1p/3p1p2/N4Q2/1P1B2PP/P4PK1/2r5 w - - 0 37,f4c1 e6e5 a4c3 f6c6 c3e2,1559,crushing middlegame long
+m00066,rnbq2nQ/ppp2kb1/6p1/3p4/4p3/2NP4/PPP2PPP/R1B1KB1R w KQ - 1 9,h8h7 b8c6 d3e4 d8e7 f1d3,1859,advantage middlegame long quietMove
+m00067,2r2rk1/4pp1p/3p2p1/q2P1b1P/1p1Q4/1B3P2/1PP3P1/2KR3R w - - 1 21,h5h6 f7f6 c1d2 e7e5 d5e6,1850,advantage middlegame long quietMove
+m00068,2r5/5p2/4p2p/4k1p1/4P3/b1p3NP/4bPP1/2R1R1K1 w - - 0 29,g3e2 c3c2 f2f3 a3b4 g1f2,1616,advantage middlegame long
+m00069,8/1p2k3/p7/P2n4/3BN1bP/4p1P1/8/4K3 w - - 3 45,e4c5 b7b6 a5b6 d5b6 d4e3,1910,advantage endgame long quietMove
+m00070,8/5p2/2K4p/3P2pP/3kp1P1/8/8/8 w - - 0 61,d5d6 d4e3 d6d7 e3f3 d7d8q,1949,crushing endgame long quietMove
+m00071,8/1p3k1p/6pP/5p2/4pQ2/4P1P1/1q3PK1/8 w - - 0 41,f4c7 f7f8 c7d8 f8f7 d8d7,1622,advantage middlegame long
+m00072,r4r2/1p1b1k2/1q4n1/3pPp2/1P1p1P1N/P7/1B2Q3/6RK w - - 0 29,g1g6 d7e6 e2h5 f7e7 h5h7,1550,crushing middlegame long
+m00073,4brk1/1p1q2p1/p5P1/2n1ppb1/2Pp3N/5B2/P1P4P/R3QRK1 w - - 0 29,e1e5 g5h4 e5c5 e8g6 f3d5,1562,advantage middlegame long
+m00074,3rr1k1/5pb1/2P5/2n1p1pp/pQq1P3/P2b3P/5PPB/3RNRK1 w - - 0 29,e1d3 c4b4 d3b4 d8c8 d1d5,1577,advantage middlegame long
+m00075,4r2r/1k1nbpp1/p1p3p1/1pPp2Pn/1P1p1P1P/2NBP3/1P1B4/2K3RR w - - 0 21,e3d4 d7f8 h1h3 f7f5 g5f6,1571,advantage middlegame long
+m00076,5k2/4R3/5K2/5p2/4b2P/6P1/4p3/8 w - - 3 53,e7c7 f8g8 c7c1 g8h7 c1e1,1919,crushing endgame long quietMove
+m00077,6k1/1B6/1P3p1p/p7/1r6/8/4bP1P/2R4K w - - 3 33,b7d5 g8g7 b6b7 e2a6 d5e4,1589,advantage endgame long
+m00078,2b2n2/5k2/pp1Q3p/3Nb2q/P2np1p1/1P4RN/2P2P1K/4R3 w - - 1 41,d6e7 f7g8 h2h1 d4f5 e7e5,1550,advantage middlegame long
+m00079,2k1r3/1pp5/p6P/5q2/6P1/3n1P2/PP3BK1/7R w - - 0 33,g4f5 d3f2 g2f2 e8h8 f2g3,1571,crushing middlegame long
+m00080,5r2/3q4/2p3k1/p1PpP2p/Pp1P4/4QrP1/7P/4KR2 w - - 0 41,f1f3 f8f3 e3f3 d7f7 f3f7,1595,advantage middlegame long
+m00081,r2q1rk1/pp3ppp/4p3/1b1p3n/3P4/3BPN2/PP3PPP/R2QK2R w KQ - 2 13,d3b5 d8a5 f3d2 a5b5 d1h5,1553,crushing middlegame long
+m00082,8/8/p5p1/4K2p/6k1/5p2/8/2R5 w - - 5 65,e5e4 g4g3 e4e3 f3f2 e3e2,1910,advantage endgame long quietMove
+m00083,r2q1rk1/p4ppp/2p1p3/1b6/P1p5/2b3P1/1PQ1PPBP/2R2RK1 w - - 0 17,a4b5 c3e5 b5c6 a8c8 c2c4,1565,advantage middlegame long
+m00084,2rN2k1/p6p/1p1b2pB/3n4/8/8/5PPP/4R1K1 w - - 0 29,e1e8 d6f8 e8f8,1177,mate mateIn2 middlegame short
+m00085,3R4/1p5p/1kp2p2/4p1P1/7r/5P1B/8/6K1 w - - 0 45,g5f6 h4h3 g1g2 h3h4 f6f7,1583,crushing endgame long
+m00086,3rr2k/p5pp/8/qpp1b3/4Np2/PQPP1n1B/1P3P1P/2KR3R w - - 0 25,h3g4 f3h4 e4g5 e8f8 g5e6,1865,advantage middlegame long quietMove
+m00087,4k1r1/5p2/4p2p/pp1pP1pP/2n2PQ1/P3q3/1P4PK/1RR5 w - - 2 33,b2b3 c4b6 c1c7 g8g7 c7b7,1895,advantage middlegame long quietMove
+m00088,1r2r3/5pk1/p2p3p/P2P1Bp1/2pqPn2/6PP/3Q1P2/R4RK1 w - - 1 37,d2d4 g7g8 g3f4 g5f4 f1c1,1562,crushing middlegame long
+m00089,4rb2/1b3p1k/3p1np1/q3p2p/1N2P3/1P2BP2/1PPQ2PP/3R2K1 w - - 1 33,b4d5 a5d2 d5f6 h7h8 e3d2,1859,crushing middlegame long quietMove
+m00090,1r6/p2Nkp1p/3q4/5pN1/7P/1P1b2P1/P2PrPB1/Q5K1 w - - 10 33,d7b8 d6b8 g2f1 f7f6 f1e2,1550,crushing middlegame long
+m00091,7r/p6r/1p3k2/n2p1pp1/P1pP4/2P1P1P1/2B2PK1/R6R w - - 4 45,h1h7 h8h7 g3g4 h7h4 c2f5,1571,advantage middlegame long
+m00092,6k1/1n4p1/4b2p/n1p1p3/p1PpNrP1/P2B1P2/1P5P/2KR1R2 w - - 4 29,e4d2 b7d6 f1e1 e6c4 d3c2,1895,advantage middlegame long quietMove
+m00093,6k1/1p2n2p/5p2/pP1p4/1n6/5N2/5PPP/2r1R1K1 w - - 0 25,e1c1 e7f5 c1c8 g8f7 c8c7,1625,crushing middlegame long
+m00094,2kr3r/pp2b1pp/2p2n2/q1n1p3/6b1/1BN1BN2/PPPQ1PPP/1K1RR3 w - - 14 17,c3d5 c5b3 d2a5 b3a5 d5e7,1850,advantage opening long quietMove
+m00095,r7/1b2Qr1k/pq4pp/1p6/4P1n1/1BN1N3/PPP3PP/R5K1 w - - 0 21,e7f7 h7h8 a1e1 g4e3 f7f2,1553,crushing middlegame long
+m00096,8/1pkr4/p5Q1/2pPb3/P7/4Pp2/2R2P2/2KN1q2 w - - 3 37,c2c5 c7b8 g6e8 b8a7 e8e5,1571,crushing middlegame long
+m00097,8/6pk/4pb1p/p2q1p2/P1Q2P1P/5NP1/5P2/5K2 w - - 2 37,c4d5 e6d5 f3e5 g7g5 h4g5,1580,advantage middlegame long
+m00098,7r/5k2/2pnp1p1/6P1/r1bPP3/2B2P1B/7K/R7 w - - 0 41,a1a4 h8b8 h3g4 c4e2 a4a7,1604,advantage middlegame long
+m00099,3rkr2/5p2/2bnn3/p4NP1/2P4P/1P1B4/P7/3RR1K1 w - - 11 41,f5d4 e8d7 d3f5 f8e8 c4c5,1877,crushing middlegame long quietMove
+m00100,4rrk1/pbp1qppp/1pn5/8/4N3/2PN4/PP3PPP/R2QR1K1 w - - 2 17,e4c5 e7f6 c5d7 f6g5 f2f4,1853,advantage middlegame long quietMove
+m00101,n6k/5q2/2NpB1p1/1p1Pp1bp/2p1P3/6P1/1PP2P1P/6K1 w - - 0 33,e6f7 h8g7 f7e6 g5c1 b2b3,1595,advantage middlegame long
+m00102,3r3k/1b3p1p/3P4/1pp1P3/5K2/2N4P/1P2r3/3R4 w - - 0 33,c3e2 b7c8 h3h4 c5c4 e2c3,1589,advantage middlegame long
+m00103,5n2/1bk2p2/3p1bp1/2pP2P1/2P2P2/3BKN2/r7/7R w - - 0 29,g5f6 a2a3 e3e2 a3a2 f3d2,1577,advantage middlegame long
+m00104,3r4/6qk/pp2ppRp/7Q/3b1P2/7P/PP4PK/8 w - - 2 33,g6g7 h7g7 h5e2 e6e5 g2g3,1583,crushing middlegame long
+m00105,6k1/p4p2/6q1/2p4p/6b1/3P4/P1P1rBQP/6RK w - - 0 29,h2h3 g6h6 g2g3 e2c2 h3g4,1883,advantage middlegame long quietMove
+m00106,2r2bk1/5p1p/6pn/4p3/1p6/1B5P/P4PP1/2R3K1 w - - 0 29,c1c8 h6f5 c8e8 f5d6 e8e5,1583,crushing middlegame long
+m00107,2kr3r/1p5p/p2R2p1/3p3n/3P3P/2N1nP2/PPP2P2/2K1R3 w - - 0 21,d6d8 h8d8 f2e3 h5g7 c1d2,1580,advantage middlegame long
+m00108,5r1k/n1pq1pp1/1p4p1/3Pp3/1Q6/2P1P1PP/5RBK/r7 w - - 0 29,b4f8 h8h7 f2f7 d7f7 f8f7,1556,crushing middlegame long
+m00109,r4rk1/pb2bppp/1pn1p3/3q4/3p4/1P2PNP1/PB3PBP/R2Q1RK1 w - - 0 13,f3d4 d5d7 d4c6 b7c6 d1d7,1574,crushing middlegame long
+m00110,4k3/5p2/2bp1Pp1/pp2q1P1/3Q4/PP1B4/K1P5/8 w - - 3 41,d4b6 e5c5 b6c7 c6d7 c7a5,1871,crushing middlegame long quietMove
+m00111,7k/pp1q4/2p3QP/4pr2/8/5PK1/6P1/5R2 w - - 0 41,f1d1 f5g5 g6g5 d7f7 g5d8,1886,crushing middlegame long quietMove
+m00112,8/2p2ppk/P1R4n/8/2pb3N/8/4bPPP/6K1 w - - 1 29,h4f3 e2f3 g2f3 h6f5 c6c4,1919,crushing middlegame long quietMove
+m00113,r2qk2r/p2bp1bp/2p2pp1/5n2/2BB4/2N5/PPP2PPP/R2QK2R w KQkq - 2 13,d4c5 d8c7 e1g1 e8c8 c3a4,1850,advantage middlegame long quietMove
+m00114,6k1/p7/2N5/1p1P1p2/7n/2P5/PP2r1p1/1K1R4 w - - 0 37,d5d6 e2e8 d6d7 e8f8 d7d8q,1898,advantage middlegame long quietMove
+m00115,8/6p1/5pkp/4p3/rR2K1P1/4PP2/8/8 w - - 7 45,b4a4 g6g5 a4a7 g5g6 a7b7,1649,crushing endgame long
+m00116,8/8/4k1p1/2p1p3/4P3/p1PK3P/1P6/2bN4 w - - 0 45,b2a3 c1a3 d3c2 c5c4 d1e3,1640,advantage endgame long
+m00117,8/6pp/8/2k1p3/2P5/2K5/6PP/8 w - - 0 49,c3d3 c5b4 g2g4 e5e4 d3e4,1943,advantage endgame long quietMove
+m00118,3r2k1/1p4p1/p1pr1p2/4pPPQ/4P2P/P1P5/qP6/2K1R2R w - - 1 37,e1d1 a2f7 h5f7 g8f7 d1d6,1892,crushing middlegame long quietMove
+m00119,r6k/1p2q1pp/1P1N1p2/3Rpb2/1nPp4/r2P2P1/4QPBP/3R2K1 w - - 11 29,d6f5 e7e6 d5b5 b4c6 f5h4,1550,crushing middlegame long
+m00120,8/6kp/6p1/1pr1P3/8/1P3R2/PK4PP/5n2 w - - 2 37,f3f1 c5e5 f1f2 b5b4 b2c2,1601,advantage middlegame long
+m00121,1b1r2k1/p4r1p/6p1/2P2bq1/1PB5/P4p2/1B2R1PP/4R1K1 w - - 0 25,e2e8 d8e8 e1e8,1150,mate mateIn2 middlegame short
+m00122,8/pp3pk1/2pbq3/6rp/1P1P3R/6P1/P4PK1/3BQ3 w - - 4 41,e1e6 f7e6 d1h5 d6b4 d4d5,1562,advantage middlegame long
+m00123,8/6k1/1p2b1q1/p5P1/P1B1p2Q/1P3p2/5P2/6K1 w - - 5 45,h4h6 g6h6 g5h6 g7h6 c4e6,1604,crushing middlegame long
+m00124,5rk1/6p1/5n1p/8/P1N2p2/5b2/5PP1/4R1K1 w - - 0 33,g2f3 f8a8 a4a5 g8f7 e1d1,1589,advantage middlegame long
+m00125,8/4p1k1/p4p2/R5p1/P1P3Pp/1r3P1P/5K2/8 w - - 0 41,a5a6 b3c3 a4a5 c3c4 a6e6,1628,advantage middlegame long
+m00126,8/p4p1p/1p6/5K2/8/7P/PPk2PP1/8 w - - 1 37,b2b4 c2b2 f2f4 b2a2 f5f6,1925,advantage endgame long quietMove
+m00127,r1b1kb1r/4pppp/p1n2n2/2pq4/2p5/N2P1N2/PP2BPPP/R1BQ1RK1 w kq - 0 9,a3c4 a8b8 c1f4 b8b7 d1a4,1577,advantage opening long
+m00128,r5k1/1p2np1p/2p1p1p1/3PPnP1/p1P5/P2R3P/1P3qB1/5R1K w - - 0 33,f1f2 c6d5 c4d5 e6d5 g2d5,1595,crushing middlegame long
+m00129,3r1r1k/1bp2p1p/pn1bpq2/4N3/3P1Pp1/3B3P/NPP1Q3/1K1RR3 w - - 0 21,h3g4 f6h4 e1g1 b6d5 e2d2,1550,advantage middlegame long
+m00130,3r4/2p5/1p2k3/p3ppBp/2p4P/P4KP1/1PP5/8 w - - 0 37,g5d8 e6d7 d8g5 a5a4 f3e2,1619,advantage middlegame long
+m00131,2br2k1/4q1p1/3nN2p/p3Q3/Pp1PP1B1/1P6/2r4P/2R3K1 w - - 0 33,c1c2 d8e8 c2c7 c8d7 d4d5,1562,advantage middlegame long
+m00132,4r3/pk3ppp/2Rb4/1P1p3P/1p1P1qP1/5P2/P2Q1K2/7R w - - 0 29,d2f4 d6f4 h5h6 f4h6 h1h5,1553,advantage middlegame long
+m00133,6nr/r3kppp/p1bbp3/8/8/5B2/PPP2PPP/R1B2RK1 w - - 0 17,f3c6 f7f5 c2c3 g8f6 g2g3,1592,advantage middlegame long
+m00134,8/8/2p5/2Pp2p1/P2P1k2/2N1nP2/3K4/8 w - - 1 57,d2d3 e3c4 d3e2 c4a5 e2f2,1934,advantage endgame long quietMove
+m00135,r4r1k/pp4q1/8/6N1/3Q3P/8/PPP2P2/2Kb3R w - - 0 25,d4d1 f8f2 c1b1 g7g6 h1e1,1550,advantage middlegame long
+m00136,8/6pp/5k2/p1b2p2/P2pb3/3R1P2/1PB3PP/6K1 w - - 6 33,f3e4 f5e4 d3b3 d4d3 g1f1,1607,advantage middlegame long
+m00137,8/8/5K2/3rPBp1/5kP1/8/8/8 w - - 1 65,e5e6 d5b5 e6e7 b5b6 f6f7,1925,crushing endgame long quietMove
+m00138,r2qk2r/3nbppp/p2p1n2/3bp3/1p2P1P1/1N2BQ1P/PPP2P2/2KR1B1R w kq - 0 13,e4d5 h7h6 h3h4 f6h7 g4g5,1550,advantage opening long
+m00139,1b2r2k/6p1/2q3p1/1P2P3/8/5RBP/6PK/8 w - - 0 41,b5c6 h8g8 f3c3 b8c7 e5e6,1604,crushing middlegame long
+m00140,r4rk1/1pp1qpp1/p1nb3p/3Q4/1P3n1P/PN3N2/1B3PB1/R4R1K w - - 2 17,d5f5 e7e2 a1b1 f4g2 h1g2,1850,advantage middlegame long quietMove
+m00141,r1b2rk1/2q2p1p/p3pbp1/1p6/4Q2P/3B1N2/PPP2PP1/1K1R3R w - - 0 17,e4a8 h7h5 a8e4 c8b7 e4e3,1550,crushing middlegame long
+m00142,2b2r2/3n2pk/4q2p/1p1p4/3P4/1P3PPB/P3PB2/2R3K1 w - - 0 29,h3e6 d7b6 e6c8 b6c8 c1c5,1580,crushing middlegame long
+m00143,6k1/7p/p1r5/5pp1/PN1Pn3/2P4P/2K3P1/8 w - - 0 41,b4c6 g8g7 a4a5 g5g4 c6b4,1619,advantage middlegame long
+m00144,2k5/p1p2pb1/q5pp/4P3/1Bb1Q3/2r2N2/PP4PP/1K5R w - - 0 25,e4a8 c8d7 b4c3 a6a2 b1c2,1550,crushing middlegame long
+m00145,3RQ3/7p/5kp1/P7/1b6/6PP/5P1K/2qq4 w - - 2 41,d8d1 c1d1 a5a6 d1f3 e8d8,1574,advantage middlegame long
+m00146,6r1/3Q1p1k/3p1p2/3BpP2/p3P3/P1P3r1/1P6/7K w - - 0 37,d7f7 h7h8 f7f6 g3g7 d5g8,1595,crushing middlegame long
+m00147,5k2/2p2p1p/1p1p1p2/2nP4/1pP2P2/P2nQK2/8/8 w - - 0 33,a3b4 d3b4 e3c3 b4d3 c3f6,1607,crushing middlegame long
+m00148,r5k1/pp3ppp/5n2/3b4/2qP1Q2/P1P1rN2/1PB3PP/1KR4R w - - 9 25,b2b3 c4c3 c2h7 g8h7 c1c3,1850,advantage middlegame long quietMove
+m00149,3r2k1/1p1q1npp/1p2pp2/pP2P3/PbbP1PP1/2N1BB1P/1Q3R2/6K1 w - - 5 29,e5f6 b4c3 b2c3 c4d5 f6g7,1550,advantage middlegame long
+m00150,3r3r/2R3Q1/4P1p1/p2N1q1k/Pp3Pp1/8/6K1/8 w - - 7 41,g7h7 h8h7 c7h7,1150,mate mateIn2 middlegame short
+m00151,r1bqr1k1/p4pp1/2pb4/7p/3P4/2N2BP1/PPP2P1n/R1BQ1RK1 w - - 0 13,g1h2 h5h4 h2g2 h4g3 f2g3,1568,crushing middlegame long
+m00152,4rr2/6kp/p1qpP1p1/6Qn/2P2P2/7R/PP4PP/R6K w - - 11 25,h3h5 g7g8 g5d5 c6d5 h5d5,1556,advantage middlegame long
+m00153,2r1r1k1/1b3p1p/p2p2p1/3P4/p1pNP3/2R3NP/nP1R1PP1/6K1 w - - 0 29,c3a3 a2b4 a3a4 b4d3 d2c2,1868,advantage middlegame long quietMove
+m00154,r3kqr1/1p1b1p2/1P2pbp1/p2pPn1p/5Q2/P1NB2P1/5P1P/3RR1K1 w q - 0 25,e5f6 f8c5 c3d5 c5d5 d3f5,1550,advantage middlegame long
+m00155,8/2p5/1p1k1b1p/1P5P/3NK1P1/8/8/8 w - - 10 45,d4f5 d6e6 f5h6 f6b2 h6f5,1631,advantage endgame long
+m00156,3qk2r/1b1nbppp/pp6/3np3/P7/1Q2B1P1/5PBP/R4RK1 w k - 0 17,g2d5 b7d5 b3d5 e8g8 f1d1,1550,advantage middlegame long
+m00157,3r1k1r/4nppp/p1B1p3/1b6/8/5NP1/1P2PP1P/R4K1R w - - 0 21,c6b5 a6b5 f1g2 f7f6 h1c1,1574,advantage middlegame long
+m00158,r5k1/2p2p1p/p1b5/1pn3n1/P1p5/6P1/1P1r1PBP/RQ4K1 w - - 0 21,g2c6 g5h3 g1g2 a8d8 g2h3,1577,advantage middlegame long
+m00159,5rk1/1p3pbp/pn3np1/8/P2PqB2/1Q6/1P3PPP/2R2RK1 w - - 2 21,f4d6 e4d4 d6f8 g7f8 a4a5,1850,advantage middlegame long quietMove
+m00160,4kb1r/1b1n1p1p/4p1pP/qBp3B1/4P3/5P2/rPP3P1/1K1R2NR w k - 0 17,b5d7,900,mate mateIn1 middlegame oneMove
+m00161,r1b1r1k1/1pp2pp1/p4n1p/2qP4/2P1p3/2N2N1P/PPP2PP1/R2QR1K1 w - - 0 17,d1d4 c5d4 f3d4 c8d7 b2b4,1868,advantage middlegame long quietMove
+m00162,7k/8/6pK/7P/8/8/8/8 w - - 0 49,h5g6 h8g8 g6g7 g8f7 h6h7,1661,crushing endgame long
+m00163,r1b1kbnr/pp4pp/1qn1p3/3pp3/3P4/P2B1N2/1P3PPP/RNBQK2R w KQkq - 0 9,d4e5 g8h6 e1g1 h6f7 b1c3,1550,advantage opening long
+m00164,r5k1/3Q1p1p/q2p2p1/3P4/P3Pp2/2r5/6PP/1R3R1K w - - 0 29,f1f4 a8f8 h2h3 c3c2 b1f1,1550,advantage middlegame long
+m00165,1r3rk1/p2P3p/1p3qpB/8/3Q4/P4b2/1P3PPP/R5K1 w - - 4 25,d4f6 f8f6 h6g5 f6f5 d7d8q,1550,advantage middlegame long
+m00166,5Qnk/6p1/1p4rp/2pN2q1/p1P5/2P4P/4R1P1/7K w - - 0 41,d5e7 g5e7 e2e7 h8h7 e7e8,1850,crushing middlegame long quietMove
+m00167,r3k2r/3n1ppp/2p1pn2/1pq5/p2pPP2/P2P2PP/1PPN2B1/R2QK2R w KQkq - 0 17,e4e5 d7e5 f4e5 c5e5 e1f2,1877,advantage opening long quietMove
+m00168,r1bqk2r/pp3ppp/4p3/1NPp4/1n2n3/P2BP3/1P3PPP/R2QK2R w KQkq - 0 13,a3b4 c8d7 b5a7 d8b8 a7b5,1553,advantage middlegame long
+m00169,8/5R1p/P3p2k/6pB/2q5/6PK/7P/8 w - - 1 45,a6a7 c4a6 h5f3 a6f1 h3g4,1904,advantage endgame long quietMove
+m00170,N2k2n1/p4pp1/1p1p4/Q1p1p3/3nP2q/3P4/PPP2PbP/2KR3R w - - 0 17,a5a7 g2h1 a8b6 g8f6 a7b8,1577,advantage middlegame long
+m00171,2rq1r2/pb4kp/1p1pp1p1/4Nn2/3P2Q1/2PB4/P4PPP/2R1R1K1 w - - 0 21,e5g6 h7g6 e1e6 f8f6 d3f5,1550,advantage middlegame long
+m00172,2r3k1/p5p1/1p2r2p/4P3/1P6/P2B2P1/1K1R3P/8 w - - 0 41,d3f5 c8e8 f5e6 e8e6 d2d5,1895,advantage middlegame long quietMove
+m00173,r3r1k1/6pp/pnq5/Rp2p3/1Pp1P3/2P1BP2/4Q1PP/R6K w - - 2 29,a5a6 c6b7 a6a8 b6a8 e2d2,1550,advantage middlegame long
+m00174,N2kr3/pb1p1ppp/1p3n2/8/3P4/3pPP2/P2K2PP/1R5R w - - 2 21,a8b6 a7b6 b1b6 d8c7 b6b2,1574,advantage middlegame long
+m00175,6RR/k1r2p2/4pp2/K2p3p/1P1r3P/8/1P6/8 w - - 2 45,b4b5 c7c4 b2b3 c4c5 g8f8,1910,crushing middlegame long quietMove
+m00176,2r1q3/1b3pk1/1PN2bpp/1B6/1p2p3/P3P3/2Q2PPP/2R3K1 w - - 0 25,a3b4 h6h5 h2h3 e8d7 c2e4,1550,advantage middlegame long
+m00177,r2r4/pp1b2p1/2n1p1k1/5q2/3P1n1Q/P4N2/1B3PPP/R1R3K1 w - - 1 25,c1c6 f5h5 f3e5 g6h7 h4h5,1565,advantage middlegame long
+m00178,1qr4k/p5pp/b4p2/3r4/2P5/P1BB4/6QP/K2R4 w - - 0 33,g2d5 b8b3 d1c1 b3a3 a1b1,1550,advantage middlegame long
+m00179,1r4k1/5p2/p1rn2p1/7p/3P1N1P/1P2P1P1/5P2/2R3K1 w - - 0 33,c1c6 d6e4 c6a6 b8b3 a6a2,1589,advantage middlegame long
+m00180,6Q1/p7/1p3P1p/2p1P2k/2Pn4/P3q3/1P1p3K/5R2 w - - 9 45,g8g2 e3e5 h2g1 d2d1r f1d1,1862,advantage middlegame long quietMove
+m00181,8/1p2r1k1/pQ3pp1/P7/1PP2q2/3r4/6B1/4R1K1 w - - 0 45,e1e7 g7h6 b6f2 d3d1 e7e1,1562,advantage middlegame long
+m00182,4k3/1p3p1p/p3p3/1b1p1n1P/1P1PqP2/P7/4BP2/2Q1K1R1 w - - 5 29,g1g8 e8e7 c1c7 b5d7 g8d8,1586,advantage middlegame long
+m00183,r3kbnr/pp3ppp/2n1p3/2ppPb2/3P4/2N1BN2/PqP1BPPP/R2Q1RK1 w kq - 0 9,c3b5 a8b8 c2c4 d5c4 e2c4,1868,advantage opening long quietMove
+m00184,2r2rk1/1b2bpp1/1qnpp2p/pp6/3P3P/1P1NPNP1/P1RQ1PB1/2R3K1 w - - 0 21,d4d5 e6d5 d3f4 a5a4 f4d5,1853,advantage opening long quietMove
+m00185,rn1q1rk1/ppp2ppp/1b1p1n2/4P3/3P1Pb1/2N2N2/PP4PP/R1BQKB1R w KQ - 1 9,e5f6 f8e8 e1f2 b8c6 c3d5,1550,advantage opening long
+m00186,4k3/2R5/4N3/P4K1p/6pP/5p2/4r3/8 w - - 4 61,f5f6 e2e6 f6e6 e8d8 c7c1,1892,crushing endgame long quietMove
+m00187,r1r1n1k1/5ppp/pq1bn3/8/2p3Q1/1PN2NP1/PB4KP/3RR3 w - - 0 25,e1e6 h7h5 g4e4 c4b3 c3d5,1550,advantage middlegame long
+m00188,7Q/1kr5/8/8/1K6/r7/8/8 w - - 100 157,b4a3 c7c8 h8h7 b7c6 h7g6,1601,advantage endgame long
+m00189,8/6p1/3k1b1p/1p1p4/p2p3P/Pr2P1P1/1PRNK1P1/8 w - - 0 37,d2b3 a4b3 c2d2 d4e3 e2e3,1604,advantage middlegame long
+m00190,2kr1b1r/ppp2Npp/1n2p3/4P3/8/2N5/PP2q1PP/R4R1K w - - 0 17,c3e2 f8b4 e2f4 g7g6 f7h8,1565,crushing middlegame long
+m00191,2rr2k1/p2q1p1p/1p2p1p1/4P2P/2bPQP1b/Pn6/1B4PN/1B1RR1K1 w - - 1 29,h2g4 d7c6 e4e3 g6h5 g4h6,1868,advantage middlegame long quietMove
+m00192,rnbqk2r/p1p2ppp/3bp3/1p1nN3/2pP4/P5P1/1P1NPPBP/R1BQK2R w KQkq - 1 9,e2e4 d6e5 e4d5 e5d4 d5e6,1856,advantage opening long quietMove
+m00193,1r5k/1b1Br1b1/p4qpp/2p1p3/P1Q1P3/2P2P1P/1P4PB/R1R3K1 w - - 5 25,c1d1 b8d8 d7g4 e7e8 c4c5,1850,advantage middlegame long quietMove
+m00194,5r1k/ppp1p1bp/3p2p1/1r2n1B1/q6P/P1PQ1N2/1PP2PP1/1K4RR w - - 3 21,f3e5 d6e5 g1e1 f8f2 e1e4,1550,advantage middlegame long
+m00195,3r3r/5Rbk/p2N2p1/2B1p2p/4P1n1/7q/PP2BP2/3Q1RK1 w - - 4 25,e2g4 h5g4 d1b3 h8f8 b3h3,1550,crushing middlegame long
+m00196,r4Bk1/1p1q1pp1/p1p5/8/P1PP3p/1PNQ4/5n1P/2K1R3 w - - 1 25,d3f3 d7d4 e1e2 a8f8 e2f2,1850,advantage middlegame long quietMove
+m00197,1R6/p3kppp/2r5/8/8/P5P1/5P1P/5K2 w - - 2 37,b8b7 e7e6 b7a7 c6c2 h2h4,1598,advantage endgame long
+m00198,2r3k1/3r1pb1/1Q4pp/p2p4/3PnN1P/qP2PNP1/5PK1/2R5 w - - 0 29,c1c8 g8h7 b6b5 a3a2 f4h3,1550,advantage middlegame long
+m00199,rn2r1k1/p5pp/2p1Pp2/8/2Q1PB2/5N2/Pq4PP/R6K w - - 0 21,e6e7 g8h8 a1d1 b2b7 c4f7,1550,advantage middlegame long
+m00200,2r2n2/1p2r2p/pP2k3/N2p1pPP/3B1P2/2P3K1/8/3R4 w - - 1 37,d1e1 e6f7 e1e7 f7e7 a5b7,1580,advantage middlegame long
+m00201,r3kbnr/pp3ppp/2n1p3/2ppPb2/3P4/2N1BN2/PqP1BPPP/R2Q1RK1 w kq - 0 9,c3b5 a8b8 c2c4 d5c4 e2c4,1868,advantage opening long quietMove
+m00202,1r1r1kn1/2R2pp1/7p/pp3q1P/3P1P2/P3P3/1P3P2/KB5R w - - 0 29,b1f5 g8f6 f5d3 d8d7 c7c5,1574,advantage middlegame long
+m00203,q1r3k1/6b1/5pp1/3b3p/3p1BN1/6QP/1P3PP1/3R2K1 w - - 0 37,g4f6 g8f7 f6d5 a8d5 g3d3,1559,advantage middlegame long
+m00204,8/8/2P5/6p1/1K3p1p/1P5P/6k1/8 w - - 1 61,c6c7 g5g4 b4c3 g4h3 c7c8q,1946,crushing endgame long quietMove
+m00205,3rRrk1/3P1pp1/2q4p/1p6/p4Q1P/4RP2/5P1K/8 w - - 2 33,e3e7 d8e8 d7e8q c6e8 e7e8,1856,crushing middlegame long quietMove
+m00206,8/p2b4/3k1p1p/PP6/2p2P1P/5K2/4B3/8 w - - 0 101,e2c4 d6c5 c4d3 f6f5 f3e3,1631,advantage endgame long
+m00207,5k2/5p2/3P2p1/p3P2p/7P/5KP1/8/8 w - - 1 53,f3f4 f8e8 f4g5 a5a4 g5f6,1943,advantage endgame long quietMove
+m00208,8/4k3/p3ppp1/1pK1N1P1/5P1P/8/1Pb5/8 w - - 0 45,e5c6 e7f8 c6b4 c2b1 b4a6,1619,advantage middlegame long
+m00209,rnb2k2/ppp5/8/4ppN1/3p4/5qP1/PPP2P1P/R3K2R w KQ - 0 17,g5f3 b8c6 f3g5 f8e7 e1c1,1601,advantage middlegame long
+m00210,2r1r1k1/1p2Pp1b/p4b1p/1p4p1/3N4/P1N5/1PP1RPPP/2KR4 w - - 0 21,c3d5 g8g7 g2g4 f6d4 d1d4,1865,advantage middlegame long quietMove
+m00211,r5k1/4bpBp/p7/1p1r4/6qP/PQ4P1/1PP5/1K2R3 w - - 0 29,b3d5 a8d8 d5e4 g4e4 e1e4,1565,advantage middlegame long
+m00212,3R1b1k/7P/p5p1/8/2p1K3/3p1r2/8/8 w - - 0 41,e4f3 g6g5 d8f8 h8h7 f8c8,1628,advantage endgame long
+m00213,8/1p4K1/p7/8/8/P7/1k5P/8 w - - 0 61,h2h4 b2a3 h4h5 a6a5 h5h6,1937,crushing endgame long quietMove
+m00214,rnbqkb1r/pp1pn2p/6p1/4p2Q/3pP2B/8/PPPN1PPP/R3KB1R w KQkq - 0 9,h5e5 g6g5 e5h8 g5h4 h8h7,1550,advantage opening long
+m00215,2r4k/pN1r2pp/q4b2/2pn1P2/3p1B2/PQ1P4/6PP/1R2R1K1 w - - 3 29,b7c5 a6c6 c5d7 c6d7 f4e5,1550,crushing middlegame long
+m00216,3q1r2/pprP2kp/4b1p1/8/3pp3/2Q1P3/PP3PPP/3RKB1R w K - 0 21,c3d4 f8f6 d4e4 c7d7 d1d7,1556,advantage middlegame long
+m00217,4r1k1/4qpp1/5n1p/8/2P5/2pP1bP1/4PP1P/1R1Q1RK1 w - - 0 21,e2f3 e7a7 b1b3 a7d4 d1c2,1598,crushing middlegame long
+m00218,R1r2q1k/3r3p/3p1p1P/4p1p1/4P1P1/5P2/8/2R1K3 w - - 0 41,c1c8 d7d8 c8d8 h8g8 d8f8,1445,mate mateIn3 middlegame long
+m00219,r2r2k1/5pbp/p1p3p1/2P1p3/4P3/2NqBBP1/P4P1P/R2R2K1 w - - 0 21,d1d3 d8d3 a1c1 f7f5 f3e2,1577,crushing middlegame long
+m00220,3r2k1/p5pp/4q3/2r1p3/3n4/P1n1P1P1/Q2R1PBP/3R2K1 w - - 1 29,a2e6 d4e6 d2d8 e6d8 d1d8,1559,crushing middlegame long
+m00221,r5k1/5ppp/2N1p1n1/2N3q1/1P1P4/2P2QPP/5P2/6K1 w - - 3 33,c6e7 g5e7 f3a8 e7f8 a8f8,1559,crushing middlegame long
+m00222,3q1rk1/4npbp/p1rBb1p1/4P3/2pN4/1P6/P4PPP/2RQ1RK1 w - - 0 17,d6e7 d8e7 d4c6 e7e8 d1f3,1556,advantage middlegame long
+m00223,2kr3r/Qpp1qppp/3b2n1/pPP5/2b5/PN3P2/1B2BPPP/R3K2R w KQ - 1 17,e1g1 c4b3 c5d6 e7d6 f3f4,1862,advantage middlegame long quietMove
+m00224,7R/kp6/p2n1N2/4K2P/8/8/8/7r w - - 11 53,e5d6 a6a5 f6d5 a5a4 d6c5,1604,advantage endgame long
+m00225,r2q1rk1/p1p5/1p2p2p/3PB1p1/3Pp3/1QP1P3/P4PPP/R4bK1 w - - 0 17,d5e6 d8e7 a1f1 c7c6 b3c4,1565,advantage middlegame long
+m00226,b4r1k/2RQBqpp/p5n1/1p6/8/5p2/PP4PP/3R2K1 w - - 0 25,e7f8 f7d7 d1d7 h7h5 f8g7,1550,crushing middlegame long
+m00227,3r2k1/3rbp2/7p/p1N2bp1/1nRp4/1P2p1P1/1P1BPPBP/R5K1 w - - 0 25,d2b4 a5b4 c5d7 d8d7 g2c6,1550,advantage middlegame long
+m00228,8/3k4/P6p/2Kb1p2/5P2/8/7P/8 w - - 0 61,c5d5 d7c7 d5e5 c7b6 e5f5,1646,crushing endgame long
+m00229,5k2/1p3Bpp/p1nr1q2/4p1b1/4P3/2P4P/PP3P1P/R2Q1RK1 w - - 0 21,f7d5 c6e7 c3c4 g5f4 c4c5,1862,crushing middlegame long quietMove
+m00230,r2r2k1/1p3pb1/4p2B/2P1P3/1PPpQ2p/7P/1q3PP1/2R3K1 w - - 0 33,e4g4 b2c1 h6c1 g8f8 c1g5,1856,advantage middlegame long quietMove
+m00231,3r2k1/p4p1p/bpp1pnp1/1qPr4/3P4/R4N2/PQ3PPP/1BR3K1 w - - 6 25,b2a1 f6d7 b1d3 b5d3 a3d3,1859,advantage middlegame long quietMove
+m00232,8/4k3/3p4/pBpPp2p/P1P1P1pP/6P1/6b1/6K1 w - - 7 57,g1g2 e7d8 g2f1 d8e7 f1f2,1649,crushing middlegame long
+m00233,2b5/5p1p/p4kp1/1p6/1P2p3/P3P1P1/5PBP/6K1 w - - 0 33,g2e4 f6e5 f2f3 c8f5 e4b7,1631,advantage middlegame long
+m00234,8/1b1n1k2/4p3/4p3/pq2P2P/1B3P2/P4N2/1KQ5 w - - 0 37,c1c7 a4b3 c7d7 f7f8 d7d8,1880,advantage middlegame long quietMove
+m00235,r4rk1/2pn1pp1/2bb1q1p/p1pp4/P1P5/5N2/4BPPP/1RBQR1K1 w - - 0 17,c4d5 c6a4 d1a4 d7b6 a4g4,1562,advantage middlegame long
+m00236,rn1qk2r/p3b2p/1p6/2ppPQ2/3P4/2N5/PPP4P/R1B3K1 w - - 1 17,e5e6 d8c8 f5f7 e8d8 c3d5,1850,advantage middlegame long quietMove
+m00237,4Rnk1/2r2p2/Qp3p2/p4r2/3q2P1/P6P/5P2/4R1K1 w - - 0 33,g4f5 c7c3 a6e2 c3g3 g1h2,1550,advantage middlegame long
+m00238,6R1/3n1k2/2r3p1/4B2p/4P2P/3K2P1/8/8 w - - 5 81,g8g7 f7e8 e5f4 d7f8 d3e3,1595,advantage endgame long
+m00239,rn3rk1/pb3ppp/4p3/q2n4/1bpP1B2/2N1P1Q1/1P3PPP/2R1KBNR w K - 9 13,f4h6 g7g6 g3e5 f7f6 e5e6,1877,advantage opening long quietMove
+m00240,r2r2k1/p1q1bppp/1pnp1n2/1B1P4/4P3/B1P4P/4QPP1/1R1R2K1 w - - 0 21,b5c6 a8c8 c3c4 e7f8 a3b2,1550,advantage middlegame long
+m00241,r2qk1r1/pp1n1pp1/2p1pn1p/5b2/2P1P3/1PN2N2/PB3P1b/R2QK1RB w Qq - 0 13,f3h2 d8c7 h2f1 f5g6 d1e2,1550,advantage opening long
+m00242,r1r2b2/2q2p1k/4pn2/n1ppP1Q1/p2P3P/P1P2N2/5PP1/R3R1K1 w - - 0 25,e5f6 f8h6 g5h5 c8h8 e1e6,1565,crushing middlegame long
+m00243,4r1k1/1p1n4/p1bP2p1/P2qBp2/5P2/2P4p/4Q2P/R4RK1 w - - 5 33,e2a2 d5a2 a1a2 g6g5 f1d1,1862,advantage middlegame long quietMove
+m00244,r5k1/5pp1/pq5p/3P4/1nQ5/4r1P1/1P3P1P/R2R2K1 w - - 0 29,f2e3 b6e3 g1g2 e3b6 a1c1,1550,crushing middlegame long
+m00245,2k3r1/pp1np3/7r/2pPp3/2P3P1/2P1QP2/q2N4/2K4R w - - 0 29,h1h6 c8c7 g4g5 a2a1 c1c2,1583,advantage middlegame long
+m00246,r2q1rk1/p3bppp/1p1np3/8/2PR1B2/2N3P1/PP2QPbP/R5K1 w - - 0 17,g1g2 d8c7 c3e4 c7b7 f4d6,1550,crushing middlegame long
+m00247,3r1r2/1p3pk1/p1pp1qpp/4n3/P2QP3/1BN1P3/1PP3PP/5RK1 w - - 0 21,f1f6 g7f6 a4a5 f6e7 h2h3,1556,crushing middlegame long
+m00248,5rk1/1bq1bppp/p7/2p1n3/3p4/2B1P3/PPQ2PPP/R3KB1R w KQ - 0 17,c3d4 f8c8 d4c3 e7f6 e1c1,1550,advantage middlegame long
+m00249,4r1k1/5p2/3n4/5p2/4qNp1/3Q2Pp/5P1P/5RK1 w - - 4 45,d3d6 e8e7 d6a6 e7b7 a6a1,1580,crushing middlegame long
+m00250,r1bq1rk1/p3b3/1pn1p1p1/2pp2PQ/3P1P2/2P5/PPN4P/R1B2RK1 w - - 0 17,h5g6 g8h8 g6h6 h8g8 g5g6,1571,crushing middlegame long
+m00251,8/p5pk/8/3P3p/1P1Q3P/5bP1/q5BK/8 w - - 3 37,d4d3 h7g8 d3f3 a2a6 f3f4,1595,crushing middlegame long
+m00252,2k1r3/p1b1rNp1/Ppp3P1/2p1p3/2P1N1b1/3P1R2/1P6/1K2R3 w - - 5 41,f3g3 g4d7 f7d6 c7d6 e4d6,1862,advantage middlegame long quietMove
+m00253,8/pp6/2p1k1n1/3p4/6Nr/6K1/PPP5/5R2 w - - 0 37,f1f6 e6e7 f6g6 h4h1 g3f3,1583,crushing middlegame long
+m00254,8/6k1/8/6K1/5P2/8/8/8 w - - 3 53,g5f5 g7f7 f5e5 f7e7 e5e4,1955,advantage endgame long quietMove
+m00255,2nqn1k1/3bb1pp/3p4/3Pp1B1/rNP1N1P1/p6P/3Q2BK/5R2 w - - 1 29,b4c6 d7c6 d5c6 a4a5 e4c3,1850,advantage middlegame long quietMove
+m00256,r2qkb1r/p4ppp/bp2p3/2PpPn2/PP1B4/2P2N2/5PPP/RN1QK2R w KQkq - 0 13,c5c6 f5d4 d1d4 f7f6 b4b5,1889,advantage opening long quietMove
+m00257,2r1kb2/5p2/2n2np1/2P1p2p/1p6/P1BR1PP1/4P2P/3R2K1 w - - 0 29,a3b4 c8b8 g1g2 c6b4 c3e5,1574,advantage middlegame long
+m00258,5r2/2r1bpk1/p5p1/3np1P1/3NN3/2PKPR2/P7/7R w - - 0 29,f3h3 f8g8 h3h7 g7f8 d4f3,1850,advantage middlegame long quietMove
+m00259,r1q1r1k1/5pbn/1B1p2p1/p2NpbPp/2P1n2P/3NR3/PPQ1BP2/1K1R4 w - - 3 29,e2f3 e4g5 h4g5 h7g5 f3g2,1850,advantage opening long quietMove
+m00260,2rr2k1/5ppp/pq2pn2/1pn5/3Bb3/1P2NNP1/P3PPBP/Q4RK1 w - - 0 21,b3b4 f6e8 d4c5 b6b7 f1c1,1865,advantage middlegame long quietMove
+m00261,2r2rk1/1p2p1b1/3p3p/2pP1bp1/6n1/2N3B1/PP2BPPP/R3R1K1 w - - 0 21,e2g4 f5g4 e1e7 c8d8 a1e1,1568,advantage middlegame long
+m00262,3r4/p1p2p1p/2k5/1pn1pPp1/4P3/2P1RN1P/P1P5/2K5 w - - 0 25,f3e5 c6b7 e5f7 d8f8 f7g5,1616,crushing middlegame long
+m00263,1k5r/2p5/1pp2b2/4p3/1P1rPp1p/P4PpQ/1NP1R1K1/1qB1R3 w - - 0 41,c2c3 d4d6 c1f4 b1a2 b2d3,1880,advantage middlegame long quietMove
+m00264,3r3r/R2Pkpp1/1p1R4/1B3p1p/7P/2n5/P4PP1/6K1 w - - 3 29,d6b6 c3b5 b6b5 d8d7 a7d7,1568,advantage middlegame long
+m00265,rnb1kb1r/1p3ppp/p3p3/2p5/8/2P2NP1/PPP2PBP/R1Bq1RK1 w kq - 0 9,f1d1 c8d7 f3e5 d7c6 e5c6,1595,advantage middlegame long
+m00266,1n2r3/1PK2pkp/6p1/8/8/6P1/1R5P/8 w - - 5 57,b2a2 g7f6 a2a8 e8e2 c7b8,1922,crushing endgame long quietMove
+m00267,8/p4pk1/1p6/2nB1R2/2P2P2/6r1/2K5/8 w - - 5 49,f5f7 g7h6 f7a7 g3g7 a7a8,1613,advantage endgame long
+m00268,1q1r1r2/1p4kp/p1nN2p1/2PQ1p2/8/1P3b1P/1b2BPP1/1R2R1K1 w - - 0 25,e2f3 b2c3 e1e6 c3f6 b1e1,1550,advantage middlegame long
+m00269,3rqr1k/p3b3/3P4/2p1p1pp/5p2/3Q1P2/3N2PP/2R2R1K w - - 1 33,d2e4 e7f6 c1c5 e8g6 c5c7,1853,advantage middlegame long quietMove
+m00270,4r1k1/R2b3p/3q2p1/2pP1p2/2P2P2/1PQ3P1/4p1BP/6K1 w - - 0 37,a7a1 g6g5 f4g5 f5f4 a1e1,1859,advantage middlegame long quietMove
+m00271,1r1r2k1/1p3pp1/pn4p1/3n4/1P3PP1/1N5P/P3K1B1/2RR4 w - - 3 29,d1d4 d5e7 c1d1 d8e8 e2f2,1853,advantage middlegame long quietMove
+m00272,3r4/1Q5p/6pk/P7/5p2/5N1P/P4PPK/2q5 w - - 2 29,f3e5 h6h5 b7h7 h5g5 e5f7,1871,crushing middlegame long quietMove
+m00273,r2qr1k1/pp5p/2pb2p1/3b1pN1/2PPn3/4B3/PP1Q1PP1/1K1R1B1R w - - 1 17,g5e4 d5e4 b1c1 f5f4 e3f4,1553,advantage middlegame long
+m00274,2rb2k1/1p3rp1/1n5p/3ppb2/pN2N3/P6P/1P3PP1/2BRR1K1 w - - 0 33,e4d6 b6c4 d6c8 f5c8 d1d5,1868,advantage middlegame long quietMove
+m00275,1r5r/p2k1ppp/8/4P3/3NP3/b1B5/PP4PP/2Kn3R w - - 0 21,h1d1 a3f8 c1c2 d7e8 d4f5,1592,advantage middlegame long
+m00276,6k1/p4qpp/1p2bp2/1QrBp3/2P5/1PP5/3R1PPP/6K1 w - - 2 29,d5e6 f7e6 d2d8 g8f7 b5d7,1577,advantage middlegame long
+m00277,1n1q2rk/1Qp5/1p1p3b/1N1PpB1p/1PP1np2/5P2/3B3P/R6K w - - 0 29,f3e4 d8g5 f5h3 g5g6 b5c3,1550,crushing middlegame long
+m00278,8/3r1pk1/bq3pp1/p1bP3p/1p6/PB1Q3P/1P2RPP1/2R3K1 w - - 0 37,b3c4 a6c4 c1c4 b4a3 b2a3,1850,advantage middlegame long quietMove
+m00279,8/2p2r2/1p4k1/pP1PB1p1/P1PK2Pp/5p1P/5P2/8 w - - 5 57,d5d6 f7d7 d4d5 c7d6 e5d6,1928,advantage middlegame long quietMove
+m00280,8/pp2nk2/2n3p1/3pq1RN/6R1/8/PP3PKP/8 w - - 0 33,g5e5 c6e5 g4f4 f7e6 f4f6,1586,crushing middlegame long
+m00281,8/3kn3/3p1p2/6p1/3PN2p/7P/2K2PP1/8 w - - 1 53,e4f6 d7c6 f6e4 c6d5 c2d3,1610,advantage endgame long
+m00282,2k5/2q1b3/1np2p2/2N1pPp1/ppP3Pp/1P1RB2P/2K2P2/3R4 w - - 0 45,c5e6 a4b3 c2b3 c7a7 d3d8,1871,advantage middlegame long quietMove
+m00283,8/7p/2nk1ppP/1p1p1p2/p2P1P2/P3PP2/1P1K4/r2B1R2 w - - 6 37,d1e2 a1f1 e2f1 b5b4 a3b4,1922,advantage middlegame long quietMove
+m00284,rnb1k2r/1p2bpp1/2p2n1p/3pN3/3P1B2/p1NQR3/PPP1PPP1/R3KB1q w Qkq - 0 13,e5g6 f7g6 d3g6 e8d8 e3e7,1850,advantage opening long quietMove
+m00285,r1b1k2r/ppq2ppp/2nbp3/2ppN2n/3P1B2/2P1PN2/PP3PPP/R2QKB1R w KQkq - 7 9,e5f7 e8f7 f3g5 f7g8 d1h5,1550,advantage opening long
+m00286,5n2/8/p2k4/1p3pP1/1P1KB3/8/8/8 w - - 0 53,e4f5 d6c6 d4e5 c6c7 e5d5,1625,crushing endgame long
+m00287,8/p3R1pk/1p2n2p/8/4q1PP/5P1K/8/8 w - - 0 37,f3e4 e6c5 e7a7 c5e4 h4h5,1625,crushing endgame long
+m00288,r4rk1/p3bppp/1p2pB2/8/P1q1b3/5NP1/1P2PPBP/2RR2K1 w - - 0 17,c1c4 e7f6 c4e4 f6b2 d1d7,1553,crushing middlegame long
+m00289,8/p7/8/1P6/k5Bp/8/5K2/8 w - - 0 57,g4e2 a4b4 f2f3 h4h3 f3g3,1919,advantage endgame long quietMove
+m00290,6R1/8/8/1pk1p2p/r1b1PP1P/p1K3P1/P7/1B6 w - - 1 45,g8c8 c5b6 f4e5 c4e6 c8e8,1616,advantage middlegame long
+m00291,3r3r/kpqn4/pn3bp1/B2p1p2/PR2pP1p/1N2R3/1PP2QPP/1K3B2 w - - 0 29,a5b6 d7b6 a4a5 d8d6 e3e1,1553,advantage middlegame long
+m00292,1r3rk1/p1p2ppp/Q2q1b2/8/4p1b1/1BNP2P1/PP2PP1P/R4RK1 w - - 2 17,a6d6 c7d6 d3e4 f6c3 b2c3,1550,advantage middlegame long
+m00293,3k4/2r2p2/2P5/3K2p1/7p/4R2P/8/8 w - - 6 49,d5c5 f7f5 e3a3 d8e7 c5b6,1913,advantage endgame long quietMove
+m00294,2b1r3/1p2P2k/p4bpp/5p2/5qP1/1Q3N1P/PP3P2/4R1K1 w - - 0 29,b3f7 f6g7 f7e8 f4f3 e8c8,1550,crushing middlegame long
+m00295,r2qr1k1/2pn1p1p/1p1p2p1/bNP5/P2P4/1Q3PnB/P4P1P/2RR2K1 w - - 0 21,h2g3 d7f6 c5d6 c7d6 b5c7,1550,advantage middlegame long
+m00296,8/5rkp/4R1p1/8/3r4/2p3BP/5PP1/6K1 w - - 0 41,g3e5 g7h6 e5d4 f7c7 e6e1,1592,crushing endgame long
+m00297,r4rk1/p1p2qpp/1p1p4/8/4R3/1PRQ2P1/P4PKP/8 w - - 1 25,e4f4 f7e6 f4f8 a8f8 c3c7,1850,advantage middlegame long quietMove
+m00298,8/p4P2/kp6/6K1/2pP4/2P5/PP6/7q w - - 0 61,f7f8q h1g2 g5f6 g2b2 f8c8,1928,advantage endgame long quietMove
+m00299,2rr4/1p2Nkb1/p2pb2p/n3pp2/8/P1P2N2/1P2BPPP/3R1RK1 w - - 3 21,e7c8 e6c8 d1d5 a5c6 f1d1,1565,advantage middlegame long
+m00300,4r3/1pp3nQ/3p1k2/p1nB1r2/2P2N1P/PP4q1/8/5R1K w - - 0 29,f4h5 f6e5 h5g3 f5f1 g3f1,1571,crushing middlegame long
+m00301,r4rk1/1ppbbppp/p1n2n2/1N2p3/P5q1/3P1NP1/1P1BPPBP/R2Q1RK1 w - - 2 13,h2h3 g4h5 g3g4 f6g4 h3g4,1850,advantage opening long quietMove
+m00302,8/1k6/6nP/6p1/6P1/4K3/8/8 w - - 2 65,e3e4 b7c6 e4f5 g6f8 f5g5,1946,crushing endgame long quietMove
+m00303,r2qk2r/pb2bpp1/1p2p2p/2pnn3/7P/2P2NP1/PP1P1PB1/R1BQR1K1 w kq - 0 13,f3e5 e7d6 d1a4 e8f8 a4e4,1583,advantage opening long
+m00304,r2q1rk1/p1p2ppp/8/3N1Pn1/2nb2P1/5Q1P/P1B1R1K1/1RB5 w - - 1 29,c1g5 d8g5 f3d3 c7c5 d3c4,1550,advantage middlegame long
+m00305,k5r1/1bq5/p1n1Q3/1p5p/2p5/P1P5/1PB2PPP/2KR4 w - - 0 29,e6g8 a8a7 g8g3 c7e7 g3e3,1550,crushing middlegame long
+m00306,r4r2/bpp4k/3pq2p/5n2/p2P4/5N1P/PP3PP1/1N1RR1K1 w - - 0 21,e1e6 f8f7 b1c3 a7b6 d1d3,1589,advantage middlegame long
+m00307,6k1/2n3b1/p1p5/1pPp1p1p/1P1P1Pp1/1NBb2P1/1P2r1BP/R5K1 w - - 0 33,b3c1 e2g2 g1g2 d3c2 g2f2,1895,advantage middlegame long quietMove
+m00308,8/B7/4kp2/1P1pp2B/r7/8/7P/4K3 w - - 0 45,b5b6 a4b4 h5e2 e6d6 e2a6,1904,advantage endgame long quietMove
+m00309,1rb2rk1/p3p1b1/1nnq2p1/2pp2Pp/1p2P2N/3P2NP/PPP3B1/R1BQ1RK1 w - - 2 17,f1f8 g8f8 c1f4 g7d4 g1h2,1559,advantage opening long
+m00310,5k2/7Q/2P5/p3qp1p/8/KP6/8/8 w - - 9 57,a3a4 e5e4 a4b5 e4d5 b5b6,1919,advantage endgame long quietMove
+m00311,3r2k1/pb1q4/1p1Q1bpp/1P3p2/3p4/3P2P1/4PPBP/1R4K1 w - - 0 25,d6f6 b7g2 f6g6 d7g7 g6g7,1550,advantage middlegame long
+m00312,2r1kb1r/pp3ppp/q3b3/3QPn2/1Pp5/P4N2/1B2BPPP/2R2RK1 w k - 1 17,d5e4 f8e7 g2g4 f5h6 f3d4,1850,advantage middlegame long quietMove
+m00313,r5n1/1p2kpb1/2pp2p1/p5N1/1nP1PB2/1KNr4/PP5P/3R3R w - - 2 21,a2a3 f7f6 a3b4 d3d1 h1d1,1880,advantage middlegame long quietMove
+m00314,5rk1/4ppbp/4b1p1/3p4/r2P4/1PB3PP/2PR1PBK/8 w - - 0 25,b3a4 f8b8 a4a5 g8f8 g2f1,1610,advantage middlegame long
+m00315,8/1n1k1pr1/1qn1p1p1/3pP1N1/pp1P1QP1/1N6/PPR2PK1/8 w - - 0 37,b3c5 b7c5 c2c5 b4b3 a2b3,1559,advantage middlegame long
+m00316,2r4r/5kp1/Q2bp3/4qbB1/2Bp1NpP/1P2n3/P7/4RRK1 w - - 4 25,c4e6 f5e6 f4d3 e5f5 g5e3,1550,crushing middlegame long
+m00317,1n2r3/1p5k/3Pp2b/pq1pBp1p/P2P2rP/2P5/1PB3P1/1K3R1R w - - 0 29,a4b5 g4g2 c2d1 e8f8 d1h5,1580,advantage middlegame long
+m00318,8/8/P7/5KPk/8/4b3/8/8 w - - 1 69,g5g6 h5h6 f5f6 e3b6 f6f7,1952,crushing endgame long quietMove
+m00319,r1r3k1/1p2bp1p/6pq/1B1RPp1P/5P2/2P1n3/PPQ2P2/1K5R w - - 0 25,f2e3 a8a5 c2b3 c8c7 d5d7,1550,crushing middlegame long
+m00320,8/p7/Np3k2/3P3R/P3npP1/1P4r1/2K5/8 w - - 3 57,h5f5 f6g6 f5f4 g3e3 a6b8,1604,advantage middlegame long
+m00321,rn1q1rk1/pb1n1pp1/1p1bp2p/4N3/3PpP2/1PN3P1/P5BP/R1BQ1RK1 w - - 0 13,c3e4 d8e7 f1f2 d6e5 f4e5,1550,advantage opening long
+m00322,r2q1rk1/1p3pbp/2n3p1/p1Pppb2/3N1B2/2P1P2P/PP1QBPP1/R4RK1 w - - 0 13,d4f5 g6f5 f4g3 a8c8 f1d1,1550,advantage opening long
+m00323,3r3r/pb3pk1/1p5p/3NPqp1/5P1Q/7P/PP1R2PK/3R4 w - - 0 29,d5e3 f5e4 h4g3 d8d2 d1d2,1859,advantage middlegame long quietMove
+m00324,8/p4ppk/1b1r3p/1P6/2P3q1/5N2/P2B3N/4R2K w - - 0 33,h2g4 d6d3 d2e3 f7f6 e3b6,1577,crushing middlegame long
+m00325,8/1k6/8/pK3np1/P7/7p/8/6R1 w - - 0 65,g1g5 h3h2 g5h5 f5d4 b5a5,1628,advantage endgame long
+m00326,2r1r1k1/1p3pb1/p2p1q1p/P2P2p1/2n1P3/1P4BP/2Q2PP1/1R2R1K1 w - - 0 25,b3c4 f6c3 c2a4 c3c4 a4d7,1574,advantage middlegame long
+m00327,3r2k1/4pp1p/p5p1/Q5P1/2B3qP/1P6/P7/5K2 w - - 3 29,a5d8 g8g7 d8e7 g4f5 f1e2,1586,crushing middlegame long
+m00328,2n5/1R2npkN/2p3p1/4p3/4P3/1P2KPN1/2P3PP/3r4 w - - 1 29,h7g5 d1b1 h2h4 b1g1 e3f2,1898,crushing middlegame long quietMove
+m00329,3qr1k1/4Bpp1/7p/p1rp4/Pp6/1P2P2P/3nNPP1/1RR3K1 w - - 0 25,e7d8 c5c1 b1c1 e8d8 e2d4,1586,advantage middlegame long
+m00330,1r3r2/B1R2pbk/p1q2npp/1p2p3/4P3/2P2N1P/PP3PP1/3R2K1 w - - 0 25,c7c6 b8a8 c6a6 f8c8 f3e5,1550,advantage middlegame long
+m00331,7r/k1p5/2K1R3/2P5/8/8/8/8 w - - 0 97,c6c7 h8h7 c7c6 h7h3 e6d6,1625,advantage endgame long
+m00332,8/4k1p1/1p2pp2/7p/nrPNP2P/5PP1/8/R5K1 w - - 10 57,d4c6 e7d6 c6b4 a4b2 a1c1,1598,crushing middlegame long
+m00333,1R6/8/8/1p3r2/pk6/2bB4/K1P5/8 w - - 11 53,d3f5 b4c5 f5d7 c5d4 d7b5,1619,crushing endgame long
+m00334,rr4k1/2pqp1b1/p2pp3/6p1/p1PPN2n/2PQ3P/5PP1/R3R1K1 w - - 0 25,e4g5 h4f5 e1e6 b8f8 g2g4,1562,advantage middlegame long
+m00335,6k1/pp3pp1/4p2p/1q1pP1N1/1b1P4/rP6/5PPP/1Q3RK1 w - - 2 25,b1h7 g8f8 h7h8 f8e7 g5h7,1586,advantage middlegame long
+m00336,r2q1rk1/pp2b1pp/4pp2/8/2BP1BPP/2n1P3/5P2/R2QK2R w KQ - 0 17,c4e6 g8h8 d1b3 d8b6 b3b6,1550,advantage middlegame long
+m00337,4rrk1/1p4pp/p3pb2/2P1B3/1P2qP2/P7/6PP/4RRK1 w - - 0 25,e1e4 f6e5 e4e5 g7g6 f1e1,1589,advantage middlegame long
+m00338,3k3r/1r1n1pp1/3P2p1/p7/P1p2BP1/5P1P/6K1/1R6 w - - 0 29,b1b7 h8e8 g2f2 e8e6 b7c7,1583,advantage middlegame long
+m00339,5R2/1p5r/p7/8/P2pk1K1/1P2b1P1/8/3R4 w - - 5 45,f8e8 e4d5 e8e3 h7g7 g4f3,1592,crushing endgame long
+m00340,3r2k1/2p2bp1/2p2p2/p3pN1p/PrP1P3/6PP/5PK1/4Q3 w - - 4 37,f5e7 g8h7 e7c6 d8d4 c6b4,1583,advantage middlegame long
+m00341,r4rk1/p4ppp/bp6/2ppq3/7P/3P2P1/PPP2PB1/R3R1K1 w - - 0 17,e1e5 a8e8 a1e1 e8e5 e1e5,1577,advantage middlegame long
+m00342,8/2B5/2p5/5k2/2PP4/1P1nP3/1P1K4/1r6 w - - 0 41,d2d3 b1b2 d3c3 b2b1 c3b4,1619,advantage endgame long
+m00343,8/8/7p/5k2/3K1P1P/8/8/8 w - - 1 53,d4e3 f5g4 e3e4 g4h4 f4f5,1949,crushing endgame long quietMove
+m00344,8/1p1r1pp1/2pN3p/P2bP3/3P1P2/2K3Pk/P4R2/8 w - - 6 37,f2b2 d7d8 b2b7 d8a8 f4f5,1889,advantage middlegame long quietMove
+m00345,2r3k1/1p1brpqp/p2Q4/2n5/8/5N2/PP3PPP/R4RK1 w - - 0 21,d6e7 d7b5 f1c1 b7b6 c1c2,1550,crushing middlegame long
+m00346,3r2k1/p4p2/1p5p/6pN/8/5b2/P4PPP/2K4R w - - 0 29,g2f3 d8d3 f3f4 d3a3 c1b2,1616,advantage middlegame long
+m00347,8/1P3n2/6pk/8/2p1p3/7P/2p1K3/8 w - - 0 53,e2d2 e4e3 d2c2 e3e2 c2d2,1940,crushing endgame long quietMove
+m00348,r5k1/5p1p/2bNp1p1/p7/2P1p3/4Q1P1/r3PPKP/8 w - - 0 29,e3b6 c6e8 b6b7 a8d8 b7e7,1874,advantage middlegame long quietMove
+m00349,5rk1/pb2b1p1/1pp1p1B1/8/2PpP3/8/PP2Q1P1/1K1N1r2 w - - 2 25,e2h5 f1d1 b1c2 d1c1 c2c1,1892,crushing middlegame long quietMove

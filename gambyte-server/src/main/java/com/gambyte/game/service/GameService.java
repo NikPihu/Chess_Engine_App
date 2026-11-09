@@ -379,6 +379,8 @@ public class GameService {
     record.finish(game.status(), game.winner(), game.termination(), game.moves(), game.moveTimes(),
         game.fen());
     record.setOpening(Openings.name(game.sans()));
+    int[] blurs = game.blurs();
+    record.setBlurs(blurs[0], blurs[1]);
     repo.save(record);
     events.publish(game.id(), GameEvent.end(game.version(), game.status().name(), game.winner(),
         game.termination(), clock(game), wDiff, bDiff));
@@ -480,6 +482,11 @@ public class GameService {
         .toList();
     Instant next = rows.size() == size ? rows.getLast().getCreatedAt() : null;
     return new GamePage(out, next);
+  }
+
+  /** All running games (used by the tournament pairer to know who is busy). */
+  public List<LiveGame> ongoingAll() {
+    return live.all().stream().filter(g -> !g.status().isOver()).toList();
   }
 
   /** Number of games being played right now. */

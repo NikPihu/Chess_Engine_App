@@ -45,6 +45,21 @@ public class GameRecord {
   private String opening;
   private Instant createdAt = Instant.now();
   private Instant endedAt;
+  private int whiteBlurs;
+  private int blackBlurs;
+
+  public void setBlurs(int white, int black) {
+    this.whiteBlurs = white;
+    this.blackBlurs = black;
+  }
+
+  public int getWhiteBlurs() {
+    return whiteBlurs;
+  }
+
+  public int getBlackBlurs() {
+    return blackBlurs;
+  }
 
   protected GameRecord() {}
 

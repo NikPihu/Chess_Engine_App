@@ -1,0 +1,15 @@
+# Gambyte web image: the built React app served by Caddy, which also terminates HTTPS and proxies
+# /api and /ws to the server container.
+#
+#   docker build -f deploy/Dockerfile.web -t gambyte-web .     (from the repository root)
+
+FROM node:22-alpine AS build
+WORKDIR /web
+COPY gambyte-web/package.json gambyte-web/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY gambyte-web .
+RUN npm run build
+
+FROM caddy:2-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /web/dist /srv

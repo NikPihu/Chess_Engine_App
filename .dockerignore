@@ -1,0 +1,18 @@
+# Keep Docker build contexts small: training data (GBs), build outputs and dependencies are never
+# needed inside the images.
+.git
+tools/data
+tools/results
+tools/versions
+tools/lichess-bot
+tools/bin
+tools/books
+**/target
+**/node_modules
+gambyte-web/dist
+chess_engine_v3/build
+chess_engine_v3/bin
+chess_engine_v3/train_new
+**/*.pt
+**/*.ckpt
+deploy/.env

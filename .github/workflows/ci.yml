@@ -5,7 +5,9 @@ on:
   pull_request:
 
 jobs:
-  build:
+  # Engines (v1, v2) and the Gambyte server: unit tests, ArchUnit rules, and Testcontainers
+  # integration tests (GitHub's Ubuntu runners have Docker).
+  java:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,5 +16,32 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Build, test and check formatting
+      - name: Build and test
         run: mvn -B -ntp verify
+
+  # The React app: type check, unit tests, production build.
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gambyte-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: gambyte-web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # The production images build (engine compiled for Linux, server jar, web + Caddy).
+  docker:
+    runs-on: ubuntu-latest
+    needs: [java, web]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f deploy/Dockerfile.server -t gambyte-server .
+      - run: docker build -f deploy/Dockerfile.web -t gambyte-web .

@@ -1,5 +1,9 @@
 # Chess_Engine_App — Roadmap
 
+> **Part C is built as Gambyte** (2026-11): see [ARCHITECTURE.md](ARCHITECTURE.md), [RUNBOOK.md](RUNBOOK.md),
+> [API.md](API.md), [SECURITY.md](SECURITY.md) and ADRs 0007–0012. Beyond the original plan it also has
+> puzzles, lessons, game review with a coach, arena tournaments, a bot API and Premium (Razorpay).
+
 > A chess.com-style platform built from scratch: **our own Java chess engine**, a **Spring Boot**
 > backend with real-time matchmaking, a **React** frontend, **fair-play (anti-cheat)** checks, and an
 > **LLM Arena** where language models play each other and our engine.
@@ -20,10 +24,10 @@
 | 6 | [Strength sprints](phases/06-strength.md) | B · Strength | `engine-v2.0`: +296 Elo over v1, every feature proven in ledger | ✅ |
 | 7 | [Lichess bot](phases/07-lichess-bot.md) | B · Strength | BOT nikpihu live on lichess.org: blitz 2289 (provisional) | ✅ |
 | v2 | [Engine v2: NNUE + self-play learning](phases/v2-nnue.md) | B2 · Learning | gen-2 NNUE beats v1 by ~+76 Elo (SPRT); `engine gui` → Watch | ✅ |
-| 8 | Backend core | C · Product | `docker compose up` + play a game via Swagger UI | ⬜ |
-| 9 | Web frontend | C · Product | `npm run dev` → play vs engine at localhost:5173 | ⬜ |
-| 10 | Real-time multiplayer | C · Product | Two browser windows matched, timed game, ratings move | ⬜ |
-| 11 | Fair play, hardening, deploy | C · Product | Public URL + fair-play report on a suspicious game | ⬜ |
+| 8 | Backend core ([gambyte-server](../gambyte-server/README.md)) | C · Product | `docker compose up` + play a game via Swagger UI | ✅ |
+| 9 | Web frontend ([gambyte-web](../gambyte-web/README.md)) | C · Product | `npm run dev` → play vs engine at localhost:5173 | ✅ |
+| 10 | Real-time multiplayer | C · Product | Two browser windows matched, timed game, ratings move | ✅ |
+| 11 | Fair play, hardening, deploy ([runbook](RUNBOOK.md)) | C · Product | Public URL + fair-play report on a suspicious game | 🟨 built; deploy pending |
 | 12 | LLM Arena harness | D · Arena | `arena run …` → PGN + JSON token/legality report | ⬜ |
 | 13 | Arena in app + prompt optimisation | D · Arena | Arena leaderboard page + experiment ledger | ⬜ |
 

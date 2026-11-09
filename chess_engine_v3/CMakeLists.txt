@@ -29,7 +29,11 @@ if(MSVC)
   # MSVC's /arch:AVX2 allows BMI2 instructions but does not define the GCC-style macro.
   add_compile_definitions(V3_BMI2=1 _CRT_SECURE_NO_WARNINGS)
 else()
-  add_compile_options(-Wall -Wextra -march=native -mbmi2 -mavx2)
+  # V3_MARCH=native tunes for the build machine; Docker images built on one machine and run on
+  # another use a fixed target instead (e.g. -DV3_MARCH=haswell: AVX2 + BMI2, every x86 server
+  # since 2013, including AWS t3 instances).
+  set(V3_MARCH "native" CACHE STRING "CPU target for -march (native, haswell, x86-64-v3, ...)")
+  add_compile_options(-Wall -Wextra -march=${V3_MARCH} -mbmi2 -mavx2)
   add_compile_options($<$<CONFIG:Release>:-O3>)
   add_compile_definitions(V3_BMI2=1)
 endif()

@@ -3,7 +3,7 @@ server:
   servlet:
     session:
       cookie:
-        secure: true        # cookies only over HTTPS (Caddy terminates TLS)
+        secure: ${COOKIE_SECURE:true}   # cookies only over HTTPS; set false only to test by IP over plain HTTP
 
 logging:
   structured:

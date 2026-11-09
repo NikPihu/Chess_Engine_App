@@ -1,6 +1,6 @@
 # ADR-0004 — Session-cookie auth over JWT
 
-- **Status:** proposed (to be confirmed at the start of Phase 8)
+- **Status:** accepted (implemented in gambyte-server, 2026-11-09)
 - **Date:** 2026-10-31
 
 ## Context

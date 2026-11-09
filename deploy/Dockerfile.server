@@ -1,0 +1,42 @@
+# Gambyte server image: the Spring Boot app plus the C++ engine, built from source.
+#
+#   docker build -f deploy/Dockerfile.server -t gambyte-server .     (from the repository root)
+#
+# Three stages keep the final image small: compilers and Maven never reach production.
+
+# ---- 1. The engine (chess_engine_v3), compiled for Linux ---------------------------------------
+FROM debian:bookworm-slim AS engine
+RUN apt-get update && apt-get install -y --no-install-recommends g++ cmake make && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY chess_engine_v3 chess_engine_v3
+# haswell = AVX2 + BMI2: runs on every x86 server since 2013 (AWS t3 included) even when the image
+# is built on a different machine. The live network (best.nnue) is embedded into the binary.
+RUN cmake -S chess_engine_v3 -B build -DCMAKE_BUILD_TYPE=Release -DV3_MARCH=haswell \
+        -DV3_DEFAULT_NET=/src/chess_engine_v3/nets/best.nnue \
+ && cmake --build build --target engine_v3 -j"$(nproc)" \
+ && /src/chess_engine_v3/bin/engine_v3 bench 2>/dev/null | tail -1
+
+# ---- 2. The server jar (and chess_engine_v1, whose rules it uses) ------------------------------
+FROM maven:3.9-eclipse-temurin-21 AS server
+WORKDIR /src
+COPY pom.xml .
+COPY chess_engine_v1 chess_engine_v1
+COPY chess_engine_v2/pom.xml chess_engine_v2/pom.xml
+COPY gambyte-server gambyte-server
+RUN mvn -B -ntp -q -pl gambyte-server -am package -DskipTests \
+ && cp gambyte-server/target/gambyte-server-*.jar /app.jar
+
+# ---- 3. Runtime --------------------------------------------------------------------------------
+FROM eclipse-temurin:21-jre
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*  && useradd --system --uid 10001 gambyte
+WORKDIR /app
+COPY --from=engine /src/chess_engine_v3/bin/engine_v3 /app/engine/engine_v3
+COPY --from=server /app.jar /app/gambyte.jar
+USER gambyte
+ENV SPRING_PROFILES_ACTIVE=prod \
+    ENGINE_PATH=/app/engine/engine_v3 \
+    JAVA_OPTS="-XX:MaxRAMPercentage=60 -XX:+UseSerialGC"
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \
+  CMD curl -fs http://localhost:8080/actuator/health/liveness || exit 1
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/gambyte.jar"]

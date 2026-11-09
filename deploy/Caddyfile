@@ -1,0 +1,36 @@
+# Caddy: automatic HTTPS (Let's Encrypt), compression, security headers, static files and the
+# reverse proxy to the Spring Boot server. {$SITE_ADDRESS} comes from the environment, e.g.
+# "gambyte.example.com" (HTTPS) or ":80" (plain HTTP, for a first test by IP address).
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# Razorpay Checkout needs its script, frames and API; everything else is same-origin.
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://checkout.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; connect-src 'self' wss: https://lumberjack.razorpay.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'"
+		-Server
+	}
+
+	# API, WebSocket, bot streams and API docs go to the server.
+	@backend path /api/* /ws /ws/* /v3/api-docs* /swagger-ui* /actuator/health*
+	handle @backend {
+		reverse_proxy server:8080 {
+			# NDJSON bot streams and WebSockets must not be buffered.
+			flush_interval -1
+		}
+	}
+
+	# Hashed asset files never change: cache them for a year.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# Everything else is the single-page app.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

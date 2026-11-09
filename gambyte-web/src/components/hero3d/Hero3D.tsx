@@ -1,10 +1,13 @@
 /**
  * React wrapper for the 3D hero scene. three.js (~150 kB gzipped) is loaded only here, on the
- * landing page, after first paint; until it is ready (or if WebGL is unavailable) the lighter
- * code-drawn scene is shown, so the page never waits on the 3D.
+ * landing page. While it loads only the ember glow is shown (the 3D then fades in); the lighter
+ * code-drawn scene is used only when WebGL is unavailable, so visitors never see two designs.
  */
 import { useEffect, useRef, useState } from 'react';
 import { HeroScene } from '@/components/HeroScene';
+
+/** Start fetching three.js immediately when the landing page code loads (saves a round trip). */
+const sceneModule = import('./scene');
 
 function webglAvailable(): boolean {
   try {
@@ -27,7 +30,7 @@ export function Hero3D() {
     }
     let dispose: (() => void) | undefined;
     let cancelled = false;
-    import('./scene')
+    sceneModule
       .then(({ createHeroScene }) => {
         if (cancelled || !canvasRef.current) return;
         dispose = createHeroScene(canvasRef.current, {
@@ -49,11 +52,12 @@ export function Hero3D() {
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
       {/* Ember back-glow behind the pieces (bloom-like, cheaper than post-processing) */}
       <div className="absolute top-[45%] left-[56%] h-[60vmin] w-[42vmin] -translate-x-1/2 -translate-y-1/2 animate-glow rounded-full bg-[radial-gradient(circle,rgba(229,83,45,0.45)_0%,rgba(198,63,28,0.18)_45%,transparent_72%)] blur-3xl" />
-      {!ready && <HeroScene />}
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 h-full w-full transition-opacity duration-[1400ms] max-md:translate-y-[12%] ${ready ? 'opacity-100 max-md:opacity-55' : 'opacity-0'}`}
+        className={`absolute inset-0 h-full w-full transition-opacity duration-[900ms] max-md:translate-y-[12%] ${ready ? 'opacity-100 max-md:opacity-55' : 'opacity-0'}`}
       />
+      {/* Black film: dims the whole scene slightly so the white headline always sits on top */}
+      <div className="absolute inset-0 bg-noir-950/30" />
       {/* Scrim behind the headline column so the copy stays readable over the pieces */}
       <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-noir-950/85 via-noir-950/35 to-transparent md:w-[60%]" />
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-noir-950/90 to-transparent md:hidden" />

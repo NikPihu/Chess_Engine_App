@@ -1,0 +1,15 @@
+# Production overrides (AWS). Everything secret comes from environment variables.
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true        # cookies only over HTTPS (Caddy terminates TLS)
+
+logging:
+  structured:
+    format:
+      console: ecs          # JSON logs, one line per event (easy to search)
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}

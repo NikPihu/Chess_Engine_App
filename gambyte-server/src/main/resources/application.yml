@@ -1,0 +1,121 @@
+# Gambyte server configuration.
+#
+# Every value can be overridden by an environment variable (Spring's relaxed binding:
+# gambyte.engine.path -> GAMBYTE_ENGINE_PATH). Secrets are NEVER written here: they come from
+# environment variables (see deploy/.env.example).
+#
+# Profiles:  dev  (default, local docker-compose)   prod  (the server on AWS)
+
+spring:
+  application:
+    name: gambyte
+  profiles:
+    default: dev
+  threads:
+    virtual:
+      enabled: true          # Java 21 virtual threads: blocking I/O never starves request threads
+  jpa:
+    open-in-view: false      # no lazy loading during view rendering: queries happen in services only
+    hibernate:
+      ddl-auto: validate     # Flyway owns the schema; Hibernate only checks it matches the entities
+    properties:
+      hibernate:
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gambyte}
+    username: ${DATABASE_USER:gambyte}
+    password: ${DATABASE_PASSWORD:gambyte}
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:10}
+      minimum-idle: 2
+      connection-timeout: 5000
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+  session:
+    timeout: 30d             # stay logged in for a month (sessions live in Redis)
+    redis:
+      namespace: gambyte:session
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=60s
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  jackson:
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 2MB
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful         # finish in-flight requests and save live games before stopping
+  compression:
+    enabled: true
+    mime-types: application/json,text/plain,application/x-ndjson
+  servlet:
+    session:
+      cookie:
+        name: GAMBYTE_SESSION
+        http-only: true
+        same-site: lax
+  forward-headers-strategy: framework   # trust X-Forwarded-* from Caddy (real client IP, https)
+
+management:
+  health:
+    mail:
+      enabled: false       # SMTP is optional; its absence must not mark the server DOWN
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# ------------------------------------------------------------------ Gambyte's own settings
+gambyte:
+  site-url: ${SITE_URL:http://localhost:5173}     # used in emails and CORS
+  engine:
+    # The C++ engine (chess_engine_v3). In Docker it is built for Linux into /app/engine/engine_v3.
+    path: ${ENGINE_PATH:../chess_engine_v3/bin/engine_v3.exe}
+    eval-file: ${ENGINE_EVAL_FILE:}               # empty = the network built into the binary
+    syzygy-path: ${ENGINE_SYZYGY_PATH:}
+    pool-size: ${ENGINE_POOL_SIZE:2}              # warm engine processes
+    threads: ${ENGINE_THREADS:1}                  # search threads per process
+    hash-mb: ${ENGINE_HASH_MB:32}
+    borrow-timeout-ms: 10000
+  mail:
+    from: ${MAIL_FROM:Gambyte <no-reply@gambyte.local>}
+  coach:
+    anthropic-api-key: ${ANTHROPIC_API_KEY:}     # empty = the AI chat coach is switched off
+    model: ${COACH_MODEL:claude-haiku-5-5}
+    max-tokens: 600
+  payment:
+    razorpay:
+      key-id: ${RAZORPAY_KEY_ID:}
+      key-secret: ${RAZORPAY_KEY_SECRET:}
+      webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+      plan-monthly: ${RAZORPAY_PLAN_MONTHLY:}
+      plan-yearly: ${RAZORPAY_PLAN_YEARLY:}
+  limits:
+    free-reviews-per-day: 1
+    free-puzzles-per-day: 25

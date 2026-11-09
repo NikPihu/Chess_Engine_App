@@ -1,0 +1,4 @@
+# Local development (deploy/docker-compose.yml provides Postgres on 5432 and Redis on 6379).
+logging:
+  level:
+    com.gambyte: DEBUG

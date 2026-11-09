@@ -1,0 +1,37 @@
+# Local development services for Gambyte.
+#
+#   docker compose -f deploy/docker-compose.yml up -d      start Postgres + Redis
+#   docker compose -f deploy/docker-compose.yml down       stop (data is kept in volumes)
+#   docker compose -f deploy/docker-compose.yml down -v    stop and DELETE the data
+#
+# The server (mvn -pl gambyte-server spring-boot:run) and the web app (npm run dev) run on your
+# machine and connect to these on localhost. Production uses docker-compose.prod.yml instead.
+name: gambyte-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: gambyte
+      POSTGRES_USER: gambyte
+      POSTGRES_PASSWORD: gambyte
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gambyte"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]   # survive restarts (sessions, queues)
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:

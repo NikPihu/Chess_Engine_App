@@ -5,7 +5,6 @@ import com.anthropic.client.okhttp.AnthropicOkHttpClient;
 import com.anthropic.errors.AnthropicServiceException;
 import com.anthropic.errors.RateLimitException;
 import com.anthropic.models.beta.AnthropicBeta;
-import com.anthropic.models.beta.messages.BetaContentBlock;
 import com.anthropic.models.beta.messages.BetaFallbacksParam;
 import com.anthropic.models.beta.messages.BetaMessage;
 import com.anthropic.models.beta.messages.BetaOutputConfig;
@@ -142,10 +141,5 @@ public class CoachChatService {
   @PreDestroy
   void close() {
     if (client != null) client.close();
-  }
-
-  /** Visible for the UI: whether a block is text (keeps the SDK types out of controllers). */
-  static boolean isText(BetaContentBlock block) {
-    return block.text().isPresent();
   }
 }

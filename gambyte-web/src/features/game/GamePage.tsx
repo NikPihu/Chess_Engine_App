@@ -75,8 +75,9 @@ export default function GamePage() {
   const vsEngine = Boolean(game.white.engineLevel || game.black.engineLevel);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <section className="mx-auto w-full max-w-[min(92vw,calc(100vh-12rem))]">
+    <div className="grid animate-fade gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:gap-10">
+      <section className="relative mx-auto w-full max-w-[min(94vw,calc(100vh-17rem))]">
+        <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ember-600/10 blur-[100px]" />
         <PlayerBar
           player={game[top]}
           color={top}
@@ -105,30 +106,40 @@ export default function GamePage() {
       </section>
 
       <aside className="flex flex-col gap-4">
-        <div className="card p-4">
-          <p className="text-sm text-ink-300">
-            {timeControlLabel(game.clock.initial, game.clock.increment)} · {game.rated ? 'Rated' : 'Casual'}{' '}
-            {game.perf}
-            {vsEngine && ' · vs Gambyte Engine'}
+        <div className="card p-5">
+          <div className="flex items-center justify-between">
+            <p className="eyebrow">
+              {game.rated ? 'Rated' : 'Casual'} · {game.perf} · {timeControlLabel(game.clock.initial, game.clock.increment)}
+            </p>
+            {live ? (
+              <span className="eyebrow flex items-center gap-1.5 text-ember-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember-500" /> Live</span>
+            ) : (
+              <span className="eyebrow">Finished</span>
+            )}
+          </div>
+          <p className="mt-2 text-lg font-light tracking-tight">
+            {game.white.username} <span className="text-noir-500">vs</span> {game.black.username}
+            {vsEngine && <span className="ml-2 text-sm text-noir-400">· Gambyte Engine</span>}
           </p>
           {!live && <GameResult game={game} />}
           {game.drawOffer && live && myColor && game.drawOffer !== myColor && (
-            <div className="mt-3 flex items-center justify-between rounded-lg bg-ink-800 p-2 text-sm">
-              Your opponent offers a draw
+            <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-2 pl-4 text-sm">
+              Draw offered
               <span className="flex gap-1">
-                <button className="btn-primary px-3 py-1" onClick={() => action('draw')}>Accept</button>
-                <button className="btn-secondary px-3 py-1" onClick={() => action('draw/decline')}>Decline</button>
+                <button className="btn-primary px-4 py-1.5" onClick={() => action('draw')}>Accept</button>
+                <button className="btn-ghost px-3 py-1.5" onClick={() => action('draw/decline')}>Decline</button>
               </span>
             </div>
           )}
-          {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+          {error && <p className="mt-2 text-sm text-loss">{error}</p>}
         </div>
 
-        <div className="card p-3">
+        <div className="card p-4">
+          <p className="eyebrow mb-3">Moves</p>
           <MoveList sans={game.sans} current={shownPly ?? game.sans.length - 1} onSelect={setShownPly} />
         </div>
 
-        <div className="card flex flex-wrap gap-2 p-3">
+        <div className="flex flex-wrap gap-2">
           {live && myColor && (
             <>
               {game.moves.length < 2 ? (
@@ -136,7 +147,7 @@ export default function GamePage() {
                   <X size={16} /> Abort
                 </button>
               ) : confirmResign ? (
-                <button className="btn bg-red-600 text-white hover:bg-red-500" onClick={() => { setConfirmResign(false); void action('resign'); }}>
+                <button className="btn-danger" onClick={() => { setConfirmResign(false); void action('resign'); }}>
                   <Flag size={16} /> Confirm resign
                 </button>
               ) : (
@@ -158,7 +169,7 @@ export default function GamePage() {
           )}
           {!live && myColor && (
             <>
-              <button className="btn-primary" onClick={() => action('rematch')}>
+              <button className="btn-accent" onClick={() => action('rematch')}>
                 <Repeat size={16} /> {game.rematchOffer && game.rematchOffer !== myColor ? 'Accept rematch' : 'Rematch'}
               </button>
               <Link to={`/review/${game.id}`} className="btn-secondary">
@@ -181,7 +192,7 @@ export default function GamePage() {
               )}
             </>
           )}
-          <button className="btn-ghost" onClick={() => setFlipped((f) => !f)} aria-label="Flip board">
+          <button className="btn-secondary ml-auto px-3" onClick={() => setFlipped((f) => !f)} aria-label="Flip board">
             <FlipVertical2 size={16} />
           </button>
         </div>
@@ -195,9 +206,10 @@ export default function GamePage() {
 function GameResult({ game }: { game: GameView }) {
   const score = game.winner === 'white' ? '1-0' : game.winner === 'black' ? '0-1' : game.status === 'ABORTED' ? '' : '½-½';
   return (
-    <div className="mt-3 rounded-lg bg-ink-800 p-3 text-center">
-      {score && <p className="text-2xl font-bold">{score}</p>}
-      <p className="text-sm text-ink-300">{game.termination}</p>
+    <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 text-center">
+      <div className="absolute inset-x-0 -top-10 mx-auto h-24 w-48 rounded-full bg-ember-500/25 blur-3xl" />
+      {score && <p className="num relative text-5xl font-extralight tracking-tight">{score}</p>}
+      <p className="relative mt-2 text-sm text-noir-300">{game.termination}</p>
     </div>
   );
 }

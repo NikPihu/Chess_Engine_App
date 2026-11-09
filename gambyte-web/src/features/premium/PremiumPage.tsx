@@ -4,6 +4,7 @@
  * turns premium on.
  */
 import { useState } from 'react';
+import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Crown } from 'lucide-react';
@@ -91,45 +92,56 @@ export default function PremiumPage() {
   if (plans.isLoading) return <Spinner />;
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <header className="mb-8 text-center">
-        <Crown className="mx-auto mb-2 text-amber-300" size={36} />
-        <h1 className="text-3xl font-extrabold">Gambyte Premium</h1>
-        <p className="mt-2 text-ink-400">Playing on Gambyte is free forever. Premium adds unlimited training tools.</p>
+    <div className="relative mx-auto max-w-5xl">
+      <div className="pointer-events-none absolute -top-20 left-1/2 h-80 w-[60%] -translate-x-1/2 rounded-full bg-gold/10 blur-[120px]" />
+      <header className="relative mb-12 animate-rise text-center">
+        <span className="tag"><Crown size={13} className="text-gold" /> Gambyte Premium</span>
+        <h1 className="display mt-6 text-[clamp(3rem,8vw,6.5rem)]">
+          Train <span className="font-extralight text-noir-400">without</span>
+          <br />
+          limits<span className="text-gold">.</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-lg text-noir-400">Playing on Gambyte is free forever. Premium unlocks unlimited reviews, the AI coach and unlimited puzzles.</p>
       </header>
 
       {me?.premium && (
-        <div className="card mb-6 p-4 text-center">
-          <p className="font-semibold text-amber-300">You are Premium until {new Date(me.premiumUntil!).toLocaleDateString()}. Thank you!</p>
-          <button className="btn-ghost mt-2 text-sm" onClick={() => cancel.mutate()} disabled={cancel.isPending || cancel.isSuccess}>
-            {cancel.isSuccess ? 'Renewal cancelled - premium stays until the date above' : 'Cancel renewal'}
+        <div className="card mb-6 flex flex-wrap items-center justify-between gap-3 border-gold/30 p-5">
+          <p className="flex items-center gap-2 text-gold"><Crown size={16} /> Premium until {new Date(me.premiumUntil!).toLocaleDateString()}. Thank you!</p>
+          <button className="btn-ghost text-sm" onClick={() => cancel.mutate()} disabled={cancel.isPending || cancel.isSuccess}>
+            {cancel.isSuccess ? 'Renewal cancelled - premium stays until then' : 'Cancel renewal'}
           </button>
         </div>
       )}
-      {success && <p className="card mb-6 p-4 text-center text-brand-400">Payment received - welcome to Premium!</p>}
+      {success && <p className="card mb-6 border-win/30 p-5 text-center text-win">Payment received - welcome to Premium!</p>}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {plans.data?.plans.map((p) => (
-          <div key={p.id} className="card flex flex-col p-6">
-            <h2 className="text-lg font-bold">{p.name}</h2>
-            <p className="mt-2 text-4xl font-extrabold">
-              ₹{p.priceInr}
-              <span className="text-base font-normal text-ink-400"> / {p.period}</span>
-            </p>
-            {p.id === 'yearly' && <p className="text-sm text-brand-400">Save {Math.round(100 - (1499 / (199 * 12)) * 100)}%</p>}
-            <ul className="mt-4 flex-1 space-y-2 text-sm">
-              {p.perks.map((perk) => (
-                <li key={perk} className="flex gap-2"><Check size={16} className="shrink-0 text-brand-400" /> {perk}</li>
-              ))}
-            </ul>
-            <button className="btn-primary mt-6" disabled={!plans.data?.paymentsEnabled || me?.premium} onClick={() => buy(p)}>
-              {plans.data?.paymentsEnabled ? (me?.premium ? 'Active' : 'Subscribe') : 'Coming soon'}
-            </button>
-          </div>
-        ))}
+      <div className="relative grid gap-5 md:grid-cols-2">
+        {plans.data?.plans.map((p) => {
+          const best = p.id === 'yearly';
+          return (
+            <div key={p.id} className={clsx('card relative flex flex-col overflow-hidden p-8', best && 'border-gold/40')}>
+              {best && <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-gold/15 blur-3xl" />}
+              <div className="relative flex items-center justify-between">
+                <p className="eyebrow">{p.id === 'monthly' ? '01/ Monthly' : '02/ Yearly'}</p>
+                {best && <span className="rounded-full bg-gold px-3 py-1 font-mono text-[10px] font-bold tracking-widest text-noir-950">SAVE {Math.round(100 - (1499 / (199 * 12)) * 100)}%</span>}
+              </div>
+              <p className="relative mt-8 flex items-baseline gap-2">
+                <span className="num text-6xl font-extralight tracking-tight">₹{p.priceInr}</span>
+                <span className="text-noir-400">/ {p.period}</span>
+              </p>
+              <ul className="relative mt-8 flex-1 space-y-3 text-sm">
+                {p.perks.map((perk) => (
+                  <li key={perk} className="flex gap-3 text-noir-200"><Check size={16} className="mt-0.5 shrink-0 text-gold" /> {perk}</li>
+                ))}
+              </ul>
+              <button className={clsx('relative mt-8 py-3.5', best ? 'btn-primary' : 'btn-secondary')} disabled={!plans.data?.paymentsEnabled || me?.premium} onClick={() => buy(p)}>
+                {plans.data?.paymentsEnabled ? (me?.premium ? 'Active' : 'Subscribe') : 'Coming soon'}
+              </button>
+            </div>
+          );
+        })}
       </div>
-      {error && <p className="mt-4 text-center text-sm text-red-300">{error}</p>}
-      <p className="mt-6 text-center text-xs text-ink-400">Payments by Razorpay (UPI, cards, netbanking). Cancel any time.</p>
+      {error && <p className="mt-4 text-center text-sm text-loss">{error}</p>}
+      <p className="eyebrow mt-8 text-center">Payments by Razorpay · UPI, cards, netbanking · cancel any time</p>
     </div>
   );
 }

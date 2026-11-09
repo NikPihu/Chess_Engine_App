@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, GraduationCap } from 'lucide-react';
 import { api } from '@/lib/api';
+import { PageHeader } from '@/components/PageHeader';
 import { Spinner } from '@/components/Spinner';
 
 interface LessonSummary {
@@ -23,27 +24,26 @@ export default function LearnPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="flex items-center gap-2 text-2xl font-bold"><GraduationCap /> Learn chess</h1>
-        <p className="mt-1 text-ink-400">Short interactive lessons - read, then solve on the board.</p>
-      </header>
+      <PageHeader eyebrow="Learn" title={<>Learn by doing<span className="text-ember-500">.</span></>} kicker="Short interactive lessons: read the idea, then prove it on the board.">
+        <GraduationCap className="text-ember-400" />
+      </PageHeader>
       {[...groups.entries()].map(([category, lessons]) => (
         <section key={category}>
-          <h2 className="mb-3 text-lg font-semibold">{category}</h2>
+          <h2 className="eyebrow mb-4">{category}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {lessons.map((l) => {
               const done = l.completedSteps >= l.steps;
               return (
-                <Link key={l.slug} to={`/learn/${l.slug}`} className="card block p-4 transition hover:border-brand-600">
+                <Link key={l.slug} to={`/learn/${l.slug}`} className="card card-hover group block p-6">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold">{l.title}</h3>
-                    {done && <CheckCircle2 size={18} className="shrink-0 text-brand-400" />}
+                    <h3 className="text-xl font-light tracking-tight">{l.title}</h3>
+                    {done && <CheckCircle2 size={18} className="shrink-0 text-ember-300" />}
                   </div>
                   <p className="mt-1 text-sm text-ink-400">{l.summary}</p>
                   <div className="mt-3 flex items-center gap-2 text-xs text-ink-400">
-                    <span className="rounded bg-ink-700 px-2 py-0.5">{l.level}</span>
+                    <span className="tag px-2.5 py-1 text-[10px]">{l.level}</span>
                     <div className="h-1.5 flex-1 overflow-hidden rounded bg-ink-700">
-                      <div className="h-full bg-brand-500" style={{ width: `${(100 * l.completedSteps) / l.steps}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-ember-700 to-ember-400" style={{ width: `${(100 * l.completedSteps) / l.steps}%` }} />
                     </div>
                   </div>
                 </Link>

@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { Shield } from 'lucide-react';
 import { api, errorMessage } from '@/lib/api';
 import { useMe } from '@/features/auth/useAuth';
+import { PageHeader } from '@/components/PageHeader';
 
 type Row = Record<string, string | number | boolean | null>;
 
@@ -32,7 +33,7 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="flex items-center gap-2 text-2xl font-bold"><Shield /> Moderation</h1>
+      <PageHeader eyebrow="Staff" title="Moderation" kicker="Fair-play flags, player reports and account actions. Every action is logged."><Shield className="text-ember-400" /></PageHeader>
       {stats.data && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
           {Object.entries(stats.data).map(([k, v]) => (
@@ -55,12 +56,12 @@ export default function AdminPage() {
             <thead className="text-left text-xs uppercase text-ink-400">
               <tr><th className="p-3">Player</th><th>Game</th><th>Suspicion</th><th>Engine match</th><th>ACPL</th><th>Time CV</th><th>Blurs</th><th>Flags</th><th /></tr>
             </thead>
-            <tbody className="divide-y divide-ink-700">
+            <tbody className="divide-y divide-white/[0.06]">
               {flags.data?.map((f) => (
                 <tr key={`${f.game_id}-${f.user_id}`}>
-                  <td className="p-3"><Link to={`/@/${f.username}`} className="text-brand-400">{f.username}</Link> ({f.rating})</td>
-                  <td><Link to={`/game/${f.game_id}`} className="font-mono text-brand-400">{f.game_id}</Link></td>
-                  <td className="font-bold text-red-300">{Math.round(Number(f.suspicion) * 100)}%</td>
+                  <td className="p-3"><Link to={`/@/${f.username}`} className="text-ember-300">{f.username}</Link> ({f.rating})</td>
+                  <td><Link to={`/game/${f.game_id}`} className="font-mono text-ember-300">{f.game_id}</Link></td>
+                  <td className="font-bold text-loss">{Math.round(Number(f.suspicion) * 100)}%</td>
                   <td>{Math.round(Number(f.top_match) * 100)}%</td>
                   <td>{f.acpl}</td>
                   <td>{f.time_cv}</td>
@@ -68,7 +69,7 @@ export default function AdminPage() {
                   <td>{f.total_flags}</td>
                   <td className="space-x-1 whitespace-nowrap pr-3">
                     <button className="btn-ghost px-2 text-xs" onClick={() => act(`/api/admin/flags/${f.game_id}/${f.user_id}/reviewed`)}>Dismiss</button>
-                    <button className="btn bg-red-700 px-2 py-1 text-xs text-white" onClick={() => act(`/api/admin/users/${f.username}/ban`)}>Close account</button>
+                    <button className="btn bg-loss px-2 py-1 text-xs text-white" onClick={() => act(`/api/admin/users/${f.username}/ban`)}>Close account</button>
                   </td>
                 </tr>
               ))}
@@ -84,14 +85,14 @@ export default function AdminPage() {
           {reports.data?.map((r) => (
             <div key={String(r.id)} className="card p-4 text-sm">
               <p>
-                <span className="font-semibold">{r.reporter}</span> reported <Link to={`/@/${r.reported}`} className="text-brand-400">{r.reported}</Link> for{' '}
-                <span className="font-semibold">{r.reason}</span>{r.game_id && <> in <Link to={`/game/${r.game_id}`} className="font-mono text-brand-400">{r.game_id}</Link></>}
+                <span className="font-semibold">{r.reporter}</span> reported <Link to={`/@/${r.reported}`} className="text-ember-300">{r.reported}</Link> for{' '}
+                <span className="font-semibold">{r.reason}</span>{r.game_id && <> in <Link to={`/game/${r.game_id}`} className="font-mono text-ember-300">{r.game_id}</Link></>}
               </p>
               {r.text && <p className="mt-1 text-ink-300">{r.text}</p>}
               <div className="mt-2 flex gap-2">
                 <button className="btn-secondary px-2 py-1 text-xs" onClick={() => api.post(`/api/admin/reports/${r.id}/close`, { resolution: 'no action' }).then(() => qc.invalidateQueries())}>Close, no action</button>
                 <button className="btn-secondary px-2 py-1 text-xs" onClick={() => act(`/api/admin/users/${r.reported}/mute`)}>Mute</button>
-                <button className="btn bg-red-700 px-2 py-1 text-xs text-white" onClick={() => act(`/api/admin/users/${r.reported}/ban`)}>Close account</button>
+                <button className="btn bg-loss px-2 py-1 text-xs text-white" onClick={() => act(`/api/admin/users/${r.reported}/ban`)}>Close account</button>
               </div>
             </div>
           ))}

@@ -47,8 +47,8 @@ interface ReviewStatus {
 
 const LABEL_ORDER = ['best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder'];
 const LABEL_COLOR: Record<string, string> = {
-  best: 'text-brand-400', excellent: 'text-brand-400', good: 'text-ink-300',
-  inaccuracy: 'text-yellow-300', mistake: 'text-orange-400', blunder: 'text-red-400',
+  best: 'text-ember-300', excellent: 'text-ember-300', good: 'text-ink-300',
+  inaccuracy: 'text-yellow-300', mistake: 'text-orange-400', blunder: 'text-loss',
 };
 
 export default function ReviewPage() {
@@ -101,12 +101,12 @@ export default function ReviewPage() {
   if (!review) {
     return (
       <div className="card mx-auto mt-10 max-w-md p-6 text-center">
-        <Sparkles className="mx-auto mb-3 text-brand-400" />
+        <Sparkles className="mx-auto mb-3 text-ember-300" />
         <p className="font-semibold">Reviewing your game…</p>
         <p className="mt-1 text-sm text-ink-400">
           {status.data?.status === 'QUEUED' && status.data.queuePosition ? `Position ${status.data.queuePosition} in the queue` : 'The engine is going through every move.'}
         </p>
-        {status.data?.status === 'FAILED' && <p className="mt-2 text-sm text-red-300">The review failed. Try again later.</p>}
+        {status.data?.status === 'FAILED' && <p className="mt-2 text-sm text-loss">The review failed. Try again later.</p>}
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function ReviewPage() {
       </section>
 
       <aside className="space-y-4">
-        <div className="card grid grid-cols-2 divide-x divide-ink-700">
+        <div className="card grid grid-cols-2 divide-x divide-white/[0.06]">
           {(['white', 'black'] as const).map((c) => (
             <div key={c} className="p-4 text-center">
               <p className="truncate text-sm text-ink-400">{g[c].username}</p>

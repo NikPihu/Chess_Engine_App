@@ -66,7 +66,7 @@ export default function TournamentPage() {
   return (
     <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-[18rem_1fr]">
       <aside className="card h-fit space-y-3 p-4">
-        <h1 className="flex items-center gap-2 text-xl font-bold"><Trophy className="text-amber-300" /> {t.name}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold"><Trophy className="text-gold" /> {t.name}</h1>
         <p className="text-sm text-ink-400">{t.initial / 60}+{t.increment} · {t.rated ? 'Rated' : 'Casual'} · {t.minutes} minutes</p>
         {t.status !== 'FINISHED' && (
           <p className="text-sm">
@@ -74,7 +74,7 @@ export default function TournamentPage() {
             <span className="font-mono text-lg font-bold">{formatClock(target - now)}</span>
           </p>
         )}
-        {t.status === 'FINISHED' && <p className="text-sm font-semibold text-amber-300">Finished - winner: {data.standings[0]?.username ?? 'nobody'}</p>}
+        {t.status === 'FINISHED' && <p className="text-sm font-semibold text-gold">Finished - winner: {data.standings[0]?.username ?? 'nobody'}</p>}
         {me && t.status !== 'FINISHED' && (
           data.joined
             ? <button className="btn-secondary w-full" onClick={() => act('withdraw')}>Withdraw</button>
@@ -83,18 +83,18 @@ export default function TournamentPage() {
         {!me && <Link to={`/login?next=/tournaments/${id}`} className="btn-primary w-full">Log in to join</Link>}
         {data.joined && t.status === 'STARTED' && <p className="text-xs text-ink-400">Stay on this page - your next game starts automatically.</p>}
         <p className="text-xs text-ink-400">Win 2, draw 1. After two wins in a row you are on fire 🔥 and score double.</p>
-        {error && <p className="text-sm text-red-300">{error}</p>}
+        {error && <p className="text-sm text-loss">{error}</p>}
       </aside>
       <section className="card">
-        <h2 className="border-b border-ink-700 px-4 py-3 font-semibold">Standings</h2>
+        <h2 className="border-b border-white/[0.06] px-4 py-3 font-semibold">Standings</h2>
         {data.standings.length === 0 && <p className="p-4 text-sm text-ink-400">No players yet.</p>}
         <table className="w-full text-sm">
-          <tbody className="divide-y divide-ink-700">
+          <tbody className="divide-y divide-white/[0.06]">
             {data.standings.map((s) => (
               <tr key={s.userId} className={s.withdrawn ? 'opacity-50' : ''}>
                 <td className="w-10 px-4 py-2 text-right text-ink-400">{s.rank}</td>
                 <td className="px-2 py-2">
-                  <Link to={`/@/${s.username}`} className="font-medium hover:text-brand-400">{s.username}</Link>{' '}
+                  <Link to={`/@/${s.username}`} className="font-medium hover:text-ember-300">{s.username}</Link>{' '}
                   <span className="text-ink-400">{s.rating}</span>
                 </td>
                 <td className="px-2 py-2 text-ink-400">{s.games} games</td>

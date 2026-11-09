@@ -26,7 +26,7 @@ export function ReportDialog({ username, onClose }: { username: string; onClose:
           <button className="btn-ghost px-2" onClick={onClose} aria-label="Close"><X size={18} /></button>
         </div>
         {status === 'sent' ? (
-          <p className="text-sm text-brand-400">Thank you. A moderator will look at it.</p>
+          <p className="text-sm text-ember-300">Thank you. A moderator will look at it.</p>
         ) : (
           <>
             <select className="input" value={reason} onChange={(e) => setReason(e.target.value)}>
@@ -37,7 +37,7 @@ export function ReportDialog({ username, onClose }: { username: string; onClose:
             <input className="input" placeholder="Game id (optional)" value={gameId} onChange={(e) => setGameId(e.target.value)} />
             <textarea className="input" rows={4} maxLength={1000} placeholder="What happened?" value={text} onChange={(e) => setText(e.target.value)} />
             <button className="btn-primary w-full" onClick={send}>Send report</button>
-            {status !== 'idle' && <p className="text-sm text-red-300">{status}</p>}
+            {status !== 'idle' && <p className="text-sm text-loss">{status}</p>}
           </>
         )}
       </div>

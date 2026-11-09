@@ -48,7 +48,7 @@ export default function ChallengePage() {
   return (
     <div className="card mx-auto mt-12 max-w-md p-6 text-center">
       <p className="text-sm text-ink-400">Challenge from</p>
-      <h1 className="text-2xl font-bold">{c.challenger}</h1>
+      <h1 className="mt-1 text-4xl font-light tracking-tight">{c.challenger}</h1>
       <p className="mt-3 text-ink-300">
         {timeControlLabel(c.initial * 1000, c.increment * 1000)} · {c.rated ? 'Rated' : 'Casual'} · you play {yourColor}
       </p>
@@ -61,7 +61,7 @@ export default function ChallengePage() {
       ) : (
         <Link to={`/login?next=/challenge/${id}`} className="btn-primary mt-6 w-full">Log in to accept</Link>
       )}
-      {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
+      {error && <p className="mt-3 text-sm text-loss">{error}</p>}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Search, Swords, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { UserRef } from '@/lib/types';
 import { ChallengeDialog } from '@/features/lobby/ChallengeDialog';
+import { PageHeader } from '@/components/PageHeader';
 
 interface Friend {
   user: UserRef;
@@ -25,15 +26,15 @@ export default function FriendsPage() {
   });
 
   return (
-    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+    <div className="mx-auto max-w-5xl"><PageHeader eyebrow="Social" title="Friends" kicker="People you follow, who is online, and player search." /><div className="grid gap-6 md:grid-cols-2">
       <section className="card">
-        <h1 className="flex items-center gap-2 border-b border-ink-700 px-4 py-3 font-semibold"><Users size={18} /> Following</h1>
+        <h1 className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3 font-semibold"><Users size={18} /> Following</h1>
         {friends.data?.length === 0 && <p className="p-4 text-sm text-ink-400">Follow players from their profile page.</p>}
-        <ul className="divide-y divide-ink-700">
+        <ul className="divide-y divide-white/[0.06]">
           {friends.data?.map((f) => (
             <li key={f.user.id} className="flex items-center gap-3 px-4 py-2.5">
-              <span className={clsx('h-2.5 w-2.5 rounded-full', f.online ? 'bg-brand-500' : 'bg-ink-600')} />
-              <Link to={`/@/${f.user.username}`} className="font-medium hover:text-brand-400">{f.user.username}</Link>
+              <span className={clsx('h-2.5 w-2.5 rounded-full', f.online ? 'bg-win' : 'bg-noir-600')} />
+              <Link to={`/@/${f.user.username}`} className="font-medium hover:text-ember-300">{f.user.username}</Link>
               {f.mutual && <span className="rounded bg-ink-700 px-1.5 text-xs text-ink-300">friend</span>}
               {f.online && (
                 <button className="btn-ghost ml-auto px-2" onClick={() => setChallenge(f.user.username)} aria-label={`Challenge ${f.user.username}`}>
@@ -51,7 +52,7 @@ export default function FriendsPage() {
           {results.data?.map((u) => (
             <li key={u.id}>
               <Link to={`/@/${u.username}`} className="block rounded px-2 py-1.5 hover:bg-ink-800">
-                {u.title && <span className="mr-1 text-xs font-bold text-amber-300">{u.title}</span>}
+                {u.title && <span className="mr-1 text-xs font-bold text-gold">{u.title}</span>}
                 {u.username}
               </Link>
             </li>
@@ -59,6 +60,7 @@ export default function FriendsPage() {
         </ul>
       </section>
       {challenge && <ChallengeDialog opponent={challenge} onClose={() => setChallenge(null)} />}
+      </div>
     </div>
   );
 }

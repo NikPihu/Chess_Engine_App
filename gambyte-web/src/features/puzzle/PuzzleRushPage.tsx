@@ -59,8 +59,8 @@ export default function PuzzleRushPage() {
   if (!puzzles || over) {
     return (
       <div className="card mx-auto mt-8 max-w-md p-6 text-center">
-        <h1 className="flex items-center justify-center gap-2 text-2xl font-bold"><Timer /> Puzzle Rush</h1>
-        {over && <p className="mt-4 text-5xl font-extrabold text-brand-400">{score}</p>}
+        <p className="eyebrow">Against the clock</p><h1 className="display mt-3 text-6xl">Puzzle<br />Rush</h1><Timer className="mx-auto mt-4 text-ember-400" />
+        {over && <p className="mt-4 text-5xl font-extrabold text-ember-300">{score}</p>}
         {best !== null && <p className="mt-2 text-sm text-ink-400">Your best ({mode === '3min' ? '3 minutes' : 'survival'}): {best}</p>}
         <div className="mt-5 grid grid-cols-2 gap-2">
           {(['3min', 'survival'] as Mode[]).map((m) => (
@@ -93,14 +93,14 @@ export default function PuzzleRushPage() {
         </div>
         <div className="flex gap-1">
           {[0, 1, 2].map((i) => (
-            <span key={i} className={clsx('flex h-8 w-8 items-center justify-center rounded', i < strikes ? 'bg-red-600' : 'bg-ink-700')}>
+            <span key={i} className={clsx('flex h-8 w-8 items-center justify-center rounded', i < strikes ? 'bg-loss' : 'bg-ink-700')}>
               <X size={16} />
             </span>
           ))}
         </div>
         <div className="flex flex-wrap gap-1">
           {results.map((r, i) => (
-            <span key={i} className={clsx('flex h-6 w-6 items-center justify-center rounded', r ? 'bg-brand-600' : 'bg-red-600')}>
+            <span key={i} className={clsx('flex h-6 w-6 items-center justify-center rounded', r ? 'bg-brand-600' : 'bg-loss')}>
               {r ? <Check size={14} /> : <X size={14} />}
             </span>
           ))}

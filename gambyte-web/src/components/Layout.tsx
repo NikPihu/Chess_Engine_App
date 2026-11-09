@@ -39,7 +39,7 @@ function Cross({ className }: { className?: string }) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { data: me } = useMe();
+  const { data: me, isLoading: meLoading } = useMe();
   const logout = useLogout();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -99,7 +99,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-1 pl-4 lg:pl-6">
-            {me ? (
+            {meLoading ? (
+              <span className="h-9 w-28 animate-pulse rounded-full bg-white/[0.05]" />
+            ) : me ? (
               <>
                 {!me.premium && (
                   <Link to="/premium" className="btn-ghost hidden px-3 text-gold xl:inline-flex">

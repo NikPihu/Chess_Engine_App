@@ -22,7 +22,7 @@ export default function LoginPage() {
       footer={
         <>
           New here?{' '}
-          <Link to="/register" className="text-brand-400 hover:underline">
+          <Link to="/register" className="text-noir-50 underline decoration-ember-500 underline-offset-4">
             Create an account
           </Link>
         </>
@@ -56,7 +56,7 @@ export default function LoginPage() {
             required
           />
         </div>
-        <button className="btn-primary w-full" disabled={login.isPending}>
+        <button className="btn-primary w-full py-3" disabled={login.isPending}>
           {login.isPending ? 'Logging in…' : 'Log in'}
         </button>
         <Link to="/forgot-password" className="block text-center text-xs text-ink-400 hover:text-ink-100">

@@ -49,7 +49,7 @@ export default function LessonPage() {
     return (
       <div className="card mx-auto mt-10 max-w-md p-6 text-center">
         <p className="text-5xl">🎉</p>
-        <h1 className="mt-3 text-2xl font-bold">Lesson complete!</h1>
+        <h1 className="mt-3 text-3xl font-light tracking-tight">Lesson complete</h1>
         <p className="mt-2 text-ink-400">{lesson.title}</p>
         <Link to="/learn" className="btn-primary mt-6">More lessons</Link>
       </div>
@@ -59,7 +59,7 @@ export default function LessonPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <Link to="/learn" className="btn-ghost mb-3 px-2"><ArrowLeft size={16} /> All lessons</Link>
-      <h1 className="text-2xl font-bold">{lesson.title}</h1>
+      <h1 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-light tracking-tight">{lesson.title}</h1>
       <p className="mb-4 text-sm text-ink-400">Step {index + 1} of {lesson.steps.length}</p>
       {step.type === 'text' ? (
         <div className="card p-6">
@@ -111,8 +111,8 @@ function Exercise({ step, onSolved }: { step: Step; onSolved: () => void }) {
       </div>
       <div className="card h-fit space-y-3 p-4">
         <p className="font-medium">{step.prompt}</p>
-        {status === 'wrong' && <p className="text-sm text-red-300">Not quite - try again.</p>}
-        {status === 'right' && <p className="text-sm text-brand-400">{step.success}</p>}
+        {status === 'wrong' && <p className="text-sm text-loss">Not quite - try again.</p>}
+        {status === 'right' && <p className="text-sm text-ember-300">{step.success}</p>}
         {status !== 'right' && (hint ? <p className="text-sm text-ink-300">{step.hint}</p> : (
           <button className="btn-ghost px-2" onClick={() => setHint(true)}><Lightbulb size={16} /> Hint</button>
         ))}

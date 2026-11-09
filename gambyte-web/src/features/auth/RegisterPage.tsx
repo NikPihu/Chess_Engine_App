@@ -26,7 +26,7 @@ export default function RegisterPage() {
       footer={
         <>
           Already have one?{' '}
-          <Link to="/login" className="text-brand-400 hover:underline">
+          <Link to="/login" className="text-noir-50 underline decoration-ember-500 underline-offset-4">
             Log in
           </Link>
         </>
@@ -46,7 +46,7 @@ export default function RegisterPage() {
             required
           />
           {usernameBad && (
-            <p className="mt-1 text-xs text-red-300">3-20 letters, digits, _ or -, starting with a letter or digit</p>
+            <p className="mt-1 text-xs text-loss">3-20 letters, digits, _ or -, starting with a letter or digit</p>
           )}
         </div>
         <div>
@@ -79,7 +79,7 @@ export default function RegisterPage() {
           />
           <p className="mt-1 text-xs text-ink-400">At least 8 characters.</p>
         </div>
-        <button className="btn-primary w-full" disabled={register.isPending}>
+        <button className="btn-primary w-full py-3" disabled={register.isPending}>
           {register.isPending ? 'Creating…' : 'Sign up'}
         </button>
       </form>

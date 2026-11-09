@@ -55,38 +55,38 @@ export default function PuzzlePage() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className="grid animate-fade gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] xl:gap-10">
       <section className="mx-auto w-full max-w-[min(92vw,calc(100vh-10rem))]">
         {puzzle ? <PuzzleBoard puzzle={puzzle} onDone={done} showHint={hint} /> : error ? <p className="text-ink-300">{error}</p> : <Spinner />}
       </section>
       <aside className="space-y-4">
         <div className="card p-4">
-          <p className="text-xs uppercase tracking-wide text-ink-400">Your puzzle rating</p>
-          <p className="text-3xl font-bold">
+          <p className="eyebrow">Your puzzle rating</p>
+          <p className="num mt-3 text-5xl font-extralight tracking-tight">
             {result?.attempt?.rating ?? me?.ratings.puzzle?.rating ?? 1500}
             {result?.attempt && (
-              <span className={clsx('ml-2 text-lg', result.attempt.diff >= 0 ? 'text-brand-400' : 'text-red-300')}>
+              <span className={clsx('ml-3 text-xl', result.attempt.diff >= 0 ? 'text-win' : 'text-loss')}>
                 {result.attempt.diff >= 0 ? '+' : ''}
                 {result.attempt.diff}
               </span>
             )}
           </p>
-          {puzzle && <p className="mt-1 text-sm text-ink-400">Puzzle rating {puzzle.rating} · played {puzzle.plays} times</p>}
-          {!me && <p className="mt-2 text-xs text-ink-400"><Link to="/register" className="text-brand-400">Sign up</Link> to save your rating.</p>}
+          {puzzle && <p className="eyebrow mt-4">Puzzle {puzzle.rating} · {puzzle.plays} plays</p>}
+          {!me && <p className="mt-2 text-xs text-ink-400"><Link to="/register" className="text-ember-300">Sign up</Link> to save your rating.</p>}
         </div>
 
         <div className="card space-y-2 p-4">
           {!result && (
-            <button className="btn-secondary w-full" onClick={() => setHint(true)} disabled={hint}>
+            <button className="btn-secondary w-full py-3" onClick={() => setHint(true)} disabled={hint}>
               <Lightbulb size={16} /> {hint ? 'Hint shown (counts as a miss)' : 'Hint'}
             </button>
           )}
           {result && (
             <>
-              <p className={clsx('text-center font-semibold', result.outcome === 'solved' ? 'text-brand-400' : 'text-red-300')}>
+              <p className={clsx('text-center font-semibold', result.outcome === 'solved' ? 'text-win' : 'text-loss')}>
                 {result.outcome === 'solved' ? (hint ? 'Solved with a hint' : 'Well done!') : 'Missed - keep going!'}
               </p>
-              <button className="btn-primary w-full" onClick={() => load()}>
+              <button className="btn-primary w-full py-3" onClick={() => load()}>
                 Next puzzle <ArrowRight size={16} />
               </button>
             </>
@@ -97,12 +97,12 @@ export default function PuzzlePage() {
           <Link to="/puzzles/rush" className="btn-ghost w-full">
             <Timer size={16} /> Puzzle Rush
           </Link>
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {error && <p className="text-sm text-loss">{error}</p>}
         </div>
 
         {themes.data && (
           <div className="card p-4">
-            <h2 className="mb-2 text-sm font-semibold">Themes</h2>
+            <h2 className="eyebrow mb-3">Themes</h2>
             <div className="flex flex-wrap gap-1">
               <ThemeChip label="All" active={theme === ''} onClick={() => setTheme('')} />
               {Object.entries(themes.data).map(([t, n]) => (
@@ -118,7 +118,7 @@ export default function PuzzlePage() {
 
 function ThemeChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={clsx('rounded-full px-3 py-1 text-xs', active ? 'bg-brand-600 text-white' : 'bg-ink-800 text-ink-300 hover:bg-ink-700')}>
+    <button onClick={onClick} className={clsx('rounded-full px-3 py-1 text-xs', active ? 'bg-noir-50 text-noir-950' : 'border border-white/[0.07] text-noir-300 hover:border-white/20 hover:text-noir-50')}>
       {label}
     </button>
   );

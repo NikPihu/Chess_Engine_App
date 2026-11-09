@@ -25,7 +25,7 @@ export default function VerifyEmailPage() {
       {verify.isSuccess && (
         <p className="text-sm">
           Email confirmed - thanks!{' '}
-          <Link to="/" className="text-brand-400 hover:underline">
+          <Link to="/" className="text-ember-300 hover:underline">
             Start playing
           </Link>
         </p>

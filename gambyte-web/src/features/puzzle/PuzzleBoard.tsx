@@ -115,8 +115,8 @@ export function PuzzleBoard({
       />
       <p className="mt-2 text-center text-sm text-ink-300">
         {state === 'playing' && `${solverColor === 'white' ? 'White' : 'Black'} to move - find the best move`}
-        {state === 'solved' && <span className="font-semibold text-brand-400">Solved!</span>}
-        {state === 'wrong' && <span className="font-semibold text-red-300">Not the best move.{answer && ` The answer was ${answer}.`}</span>}
+        {state === 'solved' && <span className="font-semibold text-ember-300">Solved!</span>}
+        {state === 'wrong' && <span className="font-semibold text-loss">Not the best move.{answer && ` The answer was ${answer}.`}</span>}
       </p>
     </div>
   );

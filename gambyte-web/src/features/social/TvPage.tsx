@@ -7,6 +7,7 @@ import type { GameView } from '@/lib/types';
 import { Spinner } from '@/components/Spinner';
 import { Board } from '@/features/game/Board';
 import { useSettings } from '@/features/profile/useSettings';
+import { PageHeader } from '@/components/PageHeader';
 
 export default function TvPage() {
   const settings = useSettings();
@@ -14,7 +15,7 @@ export default function TvPage() {
   if (isLoading) return <Spinner />;
   return (
     <div>
-      <h1 className="mb-4 flex items-center gap-2 text-2xl font-bold"><Tv /> Watch live games</h1>
+      <PageHeader eyebrow="Gambyte TV" title="Watch live" kicker="The highest-rated games being played right now."><span className="eyebrow flex items-center gap-1.5 text-ember-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember-500" /> Live</span><Tv className="text-ember-400" /></PageHeader>
       {!data?.length && <p className="text-ink-400">No games are being played right now. Start one from the lobby!</p>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data?.map((g) => (

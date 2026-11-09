@@ -97,7 +97,7 @@ export function HeroScene() {
       </div>
 
       {/* King standing, queen falling against it */}
-      <div className="absolute bottom-[3%] left-[53%] h-[min(80vh,800px)] w-[min(52vh,520px)] -translate-x-1/2">
+      <div className="absolute bottom-[2%] left-[74%] h-[46vh] w-[30vh] -translate-x-1/2 opacity-55 sm:left-[62%] sm:h-[62vh] sm:w-[40vh] sm:opacity-80 lg:bottom-[3%] lg:left-[53%] lg:h-[min(80vh,800px)] lg:w-[min(52vh,520px)] lg:opacity-100">
         <div className="absolute bottom-0 left-[2%] h-[96%] w-[58%] [filter:drop-shadow(14px_0_26px_rgba(229,83,45,.45))_drop-shadow(0_40px_40px_rgba(0,0,0,.95))]">
           <King />
         </div>

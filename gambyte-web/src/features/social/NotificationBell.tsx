@@ -55,18 +55,18 @@ export function NotificationBell() {
       >
         <Bell size={18} />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-loss px-1 text-[10px] font-bold text-white">
             {unread}
           </span>
         )}
       </button>
       {open && (
         <div className="card absolute right-0 z-40 mt-2 w-80 overflow-hidden">
-          <p className="border-b border-ink-700 px-4 py-2 text-sm font-semibold">Notifications</p>
+          <p className="border-b border-white/[0.06] px-4 py-2 text-sm font-semibold">Notifications</p>
           <div className="max-h-96 overflow-y-auto">
             {data?.items.length === 0 && <p className="p-4 text-sm text-ink-400">Nothing yet.</p>}
             {data?.items.map((n) => (
-              <Link key={n.id} to={n.link ?? '#'} onClick={() => setOpen(false)} className="block border-b border-ink-800 px-4 py-2.5 text-sm hover:bg-ink-800">
+              <Link key={n.id} to={n.link ?? '#'} onClick={() => setOpen(false)} className="block border-b border-white/[0.05] px-4 py-2.5 text-sm hover:bg-ink-800">
                 <p className={n.read ? 'text-ink-300' : 'text-ink-100'}>{n.text}</p>
                 <p className="text-xs text-ink-400">{new Date(n.createdAt).toLocaleString()}</p>
               </Link>

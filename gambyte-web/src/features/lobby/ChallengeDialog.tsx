@@ -112,7 +112,7 @@ export function ChallengeDialog({ onClose, opponent }: { onClose: () => void; op
               Rated
             </label>
             <button className="btn-primary w-full" onClick={create}>Create challenge</button>
-            {error && <p className="text-sm text-red-300">{error}</p>}
+            {error && <p className="text-sm text-loss">{error}</p>}
           </div>
         )}
       </div>

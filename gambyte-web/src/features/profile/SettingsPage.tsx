@@ -8,6 +8,7 @@ import type { Settings } from '@/lib/types';
 import { meKey, useMe } from '@/features/auth/useAuth';
 import { BOARD_THEMES, type BoardTheme } from '@/features/game/Board';
 import { useSettings } from './useSettings';
+import { PageHeader } from '@/components/PageHeader';
 
 export default function SettingsPage() {
   const { data: me } = useMe();
@@ -23,7 +24,7 @@ export default function SettingsPage() {
   if (!me) return null;
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <PageHeader eyebrow="Account" title="Settings" kicker="Board, sounds, profile, password and API tokens." />
 
       <section className="card space-y-4 p-5">
         <h2 className="font-semibold">Board</h2>
@@ -101,8 +102,8 @@ function ProfileForm() {
         <input id="country" className="input w-24 uppercase" maxLength={2} value={country ?? profile.data?.country ?? ''} onChange={(e) => setCountry(e.target.value)} />
       </div>
       <button className="btn-primary" onClick={() => save.mutate()} disabled={save.isPending}>Save profile</button>
-      {save.isSuccess && <span className="ml-3 text-sm text-brand-400">Saved</span>}
-      {save.isError && <p className="text-sm text-red-300">{errorMessage(save.error)}</p>}
+      {save.isSuccess && <span className="ml-3 text-sm text-ember-300">Saved</span>}
+      {save.isError && <p className="text-sm text-loss">{errorMessage(save.error)}</p>}
     </section>
   );
 }
@@ -116,8 +117,8 @@ function PasswordForm() {
       <input type="password" className="input" placeholder="Current password" value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} />
       <input type="password" className="input" placeholder="New password (8+ characters)" minLength={8} value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} />
       <button className="btn-secondary" onClick={() => change.mutate()} disabled={change.isPending}>Change password</button>
-      {change.isSuccess && <span className="ml-3 text-sm text-brand-400">Changed</span>}
-      {change.isError && <p className="text-sm text-red-300">{errorMessage(change.error)}</p>}
+      {change.isSuccess && <span className="ml-3 text-sm text-ember-300">Changed</span>}
+      {change.isError && <p className="text-sm text-loss">{errorMessage(change.error)}</p>}
     </section>
   );
 }
@@ -150,7 +151,7 @@ function TokensSection() {
       <p className="text-sm text-ink-400">For bots and scripts. A token gives full access to your account - keep it secret.</p>
       {fresh && (
         <div className="rounded-lg bg-brand-600/15 p-3 text-sm">
-          <p className="mb-2 text-brand-400">Copy your token now - it will not be shown again:</p>
+          <p className="mb-2 text-ember-300">Copy your token now - it will not be shown again:</p>
           <div className="flex gap-2">
             <input className="input font-mono text-xs" readOnly value={fresh} />
             <button className="btn-secondary px-3" onClick={() => navigator.clipboard.writeText(fresh)} aria-label="Copy token">
@@ -163,7 +164,7 @@ function TokensSection() {
         <input className="input" placeholder="Token name" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
         <button className="btn-primary" onClick={() => create.mutate()}>Create</button>
       </div>
-      <ul className="divide-y divide-ink-700 text-sm">
+      <ul className="divide-y divide-white/[0.06] text-sm">
         {tokens.data?.map((t) => (
           <li key={t.id} className="flex items-center justify-between py-2">
             <span>

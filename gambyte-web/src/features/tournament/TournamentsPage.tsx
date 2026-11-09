@@ -7,6 +7,7 @@ import { Plus, Trophy } from 'lucide-react';
 import { api, errorMessage } from '@/lib/api';
 import { Spinner } from '@/components/Spinner';
 import { useMe } from '@/features/auth/useAuth';
+import { PageHeader } from '@/components/PageHeader';
 
 export interface Tournament {
   id: number;
@@ -40,7 +41,7 @@ export default function TournamentsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="flex items-center gap-2 text-2xl font-bold"><Trophy /> Tournaments</h1>
+        <PageHeader eyebrow="Compete" title="Arenas" kicker="Join any time, play as many games as you can. Win twice in a row and points count double." />
         {me && <button className="btn-secondary" onClick={() => setCreating((c) => !c)}><Plus size={16} /> Create</button>}
       </div>
 
@@ -61,7 +62,7 @@ export default function TournamentsPage() {
           </label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.rated} onChange={(e) => setForm({ ...form, rated: e.target.checked })} /> Rated</label>
           <button className="btn-primary" onClick={create}>Create arena</button>
-          {error && <p className="text-sm text-red-300 sm:col-span-2">{error}</p>}
+          {error && <p className="text-sm text-loss sm:col-span-2">{error}</p>}
         </div>
       )}
 
@@ -70,7 +71,7 @@ export default function TournamentsPage() {
       <div className="space-y-2">
         {data?.map((t) => (
           <Link key={t.id} to={`/tournaments/${t.id}`} className="card flex items-center gap-4 p-4 transition hover:border-brand-600">
-            <Trophy className={t.status === 'STARTED' ? 'text-brand-400' : 'text-ink-400'} />
+            <Trophy className={t.status === 'STARTED' ? 'text-ember-300' : 'text-ink-400'} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{t.name}</p>
               <p className="text-sm text-ink-400">

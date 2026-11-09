@@ -10,7 +10,7 @@ export function GameChat({ messages, onSend }: { messages: ChatMessage[]; onSend
 
   return (
     <div className="card flex flex-col p-3">
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-400">Chat</h2>
+      <h2 className="eyebrow mb-3">Chat</h2>
       <div className="h-32 overflow-y-auto text-sm">
         {messages.length === 0 && <p className="text-ink-400">Say hi - be nice!</p>}
         {messages.map((m, i) => (

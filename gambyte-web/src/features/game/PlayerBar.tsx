@@ -1,4 +1,4 @@
-/** Name, rating (with the change after the game) and clock of one side. */
+/** Avatar, name, rating (with the change after the game) and clock of one side. */
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { Bot } from 'lucide-react';
@@ -18,41 +18,39 @@ export function PlayerBar({
   running: boolean;
   active: boolean;
 }) {
+  const bot = player.title === 'BOT';
   return (
-    <div className="flex items-center justify-between gap-3 py-2">
-      <div className="flex min-w-0 items-center gap-2">
+    <div className="flex items-center justify-between gap-3 py-3">
+      <div className="flex min-w-0 items-center gap-3">
         <span
           className={clsx(
-            'h-3 w-3 shrink-0 rounded-full border border-ink-600',
-            color === 'white' ? 'bg-white' : 'bg-black',
-            active && 'ring-2 ring-brand-500',
+            'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold uppercase ring-2 transition',
+            color === 'white' ? 'bg-noir-100 text-noir-900' : 'bg-noir-800 text-noir-100',
+            active ? 'ring-ember-500' : 'ring-transparent',
           )}
-        />
-        {player.title && (
-          <span className="flex items-center gap-1 rounded bg-amber-500/20 px-1.5 text-xs font-bold text-amber-300">
-            {player.title === 'BOT' && <Bot size={12} />}
-            {player.title}
-          </span>
-        )}
-        <Link to={`/@/${player.username}`} className="truncate font-semibold hover:text-brand-400">
-          {player.username}
-        </Link>
-        {player.engineLevel ? (
-          <span className="text-sm text-ink-400">level {player.engineLevel}</span>
-        ) : (
-          player.rating !== undefined && (
-            <span className="text-sm text-ink-400">
-              {player.rating}
-              {player.provisional && '?'}
-            </span>
-          )
-        )}
-        {player.ratingDiff !== undefined && player.ratingDiff !== null && (
-          <span className={clsx('text-sm font-semibold', player.ratingDiff >= 0 ? 'text-brand-400' : 'text-red-400')}>
-            {player.ratingDiff >= 0 ? '+' : ''}
-            {player.ratingDiff}
-          </span>
-        )}
+        >
+          {bot ? <Bot size={18} /> : player.username[0]}
+          {active && <span className="absolute -top-1 -right-1 h-2.5 w-2.5 animate-pulse rounded-full bg-ember-500" />}
+        </span>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            {player.title && (
+              <span className="rounded-md bg-gold/15 px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wider text-gold">{player.title}</span>
+            )}
+            <Link to={`/@/${player.username}`} className="truncate font-medium hover:text-ember-300">
+              {player.username}
+            </Link>
+          </div>
+          <p className="num text-xs text-noir-400">
+            {player.engineLevel ? `LEVEL ${player.engineLevel}` : player.rating !== undefined ? `${player.rating}${player.provisional ? '?' : ''}` : ''}
+            {player.ratingDiff !== undefined && player.ratingDiff !== null && (
+              <span className={clsx('ml-2', player.ratingDiff >= 0 ? 'text-win' : 'text-loss')}>
+                {player.ratingDiff >= 0 ? '+' : ''}
+                {player.ratingDiff}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
       <Clock clock={clock} color={color} running={running} />
     </div>

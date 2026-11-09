@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
       {reset.isSuccess ? (
         <p className="text-sm">
           Password changed.{' '}
-          <Link to="/login" className="text-brand-400 hover:underline">
+          <Link to="/login" className="text-ember-300 hover:underline">
             Log in
           </Link>
         </p>

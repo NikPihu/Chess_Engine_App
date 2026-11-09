@@ -5,8 +5,8 @@ import { MoveList } from './MoveList';
 describe('MoveList', () => {
   it('shows moves in numbered pairs with review symbols', () => {
     render(<MoveList sans={['f3', 'e5', 'g4', 'Qh4#']} current={3} onSelect={() => {}} annotations={[undefined, undefined, '??', undefined]} />);
-    expect(screen.getByText('1.')).toBeInTheDocument();
-    expect(screen.getByText('2.')).toBeInTheDocument();
+    expect(screen.getByText('01')).toBeInTheDocument();
+    expect(screen.getByText('02')).toBeInTheDocument();
     expect(screen.getByText('??')).toBeInTheDocument();
   });
 

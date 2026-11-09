@@ -1,5 +1,7 @@
 # Gambyte runbook
 
+> **First deployment?** Follow [DEPLOY_STEP_BY_STEP.md](DEPLOY_STEP_BY_STEP.md): every click and command, in order.
+
 How to run Gambyte on your machine, put it on the internet (AWS free tier), and do the
 day-to-day operations.
 

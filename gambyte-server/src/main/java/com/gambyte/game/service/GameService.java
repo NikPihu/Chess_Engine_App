@@ -481,6 +481,26 @@ public class GameService {
     return new GamePage(out, next);
   }
 
+  /** Number of games being played right now. */
+  public int runningCount() {
+    return (int) live.all().stream().filter(g -> !g.status().isOver()).count();
+  }
+
+  /** Running games, best-rated first (for "Gambyte TV" and the watch page). */
+  public List<GameView> topLive(int limit) {
+    return live.all().stream()
+        .filter(g -> !g.status().isOver())
+        .sorted(java.util.Comparator.comparingInt((LiveGame g) ->
+            -(nz(g.white().rating()) + nz(g.black().rating()))))
+        .limit(limit)
+        .map(this::view)
+        .toList();
+  }
+
+  private static int nz(Integer v) {
+    return v == null ? 0 : v;
+  }
+
   /** Games this user is playing right now (to resume after closing the tab). */
   public List<GameView> ongoing(long userId) {
     return live.all().stream()

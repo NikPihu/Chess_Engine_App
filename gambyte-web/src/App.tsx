@@ -31,6 +31,7 @@ const TournamentsPage = lazy(() => import('@/features/tournament/TournamentsPage
 const TournamentPage = lazy(() => import('@/features/tournament/TournamentPage'));
 const BotsPage = lazy(() => import('@/features/bots/BotsPage'));
 const AdminPage = lazy(() => import('@/features/admin/AdminPage'));
+const ChallengePage = lazy(() => import('@/features/lobby/ChallengePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 /** Sends visitors to the login page for pages that need an account. */
@@ -60,6 +61,7 @@ export function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/game/:id" element={<GamePage />} />
+          <Route path="/challenge/:id" element={<ChallengePage />} />
           <Route path="/@/:username" element={<ProfilePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />

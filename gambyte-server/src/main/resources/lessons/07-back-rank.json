@@ -1,0 +1,24 @@
+{
+  "slug": "back-rank",
+  "order": 7,
+  "category": "Tactics",
+  "level": "Novice",
+  "title": "The back-rank mate",
+  "summary": "When your own pawns trap your king.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "A king tucked behind three unmoved pawns is safe from most attacks - but it has no escape square. A rook or queen landing on the back rank can then be mate. Defend by giving your king a *luft* (a pawn move like h3) or by keeping a piece on the back rank."
+    },
+    {
+      "type": "exercise",
+      "fen": "6k1/5ppp/8/8/8/8/r4PPP/1R4K1 w - - 0 1",
+      "prompt": "Checkmate in one.",
+      "accept": [
+        "b1b8"
+      ],
+      "hint": "The black rook is too far away to help.",
+      "success": "Rb8# - nothing can block or capture."
+    }
+  ]
+}

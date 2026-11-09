@@ -123,6 +123,13 @@
       <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
 
+    <!-- Optional AI coach chat: the official Anthropic Java SDK (only used when ANTHROPIC_API_KEY is set) -->
+    <dependency>
+      <groupId>com.anthropic</groupId>
+      <artifactId>anthropic-java</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+
     <!-- Operations: health, metrics; API docs at /swagger-ui.html -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

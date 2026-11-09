@@ -1,0 +1,27 @@
+{
+  "slug": "opening-principles",
+  "order": 9,
+  "category": "Openings",
+  "level": "Beginner",
+  "title": "Opening principles",
+  "summary": "Centre, development, king safety.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "You don't need to memorise openings to play them well. Follow three rules:\n\n1. **Fight for the centre** with pawns (e4, d4) and pieces.\n2. **Develop** knights and bishops quickly - each piece once, towards the centre.\n3. **Castle early** to get your king safe and connect your rooks.\n\nAvoid moving the same piece twice and bringing the queen out too early, where it gets chased around."
+    },
+    {
+      "type": "exercise",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "prompt": "Play a good first move that follows the principles.",
+      "accept": [
+        "e2e4",
+        "d2d4",
+        "g1f3",
+        "c2c4"
+      ],
+      "hint": "Take the centre, or develop a knight towards it.",
+      "success": "A great start: you control the centre."
+    }
+  ]
+}

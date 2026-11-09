@@ -1,0 +1,24 @@
+{
+  "slug": "skewers",
+  "order": 6,
+  "category": "Tactics",
+  "level": "Novice",
+  "title": "Skewers",
+  "summary": "The reverse pin: the big piece in front.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "A **skewer** attacks a valuable piece that must move out of the way, uncovering a piece behind it that you then capture. It is a pin in reverse: the more valuable piece is in front."
+    },
+    {
+      "type": "exercise",
+      "fen": "4q3/8/8/4k3/8/8/8/R5K1 w - - 0 1",
+      "prompt": "Win the black queen.",
+      "accept": [
+        "a1e1"
+      ],
+      "hint": "Give check on the file where both the king and the queen stand.",
+      "success": "Re1+! The king must step aside and the rook takes the queen."
+    }
+  ]
+}

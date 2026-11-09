@@ -1,0 +1,24 @@
+{
+  "slug": "pins",
+  "order": 5,
+  "category": "Tactics",
+  "level": "Novice",
+  "title": "Pins",
+  "summary": "Freeze a piece in front of a more valuable one.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "A **pin** attacks a piece that cannot move without exposing a more valuable piece behind it. If the piece behind is the king, the pinned piece is not allowed to move at all (an *absolute* pin). Pinned pieces are weak: attack them again and they often fall."
+    },
+    {
+      "type": "exercise",
+      "fen": "4k3/8/2n5/8/8/8/8/4KB2 w - - 0 1",
+      "prompt": "Pin the knight to the black king.",
+      "accept": [
+        "f1b5"
+      ],
+      "hint": "Bishops pin along diagonals. Find the diagonal through c6 and e8.",
+      "success": "Bb5 pins the knight: it cannot move without exposing the king."
+    }
+  ]
+}

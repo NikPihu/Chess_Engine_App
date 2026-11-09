@@ -1,0 +1,24 @@
+{
+  "slug": "removing-defender",
+  "order": 10,
+  "category": "Tactics",
+  "level": "Club",
+  "title": "Removing the defender",
+  "summary": "Capture the piece that holds everything together.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "Sometimes a target is defended by just one piece. Capture or chase away that defender and the target falls. Always ask: *what is this piece protecting?*"
+    },
+    {
+      "type": "exercise",
+      "fen": "3r2k1/5ppp/8/8/8/8/5PPP/3RR1K1 w - - 0 1",
+      "prompt": "Black’s rook is the only guard of the back rank. Take it - with check.",
+      "accept": [
+        "d1d8"
+      ],
+      "hint": "Capture on d8.",
+      "success": "Rxd8# - with its only defender gone, the back rank collapses at once."
+    }
+  ]
+}

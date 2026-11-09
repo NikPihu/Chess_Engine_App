@@ -107,7 +107,7 @@ gambyte:
     from: ${MAIL_FROM:Gambyte <no-reply@gambyte.local>}
   coach:
     anthropic-api-key: ${ANTHROPIC_API_KEY:}     # empty = the AI chat coach is switched off
-    model: ${COACH_MODEL:claude-haiku-5-5}
+    model: ${COACH_MODEL:claude-opus-5-5}   # set COACH_MODEL=claude-haiku-5-5 for a much cheaper coach
     max-tokens: 600
   payment:
     razorpay:

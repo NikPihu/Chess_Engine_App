@@ -1,0 +1,24 @@
+{
+  "slug": "forks",
+  "order": 4,
+  "category": "Tactics",
+  "level": "Novice",
+  "title": "Forks: two targets at once",
+  "summary": "Attack two pieces with one move.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "A **fork** is a move that attacks two (or more) enemy pieces at once. The opponent can only save one. Knights are the best forkers because their attack pattern is so unusual - and a fork that also gives check is the most powerful, because the opponent must answer the check first."
+    },
+    {
+      "type": "exercise",
+      "fen": "r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1",
+      "prompt": "Fork the king and the rook.",
+      "accept": [
+        "d5c7"
+      ],
+      "hint": "Look for a square a knight's move from both e8 and a8.",
+      "success": "Nc7+! After the king moves, the knight takes the rook."
+    }
+  ]
+}

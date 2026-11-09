@@ -1,0 +1,34 @@
+{
+  "slug": "board-and-pieces",
+  "order": 1,
+  "category": "Basics",
+  "level": "Beginner",
+  "title": "The board and the pieces",
+  "summary": "How every piece moves and captures.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "Chess is played on an 8x8 board. Files are the columns a-h, ranks the rows 1-8. White always moves first.\n\nThe **king** moves one square in any direction. The **queen** moves any distance in a straight line or diagonal. The **rook** moves in straight lines, the **bishop** on diagonals, and the **knight** jumps in an L-shape (two squares one way, one square sideways) - it is the only piece that can jump over others. **Pawns** move forward one square (two on their first move) and capture diagonally."
+    },
+    {
+      "type": "exercise",
+      "fen": "8/8/8/3r4/8/4N3/8/k1K5 w - - 0 1",
+      "prompt": "Use the knight's L-shaped jump to capture the black rook.",
+      "accept": [
+        "e3d5"
+      ],
+      "hint": "Count two squares up and one to the left from e3.",
+      "success": "The knight jumps straight to d5 and takes the rook."
+    },
+    {
+      "type": "exercise",
+      "fen": "8/4P3/8/8/8/k7/8/K7 w - - 0 1",
+      "prompt": "A pawn that reaches the last rank becomes any piece. Promote this pawn to a queen.",
+      "accept": [
+        "e7e8q"
+      ],
+      "hint": "Push the pawn one more square.",
+      "success": "Promotion! You now have a queen."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "slug": "smothered-mate",
+  "order": 8,
+  "category": "Tactics",
+  "level": "Club",
+  "title": "The smothered mate",
+  "summary": "A knight mates a king trapped by its own pieces.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "When a king is completely surrounded by its own pieces, a single knight check can be mate: nothing can block a knight, and the king has nowhere to go. It is one of the prettiest patterns in chess and shows up surprisingly often in the corner."
+    },
+    {
+      "type": "exercise",
+      "fen": "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
+      "prompt": "Checkmate with the knight.",
+      "accept": [
+        "g5f7"
+      ],
+      "hint": "Which square attacks h8?",
+      "success": "Nf7# - smothered!"
+    }
+  ]
+}

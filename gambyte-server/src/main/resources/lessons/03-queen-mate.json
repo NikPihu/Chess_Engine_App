@@ -1,0 +1,25 @@
+{
+  "slug": "queen-mate",
+  "order": 3,
+  "category": "Endgames",
+  "level": "Beginner",
+  "title": "Mating with king and queen",
+  "summary": "Push the king to the edge, then finish it.",
+  "steps": [
+    {
+      "type": "text",
+      "text": "With king and queen against a lone king you can always win. Use the queen to box the enemy king in, a knight's move away from it, and shrink the box until the king is on the edge. Then bring your own king close and deliver mate. Careful: if the enemy king has no moves and is not in check, it is stalemate."
+    },
+    {
+      "type": "exercise",
+      "fen": "7k/8/6K1/8/8/8/8/Q7 w - - 0 1",
+      "prompt": "Find a checkmate.",
+      "accept": [
+        "a1a8",
+        "a1g7"
+      ],
+      "hint": "Your king already covers g7 and h7.",
+      "success": "Checkmate. Your king protects the queen and controls the escape squares."
+    }
+  ]
+}

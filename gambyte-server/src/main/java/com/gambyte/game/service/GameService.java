@@ -152,6 +152,7 @@ public class GameService {
     repo.save(record);
 
     live.put(game);
+    events.started(new GameEvents.GameStarted(id, whiteId, blackId));
     log.debug("Game {} started: {} vs {} ({})", id, white.username(), black.username(), perf.key());
     scheduleEngineMove(game);
     return game;

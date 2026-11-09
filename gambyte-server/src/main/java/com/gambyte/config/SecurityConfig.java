@@ -63,8 +63,13 @@ public class SecurityConfig {
             csrf ->
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                    // Token-authenticated calls carry no cookies, so CSRF cannot apply to them.
                     .ignoringRequestMatchers(
-                        "/api/bot/**", "/api/account/**", "/api/payments/webhook", "/ws/**"))
+                        request -> {
+                          String auth = request.getHeader("Authorization");
+                          return auth != null && auth.startsWith("Bearer ");
+                        })
+                    .ignoringRequestMatchers("/api/payments/webhook", "/ws/**"))
         .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
         .addFilterBefore(botTokenFilter, BasicAuthenticationFilter.class)
         .authorizeHttpRequests(

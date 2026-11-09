@@ -20,6 +20,9 @@ public class GameEvents {
   /** Any change in a running game (a move, a draw offer, the end). */
   public record GameChanged(String gameId, GameEvent event) {}
 
+  /** A new game has started (the bot API tells bots to open its stream). */
+  public record GameStarted(String gameId, long whiteId, long blackId) {}
+
   /** A game has ended and been saved to the database. */
   public record GameFinished(
       String gameId, long whiteId, long blackId, boolean rated, String winner, Long tournamentId) {}
@@ -38,6 +41,10 @@ public class GameEvents {
   }
 
   public void finished(GameFinished event) {
+    spring.publishEvent(event);
+  }
+
+  public void started(GameStarted event) {
     spring.publishEvent(event);
   }
 

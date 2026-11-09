@@ -8,7 +8,7 @@ import { setSoundEnabled } from '@/lib/sound';
 import type { Settings } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Required<Settings> = {
-  boardTheme: 'green',
+  boardTheme: 'noir',
   sound: true,
   premoves: true,
   autoQueen: false,

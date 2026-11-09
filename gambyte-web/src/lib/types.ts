@@ -36,7 +36,7 @@ export interface Me {
 
 /** UI preferences stored on the server (free-form JSON owned by the frontend). */
 export interface Settings {
-  boardTheme?: 'green' | 'brown' | 'blue' | 'gray';
+  boardTheme?: 'noir' | 'ember' | 'green' | 'brown' | 'blue' | 'gray';
   sound?: boolean;
   premoves?: boolean;
   autoQueen?: boolean;

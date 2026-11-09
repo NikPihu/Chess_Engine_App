@@ -19,6 +19,8 @@ import { checkedKing, destinations, isPromotion } from '@/lib/chess';
 import type { Color } from '@/lib/types';
 
 export const BOARD_THEMES = {
+  noir: { light: '#d8d2c8', dark: '#5e554d' },
+  ember: { light: '#efe3d4', dark: '#b2694b' },
   green: { light: '#eeeed2', dark: '#769656' },
   brown: { light: '#f0d9b5', dark: '#b58863' },
   blue: { light: '#dee3e6', dark: '#8ca2ad' },
@@ -49,7 +51,7 @@ export function Board({
   onMove,
   lastMove,
   arrows = [],
-  theme = 'green',
+  theme = 'noir',
   premoves = true,
   autoQueen = false,
   showCoordinates = true,
@@ -111,19 +113,19 @@ export function Board({
   // Square highlights: last move (yellow), selection, legal targets (dots), check (red), premove (blue).
   const squareStyles: Record<string, React.CSSProperties> = {};
   if (lastMove) {
-    squareStyles[lastMove.slice(0, 2)] = { background: 'rgba(255, 213, 79, 0.45)' };
-    squareStyles[lastMove.slice(2, 4)] = { background: 'rgba(255, 213, 79, 0.55)' };
+    squareStyles[lastMove.slice(0, 2)] = { background: 'rgba(229, 83, 45, 0.38)' };
+    squareStyles[lastMove.slice(2, 4)] = { background: 'rgba(229, 83, 45, 0.5)' };
   }
   const king = checkedKing(chess);
   if (king) squareStyles[king] = { background: 'radial-gradient(circle, rgba(239,68,68,.9) 0%, rgba(239,68,68,.3) 60%, transparent 75%)' };
   if (selected) {
-    squareStyles[selected] = { background: 'rgba(34, 197, 94, 0.45)' };
+    squareStyles[selected] = { background: 'rgba(255, 255, 255, 0.28)' };
     if (myTurn) {
       for (const sq of destinations(chess, selected)) {
         const occupied = chess.get(sq as never);
         squareStyles[sq] = occupied
-          ? { background: 'radial-gradient(circle, transparent 58%, rgba(0,0,0,.25) 60%)' }
-          : { background: 'radial-gradient(circle, rgba(0,0,0,.22) 22%, transparent 24%)' };
+          ? { background: 'radial-gradient(circle, transparent 58%, rgba(10,10,12,.32) 60%)' }
+          : { background: 'radial-gradient(circle, rgba(10,10,12,.3) 20%, transparent 24%)' };
       }
     }
   }
@@ -155,7 +157,9 @@ export function Board({
           animationDurationInMs: 150,
           lightSquareStyle: { backgroundColor: colors.light },
           darkSquareStyle: { backgroundColor: colors.dark },
-          boardStyle: { borderRadius: '6px', boxShadow: '0 10px 30px rgba(0,0,0,.35)' },
+          boardStyle: { borderRadius: '14px', overflow: 'hidden', boxShadow: '0 40px 80px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.06)' },
+          darkSquareNotationStyle: { color: '#d8d2c8', fontFamily: 'JetBrains Mono Variable, monospace', fontSize: '10px', opacity: 0.8 },
+          lightSquareNotationStyle: { color: '#5e554d', fontFamily: 'JetBrains Mono Variable, monospace', fontSize: '10px', opacity: 0.8 },
         }}
       />
       {promotion && (
@@ -179,14 +183,14 @@ function PromotionPicker({ color, onPick }: { color: Color; onPick: (piece: stri
     : { q: '♛', r: '♜', b: '♝', n: '♞' };
   return (
     <div
-      className="absolute inset-0 z-20 flex items-center justify-center bg-black/50"
+      className="absolute inset-0 z-20 flex items-center justify-center rounded-[14px] bg-black/60 backdrop-blur-sm"
       onClick={() => onPick(null)}
     >
       <div className="card flex gap-2 p-3" onClick={(e) => e.stopPropagation()}>
         {pieces.map((p) => (
           <button
             key={p}
-            className="flex h-16 w-16 items-center justify-center rounded-lg bg-ink-700 text-5xl hover:bg-brand-600"
+            className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-5xl transition hover:bg-ember-500"
             onClick={() => onPick(p)}
             aria-label={`Promote to ${p}`}
           >

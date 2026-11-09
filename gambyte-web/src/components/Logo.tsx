@@ -1,18 +1,27 @@
-/** The Gambyte word mark: a pawn in a rounded square plus the name. */
+/**
+ * The Gambyte mark: a pawn cut by a "byte" notch, in a rounded square, plus an italic wordmark
+ * with an ember full stop (echoing the italic "ChessPro" wordmark in the reference design).
+ */
 export function Logo({ small = false }: { small?: boolean }) {
   return (
-    <span className="flex items-center gap-2">
-      <svg viewBox="0 0 64 64" className={small ? 'h-6 w-6' : 'h-8 w-8'} aria-hidden>
-        <rect width="64" height="64" rx="14" fill="#16a34a" />
+    <span className="flex items-center gap-2.5">
+      <svg viewBox="0 0 40 40" className={small ? 'h-7 w-7' : 'h-8 w-8'} aria-hidden>
+        <defs>
+          <linearGradient id="gb-mark" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#ff7a50" />
+            <stop offset="1" stopColor="#c63f1c" />
+          </linearGradient>
+        </defs>
+        <rect width="40" height="40" rx="11" fill="url(#gb-mark)" />
         <path
-          d="M20 50h24v-5H20zm3-8h18l-3-14c4-2 6-6 6-10a12 12 0 0 0-24 0c0 4 2 8 6 10z"
-          fill="#f8fafc"
+          d="M13 31h14v-3H13zm2-5h10l-1.7-8.2c2.3-1.1 3.7-3.3 3.7-5.8a7 7 0 0 0-14 0c0 2.5 1.4 4.7 3.7 5.8z"
+          fill="#fff7f2"
         />
-        <circle cx="38" cy="16" r="3" fill="#16a34a" />
+        <rect x="22" y="9" width="4" height="4" rx="1" fill="#c63f1c" />
       </svg>
       {!small && (
-        <span className="text-lg font-extrabold tracking-tight">
-          Gam<span className="text-brand-400">byte</span>
+        <span className="text-[19px] font-medium tracking-tight italic">
+          Gambyte<span className="text-ember-500 not-italic">.</span>
         </span>
       )}
     </span>

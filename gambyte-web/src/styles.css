@@ -1,28 +1,117 @@
 /*
- * Global styles. Tailwind CSS v4: utility classes are generated from what the components use.
- * Brand colours live in @theme below, so changing the look of the whole site starts here.
+ * Gambyte design system - "Cinematic Noir".
+ *
+ * References (2026): ChessPro landing (Behance, Sahil Dobariya) for the black canvas, technical
+ * grid with "+" crosshairs, oversized light display type, numbered glass pills and the white pill
+ * CTA; "Chess has never looked like this" (Dribbble) for monospace telemetry labels; Fourza for
+ * thin oversized headlines; Checkmate for dashboard card structure.
+ *
+ * Principles
+ *  - One accent: ember (warm red-orange). Everything else is neutral, slightly warm greys, so the
+ *    accent always means "act here" or "this matters".
+ *  - Two typefaces: Inter Tight (UI + display) and JetBrains Mono (numbers, labels, telemetry).
+ *  - Depth from light, not lines: soft glows, glass surfaces, hairline borders at 8% white.
+ *  - Fluid sizes with clamp(): the same layout scales from a phone to a 4K screen.
+ *  - Motion is short and purposeful and is disabled for prefers-reduced-motion.
  */
 @import 'tailwindcss';
+@import '@fontsource-variable/inter-tight';
+@import '@fontsource-variable/jetbrains-mono';
 
 @theme {
-  --color-brand-50: #f0fdf4;
-  --color-brand-400: #4ade80;
-  --color-brand-500: #22c55e;
-  --color-brand-600: #16a34a;
-  --color-brand-700: #15803d;
+  /* Ember: the single accent. 500 is the brand colour. */
+  --color-ember-50: #fff3ee;
+  --color-ember-200: #ffc7b2;
+  --color-ember-300: #ff9f7f;
+  --color-ember-400: #ff7a50;
+  --color-ember-500: #e5532d;
+  --color-ember-600: #c63f1c;
+  --color-ember-700: #8f2a14;
+  --color-ember-900: #3a1006;
 
-  --color-ink-950: #0e0f12;
-  --color-ink-900: #14161a;
-  --color-ink-850: #1a1d22;
-  --color-ink-800: #20242b;
-  --color-ink-700: #2b3038;
-  --color-ink-600: #3a404a;
-  --color-ink-400: #8a93a3;
-  --color-ink-300: #b4bcc8;
-  --color-ink-100: #e8ecf1;
+  /* Neutral "noir" greys with a whisper of warmth (they pair with the ember accent). */
+  --color-noir-950: #050505;
+  --color-noir-925: #08080a;
+  --color-noir-900: #0c0c0e;
+  --color-noir-850: #111113;
+  --color-noir-800: #17171a;
+  --color-noir-700: #222226;
+  --color-noir-600: #2e2e33;
+  --color-noir-500: #4a4a50;
+  --color-noir-400: #76736f;
+  --color-noir-300: #a7a39d;
+  --color-noir-200: #cfcbc4;
+  --color-noir-100: #ece9e4;
+  --color-noir-50: #f6f4f1;
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Semantic colours, tuned to sit next to ember without clashing. */
+  --color-win: #6fcf97;
+  --color-loss: #ff6b5b;
+  --color-draw: #a7a39d;
+  --color-gold: #e9c46a;
+
+  /* Kept so older class names (brand-*, ink-*) keep working: mapped onto the new palette. */
+  --color-brand-50: #fff3ee;
+  --color-brand-400: #ff7a50;
+  --color-brand-500: #e5532d;
+  --color-brand-600: #c63f1c;
+  --color-brand-700: #8f2a14;
+  --color-ink-950: #050505;
+  --color-ink-900: #0c0c0e;
+  --color-ink-850: #111113;
+  --color-ink-800: #17171a;
+  --color-ink-700: #222226;
+  --color-ink-600: #2e2e33;
+  --color-ink-400: #76736f;
+  --color-ink-300: #a7a39d;
+  --color-ink-200: #cfcbc4;
+  --color-ink-100: #ece9e4;
+
+  --font-sans: 'Inter Tight Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-pill: 999px;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-rise: rise 0.7s var(--ease-out-expo) both;
+  --animate-fade: fade 0.6s ease both;
+  --animate-glow: glow 6s ease-in-out infinite;
+  --animate-marquee: marquee 40s linear infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 html,
@@ -31,38 +120,140 @@ body,
   min-height: 100%;
 }
 
-body {
-  @apply bg-ink-900 text-ink-100 antialiased;
-  font-feature-settings: 'tnum' 1; /* equal-width digits: clocks don't wobble */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
-/* Thin, quiet scrollbars for move lists and side panels. */
+body {
+  @apply bg-noir-950 font-sans text-noir-100 antialiased;
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+  /* Film grain + a very faint vignette: depth without decoration. */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgb(229 83 45 / 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgb(255 255 255 / 0.025), transparent 70%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgb(229 83 45 / 0.35);
+  color: #fff;
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-ink-600) transparent;
+  scrollbar-color: var(--color-noir-600) transparent;
 }
 
-@utility card {
-  @apply rounded-xl border border-ink-700 bg-ink-850 shadow-lg shadow-black/20;
+:focus-visible {
+  outline: 2px solid var(--color-ember-400);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------- surfaces */
+
+/* Glass panel: the default container. */
+@utility card {
+  @apply rounded-2xl border border-white/[0.07] bg-noir-850/70 backdrop-blur-xl;
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 40%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 20px 50px -20px rgb(0 0 0 / 0.6);
+}
+
+/* A card that reacts to hover (links, selectable tiles). */
+@utility card-hover {
+  @apply transition duration-300 hover:-translate-y-0.5 hover:border-white/[0.14];
+}
+
+/* Faint technical grid, the backdrop of hero sections. */
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+}
+
+/* ---------------------------------------------------------------- type */
+
+@utility display {
+  @apply font-light tracking-[-0.045em] uppercase;
+  line-height: 0.86;
+}
+
+/* Small monospace label above a value: "RATING", "01/". */
+@utility eyebrow {
+  @apply font-mono text-[11px] tracking-[0.18em] text-noir-400 uppercase;
+}
+
+@utility num {
+  @apply font-mono tabular-nums;
+}
+
+/* ---------------------------------------------------------------- buttons (pills) */
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
-    disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium whitespace-nowrap
+    transition duration-200 select-none active:scale-[0.97]
+    disabled:pointer-events-none disabled:opacity-40;
 }
+/* White pill: the main call to action (as in the reference). */
 @utility btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-500;
+  @apply btn bg-noir-50 text-noir-950 shadow-[0_8px_30px_-8px_rgb(255_255_255/0.35)] hover:bg-white;
 }
+/* Ember pill: the "do it now" action inside the app (Play, Join, Subscribe). */
+@utility btn-accent {
+  @apply btn bg-ember-500 text-white shadow-[0_10px_30px_-10px_rgb(229_83_45/0.8)] hover:bg-ember-400;
+}
+/* Glass pill: secondary actions. */
 @utility btn-secondary {
-  @apply btn bg-ink-700 text-ink-100 hover:bg-ink-600;
+  @apply btn border border-white/10 bg-white/[0.04] text-noir-100 backdrop-blur hover:border-white/20 hover:bg-white/[0.08];
 }
 @utility btn-ghost {
-  @apply btn text-ink-300 hover:bg-ink-800 hover:text-ink-100;
+  @apply btn text-noir-300 hover:bg-white/[0.05] hover:text-noir-50;
 }
+@utility btn-danger {
+  @apply btn bg-loss/90 text-white hover:bg-loss;
+}
+
+/* Numbered glass tag: "01/  AI POWERED TRAINING". */
+@utility tag {
+  @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs
+    font-medium tracking-wide text-noir-100 uppercase backdrop-blur;
+}
+
+/* Segmented selector option (time controls, colours, tabs). */
+@utility seg {
+  @apply rounded-full px-3.5 py-1.5 text-sm text-noir-300 transition hover:text-noir-50;
+}
+@utility seg-on {
+  @apply seg bg-noir-50 text-noir-950 hover:text-noir-950;
+}
+
+/* ---------------------------------------------------------------- forms */
+
 @utility input {
-  @apply w-full rounded-lg border border-ink-600 bg-ink-800 px-3 py-2 text-sm text-ink-100
-    placeholder:text-ink-400 focus:border-brand-500 focus:outline-none;
+  @apply w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-noir-50
+    placeholder:text-noir-500 transition focus:border-ember-500/70 focus:bg-white/[0.05] focus:outline-none;
 }
 @utility label {
-  @apply mb-1 block text-xs font-medium uppercase tracking-wide text-ink-400;
+  @apply mb-1.5 block font-mono text-[11px] tracking-[0.16em] text-noir-400 uppercase;
+}
+
+/* Range slider tinted with the accent. */
+input[type='range'] {
+  accent-color: var(--color-ember-500);
 }

@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, ArrowUpRight, Bot, Brain, Play, ShieldCheck, Swords, Trophy, Users, Zap } from 'lucide-react';
 import { api } from '@/lib/api';
-import { HeroScene } from '@/components/HeroScene';
+import { Hero3D } from '@/components/hero3d/Hero3D';
 import { Board } from '@/features/game/Board';
 
 interface LobbyStats {
@@ -34,7 +34,7 @@ export default function LandingPage() {
       {/* ------------------------------------------------------------ 1. Hero */}
       <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden pt-16">
         <div className="grid-lines absolute inset-0 -z-10" />
-        <HeroScene />
+        <Hero3D />
         <div className="relative mx-auto w-full max-w-[1440px] px-5 sm:px-8">
           <h1 className="display text-[clamp(3.4rem,11.5vw,11rem)]">
             <span className="block animate-rise">Think like</span>

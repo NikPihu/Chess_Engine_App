@@ -1,6 +1,6 @@
 package com.gambyte.auth;
 
-import com.gambyte.user.repo.UserRepository;
+import com.gambyte.user.service.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
 
-  private final UserRepository users;
+  private final UserService users;
 
-  public AuthUserDetailsService(UserRepository users) {
+  public AuthUserDetailsService(UserService users) {
     this.users = users;
   }
 
   @Override
   public UserDetails loadUserByUsername(String login) {
     return users
-        .findByLogin(login)
+        .findForLogin(login)
         .filter(u -> u.getPasswordHash() != null)
         .map(AuthUser::of)
         .orElseThrow(() -> new UsernameNotFoundException("unknown account"));

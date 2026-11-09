@@ -159,6 +159,11 @@ public class UserService {
 
   // ------------------------------------------------------------------ reading accounts
 
+  /** The account for a login name (username or email), if any. Used by Spring Security. */
+  public java.util.Optional<User> findForLogin(String usernameOrEmail) {
+    return users.findByLogin(usernameOrEmail);
+  }
+
   public User get(long id) {
     return users.findById(id).orElseThrow(() -> ApiException.notFound("user"));
   }

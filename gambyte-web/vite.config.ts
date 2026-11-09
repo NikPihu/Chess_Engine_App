@@ -39,6 +39,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    globals: true, // lets Testing Library clean up the DOM after each test
     setupFiles: ['./src/test-setup.ts'],
     exclude: ['e2e/**', 'node_modules/**'],
   },

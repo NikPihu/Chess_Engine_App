@@ -65,6 +65,40 @@
       "sprt": "397-311-828 W-L-D, Elo 19.47 +/- 11.82 \u2705 H1",
       "sprt_accepted": true,
       "anchor": "63-50-87 W-L-D, Elo 22.62 +/- 32.04"
+    },
+    {
+      "gen": 3,
+      "parent": 2,
+      "date": "2026-11-11T15:34:59",
+      "shape": "(768x4 -> 768)x2 -> 8",
+      "data": [
+        "selfplay-gen2-for-gen3.bin",
+        "selfplay-gen1-for-gen2.bin",
+        "selfplay-gen7-for-gen8.bin",
+        "selfplay-gen6-for-gen7.bin",
+        "selfplay-gen5-for-gen6.bin",
+        "selfplay-gen4-for-gen5.bin",
+        "selfplay-gen3-for-gen4.bin",
+        "selfplay-gen2-for-gen3.bin",
+        "gen-2.bin",
+        "gen-1.bin",
+        "gen-0.bin",
+        "elite-2025-09.bin",
+        "elite-2025-10.bin",
+        "elite-2025-11.bin",
+        "lichess.bin"
+      ],
+      "positions": 37000242,
+      "promoted": false,
+      "blunder_scores": [
+        57,
+        140,
+        51
+      ],
+      "blunders": "57/140 (51)",
+      "sprt": "883-920-1725 W-L-D, Elo -3.64 +/- 8.10 \u274c",
+      "sprt_accepted": false,
+      "anchor": "68-57-75 W-L-D, Elo 19.13 +/- 38.46"
     }
   ],
   "events": [

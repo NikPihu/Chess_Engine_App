@@ -4,7 +4,7 @@ Generated from `chess_engine_v3/nets/registry.json` by `chess_engine_v3/train_ne
 A generation becomes the live v3 network (`chess_engine_v3/nets/best.nnue`) only after the
 blunder gate and SPRT H1 vs the current one. **Anchor** = a fixed 200-game match against the
 same opponent every time (v3 search + v2's gen-8 net), so its Elo column is directly comparable
-across generations. The Lichess bot is switched to v3 only by hand.
+across generations. The v3 Lichess bot (tools\bot_new) plays best.nnue, so promotions go live automatically.
 
 **Live v3 network: gen-2**
 
@@ -12,6 +12,7 @@ across generations. The Lichess bot is switched to v3 only by hand.
 |---|---|---|---|---|---|---|---|
 | 1 | — | (768x4 -> 768)x2 -> 8 | 27,000,242 | 54/140 (59) | 1638 games 511-419-708 W-L-D, Elo 19.53 +/- 12.16 ✅ H1 (test SPRT after gate tolerance change) | 1638 games 511-419-708 W-L-D, Elo 19.53 +/- 12.16 (same opponent as anchor) | ✅ |
 | 2 | 1 | (768x4 -> 768)x2 -> 8 | 32,000,242 | 51/140 (54) | 397-311-828 W-L-D, Elo 19.47 +/- 11.82 ✅ H1 | 63-50-87 W-L-D, Elo 22.62 +/- 32.04 | ✅ |
+| 3 | 2 | (768x4 -> 768)x2 -> 8 | 37,000,242 | 57/140 (51) | 883-920-1725 W-L-D, Elo -3.64 +/- 8.10 ❌ | 68-57-75 W-L-D, Elo 19.13 +/- 38.46 | ❌ |
 
 ## Events
 

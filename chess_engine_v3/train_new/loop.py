@@ -11,7 +11,9 @@ One generation:
   2. ELITE    new Lichess-elite position files (tools/data/v3/elite/*.txt, from `engine_v3 pgn`) are
               labelled by our own search -> ~15% of the training mix
   3. LEARN    train on a rolling window of the newest data (default 40M positions), continuing from
-              the parent's weights
+              the parent's weights at a gentler learning rate (3e-4); the newest self-play is 20% of
+              every epoch; at most 6 epochs, stopping early once the loss on held-out games (never
+              trained on) stops improving, and the best epoch is kept
   4. GATES    a. blunder suite (the bot's real Lichess mistakes, re-labelled by a deep v3 search):
                  the candidate must solve at least as many as the live network
               b. SPRT vs the live network
@@ -130,7 +132,7 @@ def write_generations_md(reg):
         "A generation becomes the live v3 network (`chess_engine_v3/nets/best.nnue`) only after the",
         "blunder gate and SPRT H1 vs the current one. **Anchor** = a fixed 200-game match against the",
         "same opponent every time (v3 search + v2's gen-8 net), so its Elo column is directly comparable",
-        "across generations. The v3 Lichess bot (tools\bot_new) plays best.nnue, so promotions go live automatically.",
+        "across generations. The v3 Lichess bot (tools\\bot_new) plays best.nnue, so promotions go live automatically.",
         "",
         f"**Live v3 network: {'gen-' + str(reg['best']) if reg['best'] else 'none yet'}**",
         "",
@@ -261,17 +263,25 @@ def one_generation(args):
 
     # 3. LEARN.
     datasets, positions = training_data(reg, args.window)
+    # The newest self-play (what the parent just learned to play) gets a fixed share of every
+    # epoch instead of being ~11% of a window dominated by data the parent already knows.
+    newest = os.path.join(V3DATA, f"selfplay-gen{parent}-for-gen{gen}.bin") if parent else None
+    if newest and args.new_share > 0 and newest in datasets:
+        datasets.remove(newest)
+        extras.insert(0, f"{newest}:{args.new_share}")
     out = os.path.join(NETS, f"gen-{gen}")
     shape = f"(768x{args.king_buckets} -> {args.hidden})x2 -> {args.output_buckets}"
     cmd = [sys.executable, os.path.join(TRAIN, "train.py"), "--data", *datasets, "--out", out,
            "--epochs", str(args.epochs), "--threads", str(args.threads), "--hidden", str(args.hidden),
            "--king-buckets", str(args.king_buckets), "--output-buckets", str(args.output_buckets),
-           "--resume"]
+           "--patience", str(args.patience), "--resume"]
     if extras:
         cmd += ["--extra", *extras]
     parent_entry = gen_entry(reg, parent) if parent else None
     if parent and parent_entry and parent_entry.get("shape") == shape and os.path.exists(os.path.join(NETS, f"gen-{parent}.pt")):
-        cmd += ["--init", os.path.join(NETS, f"gen-{parent}.pt")]
+        # Fine-tuning: a gentler peak learning rate than from scratch, so the parent's knowledge
+        # is refined instead of being shaken loose and re-learned from mostly the same data.
+        cmd += ["--init", os.path.join(NETS, f"gen-{parent}.pt"), "--lr", str(args.finetune_lr)]
     if os.path.exists(out + ".nnue"):
         print(f"gen-{gen}.nnue already trained - skipping training", flush=True)
     elif run(cmd)[0] != 0:
@@ -369,7 +379,10 @@ def main():
     ap.add_argument("--positions", type=int, default=5_000_000)
     ap.add_argument("--nodes", type=int, default=5000)
     ap.add_argument("--window", type=int, default=40_000_000, help="positions of newest data to train on")
-    ap.add_argument("--epochs", type=int, default=12)
+    ap.add_argument("--epochs", type=int, default=6, help="at most; stops earlier on the held-out loss")
+    ap.add_argument("--patience", type=int, default=2, help="epochs without a better held-out loss before stopping")
+    ap.add_argument("--finetune-lr", type=float, default=3e-4, help="peak learning rate when continuing from the parent")
+    ap.add_argument("--new-share", type=float, default=0.2, help="share of every epoch from the newest self-play (0 = plain window)")
     ap.add_argument("--hidden", type=int, default=768)
     ap.add_argument("--king-buckets", type=int, default=4)
     ap.add_argument("--output-buckets", type=int, default=8)

@@ -15,6 +15,12 @@ data set can be as big as the disk.
 
 Writes <out>.nnue (engine), <out>.pt (to continue training) and <out>.golden.txt (C++ check).
 
+Validation (fixed after v3 gen-3 memorised its data): the last --holdout (2%) of every big file
+is a set of whole games that is never trained on. The held-out loss is printed next to the loss on
+already-seen positions; training stops once the held-out loss has not improved for --patience
+epochs, and the best epoch (not the last) is exported. --max-repeat caps how often a small --extra
+set can be reused per epoch.
+
 Crash-safe: after every epoch the full training state (weights, optimizer, learning-rate schedule,
 random generator) is saved to <out>.ckpt. Run the same command again with --resume and training
 continues with the next epoch. <out>.nnue is only written at the very end, so its existence means
@@ -43,31 +49,50 @@ RECORD = np.dtype(
 assert RECORD.itemsize == 72
 
 
-class Dataset:
-    """Several memory-mapped record files seen as one array, with per-file sampling shares."""
+HOLDOUT_MIN_RECORDS = 50_000  # files smaller than this give no held-out games
 
-    def __init__(self, main_paths, extras, rng):
-        self.parts = []  # (memmap, number of samples to draw per epoch)
+
+class Dataset:
+    """Several memory-mapped record files seen as one array, with per-file sampling shares.
+
+    The last `holdout` fraction of every big file is never trained on. Self-play writes each game
+    in one piece, so a file's tail is a set of whole games the network has never seen - an honest
+    validation set (a random sample would share games, and so near-identical positions, with the
+    training data and could not detect memorisation).
+    """
+
+    def __init__(self, main_paths, extras, rng, holdout=0.02, max_repeat=2.0):
+        self.parts = []  # (memmap, samples per epoch, trainable rows = the file minus its held-out tail)
         main = [np.memmap(p, dtype=RECORD, mode="r") for p in main_paths]
-        main_total = sum(len(m) for m in main)
+
+        def trainable(m):
+            return len(m) - (int(len(m) * holdout) if len(m) >= HOLDOUT_MIN_RECORDS else 0)
+
+        main_total = sum(trainable(m) for m in main)
         for m in main:
-            self.parts.append((m, len(m)))
+            self.parts.append((m, trainable(m), trainable(m)))
         for spec in extras:
             path, share = spec.rsplit(":", 1)
             share = float(share)
             m = np.memmap(path, dtype=RECORD, mode="r")
-            # The extra set gets `share` of the final mix (sampled with replacement if small).
+            # The extra set gets `share` of the final mix (sampled with replacement if small), but
+            # no position is drawn more than `max_repeat` times per epoch on average: a tiny set
+            # asked for a big share would otherwise just be memorised.
             want = int(main_total * share / (1 - share))
-            self.parts.append((m, want))
-            print(f"extra {path}: {len(m):,} records, {want:,} samples per epoch")
+            cap = int(trainable(m) * max_repeat)
+            note = ""
+            if want > cap:
+                want, note = cap, f" (capped at {max_repeat:g}x its size)"
+            self.parts.append((m, want, trainable(m)))
+            print(f"extra {path}: {len(m):,} records, {want:,} samples per epoch{note}")
         self.rng = rng
-        self.size = sum(n for _, n in self.parts)
+        self.size = sum(n for _, n, _ in self.parts)
 
     def epoch_index(self):
-        """(part, row) pairs for one shuffled epoch."""
+        """(part, row) pairs for one shuffled epoch (held-out tails excluded)."""
         part_ids, rows = [], []
-        for i, (m, n) in enumerate(self.parts):
-            r = self.rng.permutation(len(m))[:n] if n <= len(m) else self.rng.integers(0, len(m), n)
+        for i, (m, n, usable) in enumerate(self.parts):
+            r = self.rng.permutation(usable)[:n] if n <= usable else self.rng.integers(0, usable, n)
             part_ids.append(np.full(len(r), i, dtype=np.int8))
             rows.append(r)
         part_ids = np.concatenate(part_ids)
@@ -75,9 +100,23 @@ class Dataset:
         order = self.rng.permutation(len(rows))
         return part_ids[order], rows[order]
 
+    def holdout_index(self, count, rng):
+        """(part, row) pairs from the held-out tails, each file weighted by its share of an epoch."""
+        part_ids, rows = [], []
+        held = [(i, m, n, usable) for i, (m, n, usable) in enumerate(self.parts) if usable < len(m)]
+        weight = sum(n for _, _, n, _ in held)
+        for i, m, n, usable in held:
+            k = min(len(m) - usable, max(1, round(count * n / weight)))
+            r = usable + rng.choice(len(m) - usable, k, replace=False)
+            part_ids.append(np.full(k, i, dtype=np.int8))
+            rows.append(r)
+        if not rows:
+            return np.empty(0, np.int8), np.empty(0, np.int64)
+        return np.concatenate(part_ids), np.concatenate(rows)
+
     def gather(self, part_ids, rows):
         out = np.empty(len(rows), dtype=RECORD)
-        for i, (m, _) in enumerate(self.parts):
+        for i, (m, _, _) in enumerate(self.parts):
             sel = part_ids == i
             if sel.any():
                 idx = rows[sel]
@@ -118,6 +157,12 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--max-steps", type=int, default=0, help="stop early (smoke tests)")
     ap.add_argument("--resume", action="store_true", help="continue from <out>.ckpt if it exists")
+    ap.add_argument("--holdout", type=float, default=0.02,
+                    help="fraction at the end of every big file (whole games) kept out of training for validation")
+    ap.add_argument("--patience", type=int, default=2,
+                    help="stop after this many epochs without a better held-out loss (0 = never stop early)")
+    ap.add_argument("--max-repeat", type=float, default=2.0,
+                    help="an --extra set is drawn at most this many times its size per epoch")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -129,14 +174,21 @@ def main():
     if not paths:
         sys.exit("no data files match " + " ".join(args.data))
     print("data:", *paths, sep="\n  ")
-    data = Dataset(paths, args.extra, rng)
+    data = Dataset(paths, args.extra, rng, args.holdout, args.max_repeat)
 
-    # A fixed validation sample (taken out of the same distribution; small enough to keep in RAM).
-    vp, vr = data.epoch_index()
-    n_val = min(100_000, data.size // 50)
-    val = data.gather(vp[:n_val], vr[:n_val])
+    # A fixed validation sample from the held-out games (never trained on), and for comparison a
+    # sample of training positions: a growing gap between the two means the net is memorising.
+    vp, vr = data.holdout_index(100_000, np.random.default_rng(args.seed + 1))
+    if len(vr) == 0:
+        sys.exit("no held-out data: use --holdout > 0 and at least one file of 50,000+ records")
+    val = data.gather(vp, vr)
     v_us, v_them, v_bucket, v_target, v_weight = tensors(layout, val, args.wdl)
-    print(f"{data.size:,} samples per epoch, {n_val:,} validation")
+    tp, tr = data.epoch_index()
+    seen = data.gather(tp[:len(vr)], tr[:len(vr)])
+    s_us, s_them, s_bucket, s_target, s_weight = tensors(layout, seen, args.wdl)
+    rng = np.random.default_rng(args.seed)  # the epoch_index above must not shift training's shuffles
+    data.rng = rng
+    print(f"{data.size:,} samples per epoch, {len(vr):,} held-out validation positions (unseen games)")
 
     model = NnueV3(layout.inputs, args.hidden, args.output_buckets)
     if args.init:
@@ -155,6 +207,7 @@ def main():
 
     step = 0
     first_epoch = 1
+    best_val, best_epoch = float("inf"), 0
     ckpt_path = args.out + ".ckpt"
     if args.resume and os.path.exists(ckpt_path):
         ckpt = torch.load(ckpt_path, weights_only=False)
@@ -164,6 +217,7 @@ def main():
         rng.bit_generator.state = ckpt["rng"]
         step = ckpt["step"]
         first_epoch = ckpt["epoch"] + 1
+        best_val, best_epoch = ckpt.get("best_val", float("inf")), ckpt.get("best_epoch", 0)
         print(f"resuming after epoch {ckpt['epoch']} (step {step})", flush=True)
     print(f"model {layout.king_buckets}x768 -> {args.hidden} x2 -> {args.output_buckets} heads, "
           f"{sum(p.numel() for p in model.parameters()):,} parameters, {args.threads} threads", flush=True)
@@ -192,17 +246,31 @@ def main():
         model.eval()
         with torch.no_grad():
             val_loss = loss_fn(v_us, v_them, v_bucket, v_target, v_weight).item()
-        print(f"epoch {epoch:2d}/{args.epochs}  train {total / max(n, 1):.5f}  val {val_loss:.5f}"
-              f"  ({time.time() - start:.0f}s)", flush=True)
+            seen_loss = loss_fn(s_us, s_them, s_bucket, s_target, s_weight).item()
+        improved = val_loss < best_val
+        print(f"epoch {epoch:2d}/{args.epochs}  train {total / max(n, 1):.5f}  seen {seen_loss:.5f}"
+              f"  held-out {val_loss:.5f}{'  (best)' if improved else ''}  ({time.time() - start:.0f}s)", flush=True)
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-        torch.save(model.state_dict(), args.out + ".pt")
+        if improved:
+            best_val, best_epoch = val_loss, epoch
+            # <out>.pt always holds the best epoch so far (the next generation continues from it).
+            torch.save(model.state_dict(), args.out + ".pt.tmp")
+            os.replace(args.out + ".pt.tmp", args.out + ".pt")
         # Full state for --resume, written atomically (a power cut mid-write can't corrupt it).
         torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(),
-                    "rng": rng.bit_generator.state, "step": step, "epoch": epoch}, ckpt_path + ".tmp")
+                    "rng": rng.bit_generator.state, "step": step, "epoch": epoch,
+                    "best_val": best_val, "best_epoch": best_epoch}, ckpt_path + ".tmp")
         os.replace(ckpt_path + ".tmp", ckpt_path)
         if step >= total_steps:
             break
+        if args.patience and epoch - best_epoch >= args.patience:
+            print(f"stopping early: held-out loss has not improved for {args.patience} epochs", flush=True)
+            break
 
+    # Export the best epoch, not the last one.
+    if best_epoch:
+        model.load_state_dict(torch.load(args.out + ".pt"))
+        print(f"best epoch {best_epoch}: held-out loss {best_val:.5f}", flush=True)
     net_path = args.out + ".nnue"
     worst = write_golden(model, layout, val, args.out + ".golden.txt")
     write_nnue(model, layout, net_path + ".tmp")

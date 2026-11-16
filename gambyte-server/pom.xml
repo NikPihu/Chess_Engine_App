@@ -33,7 +33,7 @@
     <springdoc.version>2.8.17</springdoc.version>
     <bucket4j.version>8.22.0</bucket4j.version>
     <archunit.version>1.5.1</archunit.version>
-    <bouncycastle.version>1.86</bouncycastle.version>
+    <bouncycastle.version>1.87</bouncycastle.version>
   </properties>
 
   <dependencies>
